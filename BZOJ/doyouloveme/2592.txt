@@ -1,0 +1,79 @@
+#include <algorithm>
+#include <iostream>
+#include <vector>
+#include <cstdio>
+#include <cmath>
+#include <set>
+#define MAXN 1010
+using namespace std;
+
+const double eps = 1e-6;
+
+int gcd(int a, int b){
+	return !b ? a : gcd(b, a % b);
+}
+
+struct line{
+	int a, b, c;
+	line(int _a, int _b, int _c){
+		a = _a; b = _b; c = _c;
+		int g = gcd(a, gcd(b, c));
+		a /= g; b /= g; c /= g;
+	}
+	bool operator < (const line &l) const{
+		return a < l.a || (a == l.a && (b < l.b || (b == l.b && c < l.c)));
+	}
+};
+
+set<pair<int, int> > s;
+vector<line> l;
+int n, x[MAXN], y[MAXN];
+
+void handle(int i, int j){
+	int a, b, c;
+	a = y[i] - y[j];
+	b = x[j] - x[i];
+	c = -(x[i] * a + y[i] * b);
+	l.push_back(line(a, b, c));
+	a = 2 * (x[j] - x[i]);
+	b = 2 * (y[j] - y[i]);
+	c = -((x[i] + x[j]) * a + (y[i] + y[j]) * b) / 2;
+	l.push_back(line(a, b, c));
+}
+
+bool rev(int i, line l){
+	double X, Y;
+	X = ((l.b * l.b - l.a * l.a) * x[i] - 2 * l.a * l.b * y[i] - 2 * l.c * l.a) / (l.a * l.a + l.b * l.b);
+	if(fabs(l.b) > eps)
+		Y = -(l.a * (x[i] + X) + 2 * l.c + l.b * y[i]) / l.b;
+	else
+		Y = y[i];
+	if(X - floor(X) > eps || Y - floor(Y) > eps) return 0;
+	return s.count(make_pair(int(X), int(Y)));
+}
+
+int main(){
+	scanf("%d", &n);
+	for(int i = 1; i <= n; ++i)
+		scanf("%d%d", &x[i], &y[i]), s.insert(make_pair(x[i], y[i]));
+	for(int i = 1; i <= 2; ++i)
+		for(int j = i + 1; j <= n; ++j)
+			handle(i, j);
+	sort(l.begin(), l.end());
+	int top = 0, tot = 0;
+	for(int i = 0; i < l.size(); ++i)
+		if(!i || (l[i] < l[i - 1] || l[i - 1] < l[i]))
+			l[top++] = l[i];
+	for(int i = 0; i < top; ++i){
+		bool ok = 1;
+		for(int j = 1; j <= n; ++j)
+			if(!rev(j, l[i])){
+				ok = 0;
+				break;
+			}
+		tot += ok;
+	}
+	printf("%d\n", tot);
+	return 0;
+}
+

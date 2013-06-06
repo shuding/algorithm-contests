@@ -1,0 +1,36 @@
+
+{
+Problem         USACO_2009_Feb Stock Market
+Algorithm       DP
+Author          DS
+Date            2011/11/8 18:32
+Complexity      O(MaxN^2)
+}
+program bzoj1578;
+
+const
+  maxn = 5000001;
+
+var
+  s, d, m, i, j, k: longint;
+  p: array[1..51, 1..11] of longint;
+  f: array[0..maxn] of longint;     //f: the maximum of that last day with money i
+
+begin
+  Read(s, d, m);
+  for i := 1 to s do
+    for j := 1 to d do
+      Read(p[i, j]);
+  for i := 2 to d do
+  begin
+    for k := 1 to m do
+      f[k] := k;
+    for k := 1 to s do
+      if p[k, i - 1] < p[k, i] then
+        for j := p[k, i - 1] to m do
+          if f[j - p[k, i - 1]] + p[k, i] > f[j] then
+            f[j] := f[j - p[k, i - 1]] + p[k, i];
+    m := f[m];
+  end;
+  Write(m);
+end.

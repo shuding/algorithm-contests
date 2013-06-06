@@ -1,0 +1,38 @@
+#include <algorithm>
+#include <iostream>
+#include <cstring>
+#include <cstdio>
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+int m, n, r, c, ans, sum, a[150][150], b[150][150];
+
+int main(){
+	scanf("%d%d", &m, &n);
+	rep(i, m) rep(j, n){
+		scanf("%d", &a[i][j]);
+		sum += a[i][j];
+	}
+	for(int i = m; i; --i)
+		for(int j = n; j; --j)
+			if(i * j > ans && sum % (i * j) == 0){
+				memcpy(b, a, sizeof(a));
+				int tot = 0;
+				for(int x = 1; x + i - 1 <= m; ++x)
+					for(int y = 1; y + j - 1 <= n; ++y){
+						int M = 1000000;
+						rep(_x, i)
+							rep(_y, j)
+								M = min(M, b[x + _x - 1][y + _y - 1]);
+						rep(_x, i)
+							rep(_y, j)
+								b[x + _x - 1][y + _y - 1] -= M;
+						tot += M;
+					}
+				if(tot * i * j == sum)
+					ans = i * j;
+			}
+	printf("%d\n", sum / ans);
+	return 0;
+}
+

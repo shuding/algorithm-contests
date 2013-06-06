@@ -1,0 +1,102 @@
+
+#include <iostream>
+#include <cstring>
+#include <cstdio>
+#include <cmath>
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+struct number{
+	int d[300];
+	void print(){
+		rep(i, d[0]){
+			if(i > 1 && d[d[0] - i + 1] < 10) printf("0");
+			printf("%d", d[d[0] - i + 1]);
+		}
+	}
+	inline number operator *(const int &n) const{
+		number c;
+		memset(c.d, 0, sizeof(c.d));
+		rep(i, d[0])
+			c.d[i] += d[i] * n;
+		c.d[0] = d[0];
+		rep(i, c.d[0]){
+			c.d[i + 1] += c.d[i] / 100;
+			c.d[i] %= 100;
+			if(c.d[c.d[0] + 1]) c.d[0]++;
+		}
+		return c;
+	}
+} ans;
+
+int n, k, t1, t2, p1[100], p2[100], n1[100], n2[100];
+
+int main(){
+	int T; cin >> T;
+	while(T--){
+		scanf("%d%d", &n, &k);
+		if(k < n){ printf("0 1\n"); continue; }
+		t1 = t2 = 0;
+		memset(ans.d, 0, sizeof(ans.d));
+		memset(n1, 0, sizeof(n1));
+		memset(n2, 0, sizeof(n2));
+		ans.d[0] = ans.d[1] = 1;
+		int num = k + 1;
+		while(num > 1){
+			for(int i = 2; i <= num; ++i)
+				if(num % i == 0){
+					p1[++t1] = i;
+					while(num % i == 0){
+						n1[t1] += n - 1;
+						num /= i;
+					}
+				}
+		}
+		num = k - n + 1;
+		for(int j = 1; j <= t1; ++j)
+			if(num % p1[j] == 0)
+				while(num % p1[j] == 0){
+					n1[j]++;
+					num /= p1[j];
+				}
+		while(num > 1){
+			for(int i = 2; i <= num; ++i)
+				if(num % i == 0){
+					p1[++t1] = i;
+					while(num % i == 0){
+						n1[t1]++;
+						num /= i;
+					}
+				}
+		}
+		num = k;
+		while(num > 1){
+			for(int i = 2; i <= num; ++i)
+				if(num % i == 0){
+					p2[++t2] = i;
+					while(num % i == 0){
+						n2[t2] += n;
+						num /= i;
+					}
+				}
+		}
+		for(int i = 1; i <= t1; ++i)
+			for(int j = 1; j <= t2; ++j)
+				if(p1[i] == p2[j]){
+					int tmp = min(n1[i], n2[j]);
+					n1[i] -= tmp; n2[j] -= tmp;
+				}
+		rep(i, t1)
+			rep(j, n1[i])
+				ans = ans * p1[i];
+		ans.print();
+		printf(" ");
+		memset(ans.d, 0, sizeof(ans.d));
+		ans.d[0] = ans.d[1] = 1;
+		rep(i, t2)
+			rep(j, n2[i])
+				ans = ans * p2[i];
+		ans.print();
+		printf("\n");
+	}
+}

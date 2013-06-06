@@ -1,0 +1,37 @@
+program OrzJZP;
+
+var
+  n, v, i, j, num, cost, max: longint;
+  f, g: array[0..100000] of longint;
+
+  procedure solve;
+  var
+    i, j, Value, pri: longint;
+  begin
+    for i := 1 to num do
+    begin
+      Read(Value, pri);
+      for j := v downto Value do
+        if g[j - Value] + pri > g[j] then
+          g[j] := g[j - Value] + pri;
+    end;
+    for i := cost to v do
+      if g[i - cost] > f[i] then
+        f[i] := g[i - cost];
+  end;
+
+begin
+  Read(n, v);
+  for i := 1 to n do
+  begin
+    Read(cost, num);
+    for j := 0 to v do
+      g[j] := f[j];
+    solve;
+  end;
+  max := 0;
+  for i := 0 to v do
+    if f[i] > max then
+      max := f[i];
+  Write(max);
+end.

@@ -1,0 +1,53 @@
+#include <iostream>
+#include <cstring>
+#include <cstdio>
+#define mod 2009
+#define rep(i, n) for(int i = 1; i <= n; i++)
+using namespace std;
+
+int n, t, p;
+char s[15];
+
+struct matrix{
+	int m[91][91];
+	void operator *= (matrix &a){
+		matrix c;
+		memset(c.m, 0, sizeof(c.m));
+		rep(i, p)
+			rep(j, p)
+				rep(k, p)
+					c.m[i][j] = (c.m[i][j] + a.m[i][k] * m[k][j]) % mod;
+		memcpy(m, c.m, sizeof(m));
+	}
+} a, b;
+
+matrix power(int n){
+	if(n == 1)
+		return a;
+	matrix tmp = power(n / 2);
+	tmp *= tmp;
+	if(n & 1)
+		tmp *= a;
+	return tmp;
+}
+
+int main(){
+	scanf("%d%d", &n, &t);
+	p = 9 * n;
+	rep(i, n)
+		rep(j, 8)
+			a.m[(j - 1) * n + i][j * n + i] = 1;
+	rep(i, n){
+		scanf("%s", s);
+		rep(j, n){
+			a.m[i][j] = s[j - 1] - '0';
+			if(a.m[i][j] > 1){
+				a.m[(a.m[i][j] - 1) * n + i][j] = 1;
+				a.m[i][j] = 0;
+			}
+		}
+	}
+	b = power(t);
+	printf("%d\n", b.m[1][n]);
+	return 0;
+}

@@ -1,0 +1,114 @@
+/*
+* Copyright (C) 2012 All rights reserved.
+* File name:  paino.cpp
+* Author:     Parabola_ds
+* Creat time: 2012.07.11
+*/
+#include <algorithm>
+#include <iostream>
+#include <cstdlib>
+#include <cstring>
+#include <climits>
+#include <vector>
+#include <cstdio>
+#include <queue>
+#include <cmath>
+#include <set>
+#include <map>
+#define MAXN 500010
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+struct data{
+	int value, id, k;
+	data(int v, int i, int _k):
+		value(v), id(i), k(_k){}
+	bool operator < (const data &n) const{
+		return value < n.value;
+	}
+};
+
+struct node{
+	int value, s, pos;
+} t[21][MAXN];
+
+struct sortData{
+	int value, pos;
+	bool operator < (const sortData& d) const{
+		return value < d.value;
+	}
+} b[MAXN];
+
+priority_queue<data> heap;
+int n, k, l, r, a[MAXN];
+
+void build(int n, int l, int r){
+	int m = (l + r) >> 1, top1, top2, tot = 0;
+	if(l < r){
+		build(n + 1, l, m);
+		build(n + 1, m + 1, r);
+	}
+	top1 = l; top2 = m + 1;
+	while(top1 <= m || top2 <= r){
+		if(top1 <= m && (top2 > r || b[top1].pos < b[top2].pos)){
+			t[n][l + tot].value = b[top1].value;
+			t[n][l + tot].pos = b[top1].pos;
+			t[n][l + tot].s = 1;
+			tot++; top1++;
+		}
+		else{
+			t[n][l + tot].value = b[top2].value;
+			t[n][l + tot].pos = b[top2].pos;
+			t[n][l + tot].s = 0;
+			tot++; top2++;
+		}
+	}
+	for(int i = l; i <= r; ++i){
+		b[i].pos = t[n][i].pos;
+		b[i].value = t[n][i].value;
+		t[n][i].s += t[n][i - 1].s;
+	}
+}
+
+int query(int l, int r, int k){
+	int d = 1, L = 1, R = n;
+	while(l < r){
+		if(t[d][r].s - t[d][l - 1].s >= k){
+			l = t[d][l - 1].s - t[d][L - 1].s + L;
+			r = t[d][r].s - t[d][L - 1].s + L - 1;
+			R = (L + R) >> 1;
+		}
+		else{
+			k = k - t[d][r].s + t[d][l - 1].s;
+			l = t[d][R].s + l - t[d][l - 1].s;
+			r = t[d][R].s + r - t[d][r].s;
+			L = ((L + R) >> 1) + 1;
+		}
+		d++;
+	}
+	return t[d][l].value;
+}
+
+int main(){
+	scanf("%d%d%d%d", &n, &k, &l, &r);
+	rep(i, n){
+		scanf("%d", &a[i]), a[i] += a[i - 1];
+		b[i].value = a[i];
+		b[i].pos = i;
+	}
+	sort(b + 1, b + 1 + n);
+	build(1, 1, n);
+	rep(i, n - l + 1)
+		heap.push(data(query(i + l - 1, min(n, i + r - 1), min(n, i + r - 1) - i - l + 2) - a[i - 1], i, 1));
+	long long ans = 0;
+	rep(i, k){
+		ans += heap.top().value;
+		int _id = heap.top().id, _k = heap.top().k + 1;
+		heap.pop();
+		if(min(n, _id + r - 1) - _id - l + 2 >= _k)
+			heap.push(data(query(_id + l - 1, min(n, _id + r - 1), min(n, _id + r - 1) - _id - l + 3 - _k) - a[_id - 1], _id, _k));
+	}
+	printf("%lld\n", ans);
+	return 0;
+}
+

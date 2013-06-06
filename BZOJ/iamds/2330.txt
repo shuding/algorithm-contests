@@ -1,0 +1,82 @@
+
+#include <algorithm>
+#include <iostream>
+#include <cstdio>
+#include <queue>
+#define MAXN 100050
+#define MAXM 500050
+#define rep(i, n) for(int i = 1; i <= n; i++)
+using namespace std;
+
+typedef long long int64;
+const int64 inf = 0x3f3f3f3f;
+
+struct edge{
+	int t, w, next;
+	edge(){}
+	edge(int _t, int _w, int _n):
+		t(_t), w(_w), next(_n){}
+} e[MAXM];
+
+int n, m, etop(0), st[MAXN];
+
+void add(int s, int t, int64 w){
+	e[++etop] = edge(t, w, st[s]);
+	st[s] = etop;
+}
+
+int64 dis[MAXN], t[MAXN], tot(0);
+bool v[MAXN];
+deque<int> q;
+
+bool spfa(){
+	q.clear();
+	rep(i, n)
+		t[i] = 1, v[i] = 1, dis[i] = 1, q.push_front(i);
+	while(!q.empty()){
+		int u = q.back();
+		for(int i = st[u]; i; i = e[i].next)
+			if(dis[e[i].t] < dis[u] + (int64)e[i].w){
+				t[e[i].t]++;
+				if(t[e[i].t] >= n)
+					return 0;
+				dis[e[i].t] = dis[u] + (int64)e[i].w;
+				if(!v[e[i].t]){
+					q.push_front(e[i].t);
+					v[e[i].t] = 1;
+				}
+			}
+		v[u] = 0;
+		q.pop_back();
+	}
+	return 1;
+}
+
+int main(){
+	scanf("%d%d", &n, &m);
+	int cmd, a, b;
+	rep(i, m){
+		scanf("%d%d%d", &cmd, &a, &b);
+		switch(cmd){
+			case 1:
+				add(a, b, 0); add(b, a, 0); break;
+			case 2:
+				add(a, b, 1); if(a == b){printf("-1\n"); return 0;} break;
+			case 3:
+				add(b, a, 0); break;
+			case 4:
+				add(b, a, 1); if(a == b){printf("-1\n"); return 0;} break;
+			case 5:
+				add(a, b, 0); break;
+		}
+	}
+	if(spfa()){
+		rep(i, n)
+			tot += dis[i];
+		printf("%lld\n", tot);
+	}
+	else
+		printf("-1\n");
+	return 0;
+}
+﻿

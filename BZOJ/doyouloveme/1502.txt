@@ -1,0 +1,64 @@
+#include <iostream>
+#include <cstdio>
+#include <cmath>
+#define MAXN 510
+#define sqr(x) (x) * (x)
+using namespace std;
+
+const double eps = 1e-7;
+int n;
+double L = 1e20, R = -L, tanAlpha, tot, x[MAXN], r[MAXN];
+double xl[MAXN], xr[MAXN], yl[MAXN], yr[MAXN];
+
+double f(double p){
+	double m = 0;
+	for(int i = 1; i <= n + 1; ++i){
+		if(x[i] - r[i] < p && x[i] + r[i] > p)
+			m = max(m, sqrt(sqr(r[i]) - sqr(x[i] - p)));
+		if(xl[i] < p && xr[i] > p)
+			m = max(m, (yr[i] - yl[i]) / (xr[i] - xl[i]) * (p - xl[i]) + yl[i]);
+	}
+	return m;
+}
+
+double SimInt(double l, double r, double fl, double fm, double fr){
+	return (r - l) * (fl + fm * 4 + fr) / 6;
+}
+
+double calc(double l, double r, double fl, double fm, double fr, double pre){
+	double m = (l + r) / 2, flm = f((l + m) / 2), frm = f((m + r) / 2);
+	double lc = SimInt(l, m, fl, flm, fm), rc = SimInt(m, r, fm, frm, fr);
+	if(fabs(lc + rc - pre) <= eps) return pre;
+	return calc(l, m, fl, flm, fm, lc) + calc(m, r, fm, frm, fr, rc);
+}
+
+int main(){
+	scanf("%d%lf", &n, &tanAlpha);
+	tanAlpha = 1 / tan(tanAlpha);
+	for(int i = 1; i <= n + 1; ++i){
+		scanf("%lf", &x[i]);
+		x[i] *= tanAlpha;
+		x[i] += x[i - 1];
+		L = min(L, x[i]);
+		R = max(R, x[i]);
+	}
+	for(int i = 1; i <= n; ++i){
+		scanf("%lf", &r[i]);
+		L = min(L, x[i] - r[i]);
+		R = max(R, x[i] + r[i]);
+	}
+	for(int i = 2; i <= n + 1; ++i){
+		if(fabs(x[i] - x[i - 1]) <= fabs(r[i] - r[i - 1])){
+			xl[i - 1] = xr[i - 1] = 0;
+			continue;
+		}
+		double delta = (r[i] - r[i - 1]) / (x[i] - x[i - 1]);
+		xl[i - 1] = x[i - 1] - delta * r[i - 1];
+		xr[i - 1] = x[i] - delta * r[i];
+		yl[i - 1] = sqrt(sqr(r[i - 1]) - sqr(x[i - 1] - xl[i - 1]));
+		yr[i - 1] = sqrt(sqr(r[i]) - sqr(x[i] - xr[i - 1]));
+	}
+	tot = calc(L, R, f(L), f((L + R) / 2), f(R), 0);
+	printf("%.2lf\n", tot * 2);
+	return 0;
+}

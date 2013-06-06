@@ -1,0 +1,31 @@
+#include <iostream>
+#include <cstdio>
+#define mod 100000007
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+int n, m;
+long long f[1000050], A[1000050];
+
+long long power(long long a, long long b){
+	if(!b) return 1;
+	long long p = power(a, b / 2);
+	p = p * p % mod;
+	if(b & 1) p = p * a % mod;
+	return p;
+}
+
+int main(){
+	scanf("%d%d", &n, &m);
+	A[0] = 1;
+	long long one_shl_n = power(2, n), fact = 1;
+	rep(i, m)
+		A[i] = A[i - 1] * (one_shl_n - i) % mod;
+	for(int i = 3; i <= m; ++i)
+		f[i] = (A[i - 1] - f[i - 1] - (one_shl_n + 1 - i) * f[i - 2] % mod * (i - 1) % mod + mod) % mod;
+	rep(i, m) fact = fact * i % mod;
+	f[m] = f[m] * power(fact, mod - 2) % mod;
+	printf("%lld\n", f[m]);
+	return 0;
+}
+

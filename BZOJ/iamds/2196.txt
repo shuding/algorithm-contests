@@ -1,0 +1,51 @@
+
+#include <algorithm>
+#include <iostream>
+#include <cstdio>
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+int r, c, a, b, p[505][505];
+
+bool check_2(int u, int d, int s){
+	int tot = 0, sum = 0;
+	rep(i, c){
+		if(sum < s)
+			sum += p[d][i] - p[u][i];
+		else{
+			tot++;
+			sum = p[d][i] - p[u][i];
+		}
+	}
+	if(sum >= s) tot++;
+	return tot >= b;
+}
+
+bool check(int s){
+	int l = 0, tot = 0;
+	rep(i, r)
+		if(check_2(l, i, s)){
+			l = i;
+			tot++;
+		}
+	return tot >= a;
+}
+
+int main(){
+	cin >> r >> c >> a >> b;
+	rep(i, r)
+		rep(j, c){
+			scanf("%d", &p[i][j]);
+			p[i][j] += p[i - 1][j];
+		}
+	int L = 0, R = 4000 * r * c, mid;
+	while(L <= R){
+		mid = (L + R) / 2;
+		if(check(mid))
+			L = mid + 1;
+		else
+			R = mid - 1;
+	}
+	cout << R << endl;
+	return 0;
+}

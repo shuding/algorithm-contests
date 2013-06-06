@@ -1,0 +1,96 @@
+#include <iostream>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <algorithm>
+#define rep(i, n) for(int i = 0; i < n; i++)
+#define debug(x) cout << #x << " = " << x << endl;
+
+using namespace std;
+
+const int MAXN = 400050;
+
+struct edge
+{
+    int x, y;
+} h[MAXN], g[MAXN];
+int n, m, p, fa[MAXN], d[MAXN], ans[MAXN], st[MAXN], st2[MAXN], tot;
+bool INset[MAXN];
+
+int father(int i)
+{
+    if(fa[i] == i)
+        return i;
+    return fa[i] = father(fa[i]);
+}
+
+void Mset(int i)
+{
+    fa[i] = i;
+    INset[i] = 0;
+    tot++;
+}
+
+void UN(int i, int j)
+{
+    if(INset[i] || INset[j])
+        return;
+    i = father(i);
+    j = father(j);
+    if(i != j)
+    {
+        fa[j] = i;
+        tot--;
+    }
+}
+
+bool cmp(edge a, edge b)
+{
+    return a.x < b.x;
+}
+
+int main()
+{
+    scanf("%d%d", &n, &m);
+    rep(i, m)
+    {
+        scanf("%d%d", &h[i].x, &h[i].y);
+        st[h[i].x]++;
+        st[h[i].y]++;
+        h[m + i] = h[i];
+        swap(h[i].x, h[i].y);
+    }
+    rep(i, n)
+        st[i + 1] += st[i];
+    for(int i = n; i > 0; i--)
+    {
+        st[i] = st[i - 1];
+        st2[i] = st[i];
+    }
+    st[0] = 0;
+    rep(i, 2 * m)
+        g[st2[h[i].x]++].y = h[i].y;
+    scanf("%d", &p);
+    memset(INset, 0, sizeof(INset));
+    tot = 0;
+    rep(i, p)
+        scanf("%d", &d[i]), INset[d[i]] = 1;
+    rep(i, n)
+        if(!INset[i])
+            Mset(i);
+    rep(i, n)
+        if(!INset[i])
+            for(int j = st[i]; j < st[i + 1]; j++)
+                UN(i, g[j].y);
+    ans[p] = tot;
+    for(int i = p - 1; i >= 0; i--)
+    {
+        Mset(d[i]);
+        for(int j = st[d[i]]; j < st[d[i] + 1]; j++)
+            UN(d[i], g[j].y);
+        ans[i] = tot;
+    }
+    rep(i, p + 1)
+        printf("%d\n", ans[i]);
+    return 0;
+}

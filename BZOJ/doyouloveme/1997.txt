@@ -1,0 +1,76 @@
+/***************************************************
+*
+*   Copyright (C) 2012 All rights reserved.
+*   File name:  planar.cpp
+*   Author:     Parabola_ds
+*   Creat time: 2012.04.18
+*
+***************************************************/
+
+#include <algorithm>
+#include <iostream>
+#include <cstring>
+#include <cstdio>
+#define MAXM 10010
+#define MAXN 210
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+struct edge{
+	int a, b;
+	bool operator < (const edge &e) const{
+		return a < e.a || (a == e.a && b < e.b);
+	}
+} e[MAXM];
+
+int n, m, a[MAXM], b[MAXM], r[MAXN], fa[MAXM * 2];
+
+int father(int i){
+	return fa[i] == i ? i : fa[i] = father(fa[i]);
+}
+
+int main(){
+	int test_num;
+	scanf("%d", &test_num);
+	while(test_num--){
+		scanf("%d%d", &n, &m);
+		rep(i, m)
+			scanf("%d%d", &e[i].a, &e[i].b);
+		rep(i, n){
+			int tmp;
+			scanf("%d", &tmp);
+			r[tmp] = i;
+		}
+		rep(i, m){
+			e[i].a = r[e[i].a];
+			e[i].b = r[e[i].b];
+			if(e[i].a > e[i].b) swap(e[i].a, e[i].b);
+		}
+		sort(e + 1, e + 1 + m);
+		rep(i, 2 * m)
+			fa[i] = i;
+		rep(i, m){
+			int j = i + 1;
+			while(j <= m && e[j].a < e[i].b){
+				if(e[j].a > e[i].a && e[j].b > e[i].b){
+					fa[father(j)] = father(i + m);
+					fa[father(i)] = father(j + m);
+				}
+				++j;
+			}
+			if(father(i) == father(i + m)){
+				printf("NO\n");
+				goto next;
+			}
+		}
+		rep(i, m)
+			if(father(i) == father(i + m)){
+				printf("NO\n");
+				goto next;
+			}
+		printf("YES\n");
+		next:{}
+	}
+	return 0;
+}
+

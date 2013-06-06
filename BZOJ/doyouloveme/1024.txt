@@ -1,0 +1,35 @@
+#include <cstdio>
+#include <iostream>
+#include <algorithm>
+#define debug(x) cout << #x << " = " << x << endl;
+using namespace std;
+double s, x, y;
+int n;
+double dfs(double x, double y, int n)
+{
+    double rate = 10000, r1, r2;
+    if(n == 1)
+        return max(x, y) / min(x, y);
+    for(int i = 1; i < n; i++)
+    {
+        r1 = dfs(x, i * s / x, i);
+        if(r1 < rate)
+        {
+            r2 = dfs(x, y - i * s / x, n - i);
+            rate = min(rate, max(r1, r2));
+        }
+        r1 = dfs(y, i * s / y, i);
+        if(r1 < rate)
+        {
+            r2 = dfs(y, x - i * s / y, n - i);
+            rate = min(rate, max(r1, r2));
+        }
+    }
+    return rate;
+}
+int main()
+{
+    scanf("%lf%lf%d", &x, &y, &n);
+    s = x * y / n;
+    printf("%.6lf", dfs(x, y, n));
+}

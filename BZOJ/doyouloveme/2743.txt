@@ -1,0 +1,73 @@
+/*
+* Copyright (C) 2012 All rights reserved.
+* File name:  2743.cpp
+* Author:     Parabola_ds
+* Creat time: 2012.05.29
+*/
+#include <algorithm>
+#include <iostream>
+#include <cstdlib>
+#include <cstring>
+#include <climits>
+#include <vector>
+#include <cstdio>
+#include <queue>
+#include <cmath>
+#include <set>
+#include <map>
+#define MAXN 1000000
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+int n, c, m;
+int st[MAXN + 10], pre[MAXN + 10], top[MAXN + 10], ans[MAXN + 10];
+
+struct query{
+	int l, r, id;
+	bool operator < (const query &q) const{
+		return r < q.r;
+	}
+} q[MAXN + 10];
+
+struct treeShapeArray{
+	int e[MAXN + 10];
+	void modify(int pos, int x){
+		for(; pos <= n; pos += pos & -pos)
+			e[pos] += x;
+	}
+	int sum(int pos){
+		int s = 0;
+		for(; pos; pos -= pos & -pos)
+			s += e[pos];
+		return s;
+	}
+} T;
+
+int main(){
+	scanf("%d%d%d", &n, &c, &m);
+	rep(i, n){
+		int tmp;
+		scanf("%d", &tmp);
+		pre[i] = st[tmp];
+		st[tmp] = i;
+	}
+	rep(i, m)
+		scanf("%d%d", &q[i].l, &q[i].r), q[i].id = i;
+	sort(q + 1, q + 1 + m);
+	int t = 1;
+	rep(i, n){
+		if(pre[pre[i]] < pre[i]){
+			T.modify(pre[pre[i]] + 1, 1);
+			T.modify(pre[i] + 1, -1);
+		}
+		while(q[t].r == i){
+			ans[q[t].id] = T.sum(q[t].l);
+			++t;
+		}
+		if(t > m) break;
+	}
+	rep(i, m)
+		printf("%d\n", ans[i]);
+	return 0;
+}
+

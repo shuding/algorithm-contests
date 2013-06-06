@@ -1,0 +1,156 @@
+#include <algorithm>
+#include <iostream>
+#include <cstdio>
+#define MAXN 100010
+#define left t[n].c[0]
+#define right t[n].c[1]
+using namespace std;
+
+struct node{
+	int	l, r,
+		n[2],		//the number of 0, 1
+		s[2],		//the longest subseq 0, 1
+		sl[2], sr[2],
+		c[2];
+	bool	a[2],	//all 0, 1
+			re;		//reverse
+	void init(int k){
+		n[k] = s[k] = sl[k] = sr[k] = r - l + 1;
+		a[k] = 1;
+		k = !k;
+		n[k] = s[k] = sl[k] = sr[k] = 0;
+		a[k] = 0;
+	}
+	void reverse(){
+		swap(n[0], n[1]);
+		swap(s[0], s[1]);
+		swap(sl[0], sl[1]);
+		swap(sr[0], sr[1]);
+		swap(a[0], a[1]);
+		re = !re;
+	}
+} t[MAXN * 3];
+
+int n, m, root, tot;
+
+void adjust(int n){
+	int mid = (t[n].l + t[n].r) / 2;
+	t[n].n[0] = t[left].n[0] + t[right].n[0];
+	t[n].n[1] = t[left].n[1] + t[right].n[1];
+	t[n].s[0] = max(max(t[left].s[0], t[right].s[0]), t[left].sr[0] + t[right].sl[0]);
+	t[n].s[1] = max(max(t[left].s[1], t[right].s[1]), t[left].sr[1] + t[right].sl[1]);
+	t[n].sl[0] = t[left].sl[0] == mid - t[n].l + 1 ? t[left].sl[0] + t[right].sl[0] : t[left].sl[0];
+	t[n].sl[1] = t[left].sl[1] == mid - t[n].l + 1 ? t[left].sl[1] + t[right].sl[1] : t[left].sl[1];
+	t[n].sr[0] = t[right].sr[0] == t[n].r - mid ? t[right].sr[0] + t[left].sr[0] : t[right].sr[0];
+	t[n].sr[1] = t[right].sr[1] == t[n].r - mid ? t[right].sr[1] + t[left].sr[1] : t[right].sr[1];
+	t[n].a[0] = t[n].a[1] = 0;
+	t[n].re = 0;
+}
+
+void mark(int n){
+	if(t[n].re){
+		t[left].reverse();
+		t[right].reverse();
+	}
+	if(t[n].a[0]){
+		t[left].init(0);
+		t[right].init(0);
+	}
+	else
+		if(t[n].a[1]){
+		 	t[left].init(1);
+			t[right].init(1);
+		}
+}
+
+void build(int &n, int l, int r){
+	n = ++tot;
+	t[n].l = l;
+	t[n].r = r;
+	t[n].re = t[n].a[0] = t[n].a[1] = 0;
+	if(l == r){
+		int _n;
+		scanf("%d", &_n);
+		t[n].init(_n);
+		return;
+	}
+	int mid = (l + r) / 2;
+	build(left, l, mid);
+	build(right, mid + 1, r);
+	adjust(n);
+}
+
+void change_all(int n, int l, int r, int k){
+	if(l > t[n].r || r < t[n].l) return;
+	if(t[n].l >= l && t[n].r <= r){
+		if(k < 2)
+			t[n].init(k);
+		else
+			t[n].reverse();
+		return;
+	}
+	mark(n);
+	change_all(left, l, r, k);
+	change_all(right, l, r, k);
+	adjust(n);
+}
+
+int query(int n, int l, int r, int k){
+	if(t[n].l == l && t[n].r == r)
+		return t[n].n[k];
+	if(t[n].a[!k])
+		return 0;
+	if(t[n].a[k])
+		return r - l + 1;
+	int mid = (t[n].l + t[n].r) / 2;
+	if(t[n].re)
+		k = !k;
+	if(r <= mid)
+		tot = query(left, l, r, k);
+	else
+		if(l > mid)
+			tot = query(right, l, r, k);
+		else
+			tot = query(left, l, mid, k) + query(right, mid + 1, r, k);
+	return tot;
+}
+
+int query_2(int n, int l, int r, int k){
+	if(t[n].l >= l && t[n].r <= r)
+		return t[n].s[k];
+	if(t[n].a[!k])
+		return 0;
+	if(t[n].a[k])
+		return r - l + 1;
+	int mid = (t[n].l + t[n].r) / 2;
+	if(t[n].re)
+		k = !k;
+	if(r <= mid)
+		tot = query_2(left, l, r, k);
+	else
+		if(l > mid)
+			tot = query_2(right, l, r, k);
+		else{
+			tot = max(query_2(left, l, mid, k), query_2(right, mid + 1, r, k));
+			tot = max(tot, min(t[left].sr[k], mid - l + 1) + min(t[right].sl[k], r - mid));
+		}
+	return tot;
+}
+
+int main(){
+	scanf("%d%d", &n, &m);
+	build(root, 1, n);
+	while(m--){
+		int cmd, l, r;
+		scanf("%d%d%d", &cmd, &l, &r);
+		l++; r++;
+		switch(cmd){
+			case 0: change_all(root, l, r, 0); break;
+			case 1: change_all(root, l, r, 1); break;
+			case 2: change_all(root, l, r, 2); break;
+			case 3: printf("%d\n", query(root, l, r, 1)); break;
+			case 4: printf("%d\n", query_2(root, l, r, 1)); break;
+		}
+	}
+}
+

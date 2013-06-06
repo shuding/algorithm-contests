@@ -1,0 +1,106 @@
+/*
+* Copyright (C) 2012 All rights reserved.
+* File name:  1030.cpp
+* Author:     Parabola_ds
+* Creat time: 2012.06.11
+*/
+#include <algorithm>
+#include <iostream>
+#include <cstdlib>
+#include <cstring>
+#include <climits>
+#include <vector>
+#include <cstdio>
+#include <queue>
+#include <cmath>
+#include <set>
+#include <map>
+#define mod 10007
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+int n, m, tot = 1, f[101][60 * 101], t[60 * 101][26];
+char s[101];
+
+struct nodeStruct{
+	int fail, ch[26];
+	bool tail;
+	nodeStruct(){
+		fail = tail = 0;
+		memset(ch, 0, sizeof(ch));
+	}
+} node[60 * 101];
+
+void insert(char *s){
+	int len = strlen(s), p = 1;
+	for(int i = 0; i < len; ++i){
+		if(!node[p].ch[s[i] - 'A'])
+			node[p].ch[s[i] - 'A'] = ++tot;
+		p = node[p].ch[s[i] - 'A'];
+	}
+	node[p].tail = 1;
+}
+
+void build(){
+	int l, r, p;
+	static int q[60 * 101];
+	q[l = r = 1] = 1;
+	node[1].fail = 0;
+	while(l <= r){
+		p = q[l++];
+		for(int i = 0; i < 26; ++i){
+			int now = node[p].ch[i];
+			if(now){
+				int x = node[p].fail;
+				while(x && !node[x].ch[i]) x = node[x].fail;
+				if(node[x].ch[i]) node[now].fail = node[x].ch[i];
+				else node[now].fail = 1;
+				for(x = now; x; x = node[x].fail)
+					if(node[x].tail){
+						node[now].tail = 1;
+						break;
+					}
+				q[++r] = now;
+			}
+		}
+	}
+}
+
+void dp(){
+	f[0][1] = 1;
+	rep(j, tot)
+		for(int k = 0; k < 26; ++k){
+			int p = 1, q;
+			for(q = j; q; q = node[q].fail)
+				if(node[q].ch[k]){
+					p = node[q].ch[k];
+					break;
+				}
+			t[j][k] = p; 
+		}
+	rep(i, m)
+		rep(j, tot)
+			for(int k = 0; k < 26; ++k)
+				if(!node[t[j][k]].tail)
+					f[i][t[j][k]] = (f[i][t[j][k]] + f[i - 1][j]) % mod;
+}
+
+int main(){
+	scanf("%d%d", &n, &m);
+	while(n--){
+		scanf("%s", s);
+		insert(s);
+	}
+	build();
+	dp();
+	int sum = 0, ans = 1;
+	rep(i, tot)
+		sum = (sum + f[m][i]) % mod;
+	rep(i, m)
+		ans = ans * 26 % mod;
+	ans -= sum;
+	while(ans < 0) ans += mod;
+	ans %= mod;
+	printf("%d\n", ans);
+	return 0;
+}

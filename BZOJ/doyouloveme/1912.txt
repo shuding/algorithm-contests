@@ -1,0 +1,62 @@
+#include <cstring>
+#include <cstdio>
+#define N 100010
+
+int n, k, tool, maxx, ans ;
+int f[N], son1[N], son2[N] ;
+int h[N], e[N << 1], ne[N << 1], v[N << 1], idx ;
+
+void init ()
+{
+    memset (h, -1, sizeof h) ;
+    idx = 0 ;
+}
+
+void add (int a, int b)
+{
+    e[idx] = b, ne[idx] = h[a], v[idx] = 1, h[a] = idx ++ ;
+}
+
+void dfs (int u, int pre)
+{
+    int t1, t2, i ;
+    t1 = t2 = 0 ;
+    f[u] = 0 ;
+    son1[u] = son2[u] = -1 ;
+    for (i = h[u]; i != -1; i = ne[i])
+        if (e[i] != pre){
+            dfs (e[i], u) ;
+            if (f[e[i]] + v[i] > t1){
+                t2 = t1, t1 = f[e[i]] + v[i] ;
+                son2[u] = son1[u] ;
+                son1[u] = i ;}
+            else if (f[e[i]] + v[i] > t2){
+                t2 = f[e[i]] + v[i] ;
+                son2[u] = i ;}}
+    f[u] = t1 ;
+    if (maxx < t1 + t2){
+        maxx = t1 + t2 ;
+        tool = u ;}
+}
+
+int main (){
+    int i, j, t ;
+    scanf ("%d%d", &n, &k) ;
+    init () ;
+    for (i = 1; i < n; i ++ ){
+        scanf ("%d%d", &j, &t) ;
+        add (t, j), add (j, t) ;}
+    maxx = 0 ;
+    dfs (1, -1) ;
+    ans = maxx - 1 ;
+    for (i = son1[tool]; i != -1; i = son1[e[i]]) v[i] = v[i ^ 1] = -1 ;
+    for (i = son2[tool]; i != -1; i = son1[e[i]]) v[i] = v[i ^ 1] = -1 ;
+    if (k > 1){
+        maxx = 0 ;
+        dfs (1, -1) ;
+        ans += maxx - 1 ;}
+    ans = ((n - 1) << 1) - ans ;
+    printf ("%d\n", ans) ;
+    return 0 ;
+}
+

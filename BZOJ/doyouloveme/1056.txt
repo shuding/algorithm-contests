@@ -1,0 +1,174 @@
+/*
+* Copyright (C) 2012 All rights reserved.
+* File name:  1056.cpp
+* Author:     Parabola_ds
+* Creat time: 2012.06.04
+*/
+#include <algorithm>
+#include <iostream>
+#include <cstdlib>
+#include <cstring>
+#include <climits>
+#include <vector>
+#include <cstdio>
+#include <queue>
+#include <cmath>
+#include <set>
+#include <map>
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+const int inf = ~0U >> 1;
+
+char name[250050][11];
+int nameNum, nameRev[3000000], score[3000000], _time[3000000];
+
+struct hashStruct{
+	#define SEED 13331
+	int hashValue(char *s){
+		int tot = 0, len = strlen(s);
+		for(int i = 0; i < len; ++i)
+			tot = tot * SEED + s[i];
+		tot = abs(tot) % 2971013;
+		while(nameRev[tot]){
+			if(strcmp(name[nameRev[tot]], s) == 0) return tot;
+			tot++;
+		}
+		return tot;
+	}
+	void insert(char *s, int sc, int ti, int pos){
+		nameNum++;
+		for(int i = 0; i < 10; ++i)
+			name[nameNum][i] = s[i];
+		nameRev[pos] = nameNum;
+		score[pos] = sc;
+		/*if(!_time[pos])*/ _time[pos] = ti;
+	}
+	char *reHash(int n){
+		return name[nameRev[n]];
+	}
+} hash;
+
+struct treap{
+	treap(){
+		null = new node(0, 0, 0, 0);
+		null->key = inf;
+		null->size = 0;
+		root = null;
+	}
+	struct node{
+		int value, time, id, size, key;
+		node(int v, int t, int i, node *n):
+			value(v), time(t), id(i){
+				size = 1; key = rand() - 1; c[0] = c[1] = n;
+			}
+		void sz(){
+			size = c[0]->size + c[1]->size + 1;
+		}
+		node *c[2];
+	} *root, *null;
+	void rot(node *&n, bool d){
+		node *t = n->c[d];
+		n->c[d] = t->c[!d];
+		t->c[!d] = n;
+		n->sz(); t->sz();
+		n = t;
+	}
+	void insert(node *&n, int v, int t, int id){
+		if(n == null){
+			n = new node(v, t, id, null);
+			return;
+		}
+		bool d = v < n->value || (v == n->value && t > n->time);
+		insert(n->c[d], v, t, id);
+		if(n->c[d]->key < n->key)
+			rot(n, d);
+		else
+			n->sz();
+	}
+	void del(node *&n, int v, int t, int id){
+		if(n == null) return;
+		bool d;
+		if(n->id == id){
+			d = n->c[0]->key > n->c[1]->key;
+			if(n->c[d] == null){
+				delete n;
+				n = null;
+			}
+			else{
+				rot(n, d);
+				del(n->c[!d], v, t, id);
+				n->sz();
+			}
+			return;
+		}
+		d = v < n->value || (v == n->value && t > n->time);
+		del(n->c[d], v, t, id);
+		n->sz();
+	}
+	int rank(node *&n, int k){
+		if(n == null) return -1;
+		int r = n->c[0]->size;
+		if(k <= r)
+			return rank(n->c[0], k);
+		if(k == r + 1)
+			return n->id;
+		return rank(n->c[1], k - r - 1);
+	}
+	void printName(node *&n, int k, int p, int ed){
+		if(n == null || k > p) return;
+		if(n->c[0]->size >= p){
+			printName(n->c[0], k, p, ed);
+			return;
+		}
+		if(n->c[0]->size + 1 < k){
+			printName(n->c[1], k - n->c[0]->size - 1, p - n->c[0]->size - 1, ed - n->c[0]->size - 1);
+			return;
+		}
+		printName(n->c[0], k, n->c[0]->size, ed);
+		printf("%s", hash.reHash(n->id));
+		if(n->c[0]->size + 1 != ed) printf(" ");
+		printName(n->c[1], 1, p - n->c[0]->size - 1, ed - n->c[0]->size - 1);
+	}
+	int printRank(node *&n, int v, int t){
+		if(n == null) return -1;
+		if(n->value == v && n->time == t)
+			return n->c[0]->size + 1;
+		if(v > n->value || (v == n->value && t < n->time))
+			return printRank(n->c[0], v, t);
+		else
+			return printRank(n->c[1], v, t) + n->c[0]->size + 1;
+	}
+} T;
+
+int main(){
+	int testNum, t = 0, n;
+	char cmd, na[15];
+	scanf("%d", &testNum);
+	while(testNum--){
+		t++;
+		cmd = getchar();
+		while(cmd != '+' && cmd != '?') cmd = getchar();
+		scanf("%s", na);
+		if(na[0] > 'Z' || na[0] < 'A'){
+			n = 0;
+			int len = strlen(na);
+			for(int i = 0; i < len; ++i)
+				n = n * 10 + na[i] - '0';
+			T.printName(T.root, n, min(n + 9, T.root->size), min(n + 9, T.root->size)); puts("");
+		}
+		else
+			if(cmd == '+'){
+				scanf("%d", &n);
+				int id = hash.hashValue(na);
+				T.del(T.root, score[id], _time[id], id);
+				hash.insert(na, n, t, id);
+				T.insert(T.root, n, _time[id], id);
+			}
+			else{
+				int id = hash.hashValue(na);
+				printf("%d\n", T.printRank(T.root, score[id], _time[id]));
+			}
+	}
+	return 0;
+}

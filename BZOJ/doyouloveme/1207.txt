@@ -1,0 +1,24 @@
+program bzoj1207;
+
+var n, m, i, j, max: longint;
+    x, y, time: array[1..10000] of longint;
+    f: array[0..10000] of longint;
+
+begin
+  read(n,m);
+  for i:=1 to m do
+    read(time[i],x[i],y[i]);
+  for i:=1 to m do
+  begin
+    f[i]:=1;
+    for j:=1 to i-1 do
+      if abs(x[j]-x[i])+abs(y[j]-y[i])<=time[i]-time[j] then
+        if f[j]>=f[i] then
+          f[i]:=f[j]+1;
+  end;
+  max := 0;
+  for i := 1 to m do
+    if f[i] > max then
+	   max := f[i];
+  write(max);
+end.

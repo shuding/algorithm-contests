@@ -1,0 +1,45 @@
+#include <algorithm>
+#include <iostream>
+#include <cstdio>
+#include <ctime>
+#define MAXN 10001
+using namespace std;
+
+int n, m, a, b, fa[MAXN];
+char cmd[10];
+
+int Root(int i){
+	while(fa[i] != i)
+		i = fa[i];
+	return i;
+}
+
+void Evert(int i){
+	if(fa[i] == i) return;
+	Evert(fa[i]);
+	fa[fa[i]] = i;
+	fa[i] = i;
+}
+
+int main(){
+	scanf("%d%d", &n, &m);
+	for(int i = 1; i <= n; ++i)
+		fa[i] = i;
+	while(m--){
+		scanf("%s %d %d", cmd, &a, &b);
+		if(cmd[0] == 'Q')
+			printf("%s\n", Root(a) == Root(b) ? "Yes" : "No");
+		else
+			if(cmd[0] == 'C'){
+				Evert(a);
+				fa[a] = b;
+			}
+			else
+				if(fa[a] == b)
+					fa[a] = a;
+				else
+					fa[b] = b;
+	}
+	return 0;
+}
+

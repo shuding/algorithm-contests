@@ -1,0 +1,84 @@
+/*
+* Copyright (C) 2012 All rights reserved.
+* File name:  cchkk.cpp
+* Author:     Parabola_ds
+* Creat time: 2012.06.13
+*/
+#include <algorithm>
+#include <iostream>
+#include <cstdlib>
+#include <cstring>
+#include <climits>
+#include <vector>
+#include <cstdio>
+#include <queue>
+#include <cmath>
+#include <set>
+#include <map>
+#define MAXN 1000
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+const int inf = ~0U >> 2;
+
+vector<int> e[MAXN + 10];
+int n, m, s, t, d[MAXN + 10][MAXN + 10], st[MAXN + 10][MAXN + 10];
+double f[MAXN + 10][MAXN + 10];
+
+void spfa(int s){
+	static int dis[MAXN + 10], que[MAXN * 10], p, q;
+	static bool vst[MAXN + 10];
+	rep(i, n)
+		dis[i] = inf, vst[i] = 0;
+	que[p = q = 1] = s;
+	dis[s] = 0; vst[s] = 1;
+	while(p <= q){
+		int Q = que[p++];
+		for(vector<int>::iterator it = e[Q].begin(); it != e[Q].end(); ++it)
+			if(dis[*it] > dis[Q] + 1){
+				dis[*it] = dis[Q] + 1;
+				if(!vst[*it])
+					que[++q] = *it;
+				vst[*it] = 1;
+			}
+		vst[Q] = 0;
+	}
+	rep(i, n)
+		d[s][i] = dis[i];
+}
+
+double dp(int s, int t){
+	if(f[s][t] > 0) return f[s][t];
+	if(s == t) return 0;
+	if(d[s][t] <= 2) return 1;
+	int tmp = s;
+	s = st[st[s][t]][t];
+	double tot = dp(s, t), sum = 1;
+	for(vector<int>::iterator it = e[t].begin(); it != e[t].end(); ++it){
+		sum += 1;
+		tot += dp(s, *it);
+	}
+	f[tmp][t] = tot / sum + 1;
+	return f[tmp][t];
+}
+
+int main(){
+	scanf("%d%d%d%d", &n, &m, &s, &t);
+	rep(i, m){
+		int a, b;
+		scanf("%d%d", &a, &b);
+		e[a].push_back(b);
+		e[b].push_back(a);
+	}
+	rep(i, n) spfa(i);
+	rep(i, n)
+		rep(j, n){
+			int p = *e[i].begin();
+			for(vector<int>::iterator it = e[i].begin(); it != e[i].end(); ++it)
+				if(d[*it][j] < d[p][j] || (d[*it][j] == d[p][j] && *it < p))
+					p = *it;
+			st[i][j] = p;
+		}
+	printf("%.3lf\n", dp(s, t));
+	return 0;
+}

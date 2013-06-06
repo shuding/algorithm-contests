@@ -1,0 +1,56 @@
+#include <algorithm>
+#include <iostream>
+#include <cstdio>
+#define MAXN 100010
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+struct edge{
+	int s, t, l, next;
+} e[MAXN * 2];
+
+long long sn[MAXN], ans = 100000000000000000ll, sum ,tot;
+int n, c[MAXN];
+int st[MAXN], etop;
+
+void add(int s, int t, int l){
+	etop++;
+	e[etop].s = s;
+	e[etop].t = t;
+	e[etop].l = l;
+	e[etop].next = st[s];
+	st[s] = etop;
+}
+
+void build(int v, int f, long long dis){
+	sum += dis * c[v];
+	sn[v] = c[v];
+	for(int i = st[v]; i; i = e[i].next)
+		if(e[i].t != f){
+			build(e[i].t, v, dis + e[i].l);
+			sn[v] += sn[e[i].t];
+		}
+}
+
+void solve(int v, int f, long long cost){
+	ans = min(ans, cost);
+	for(int i = st[v]; i; i = e[i].next)
+		if(e[i].t != f)
+			solve(e[i].t, v, cost + (tot - 2 * sn[e[i].t]) * e[i].l);
+}
+
+int main(){
+	scanf("%d", &n);
+	rep(i, n)
+		scanf("%d", &c[i]), tot += c[i];
+	int a, b, l;
+	rep(i, n - 1){
+		scanf("%d%d%d", &a, &b, &l);
+		add(a, b, l);
+		add(b, a, l);
+	}
+	build(1, 0, 0);
+	solve(1, 0, sum);
+	printf("%lld\n", ans);
+	return 0;
+}

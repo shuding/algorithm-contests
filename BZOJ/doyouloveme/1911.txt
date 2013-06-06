@@ -1,0 +1,50 @@
+/*
+*
+*   Copyright (C) 2012 All rights reserved.
+*   File name:  commando.cpp
+*   Author:     Parabola_ds
+*   Creat time: 2012.04.29
+*
+*/
+
+#include <iostream>
+#include <cstdio>
+#include <cmath>
+#define MAXN 1000050
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+typedef long long int64;
+
+int n, index[MAXN];
+int64 a, b, c, s[MAXN], f[MAXN];
+pair<int64, int64> st[MAXN];
+
+int64 calc(int64 x){
+	return a * x * x + b * x + c;
+}
+
+int64 _calc(int64 x){
+	return a * x * x - b * x;
+}
+
+int main(){
+	scanf("%d%lld%lld%lld", &n, &a, &b, &c);
+	rep(i, n){
+		scanf("%d", &s[i]);
+		s[i] += s[i - 1];
+	}
+	int p(0), q(0);
+	rep(i, n){
+		int64 k = 2 * s[i];
+		while(p < q && k * (st[p].first - st[p + 1].first) >= st[p].second - st[p + 1].second) ++p;
+		f[i] = f[index[p]] + calc(s[i] - s[index[p]]);
+		int64 dx = a * s[i], dy = f[i] + _calc(s[i]);
+		while(p < q && (dy - st[q].second) * (st[q].first - st[q - 1].first) <= (dx - st[q].first) * (st[q].second - st[q - 1].second)) --q;
+		st[++q] = make_pair(dx, dy);
+		index[q] = i;
+	}
+	printf("%lld\n", f[n]);
+	return 0;
+}
+

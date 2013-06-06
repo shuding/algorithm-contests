@@ -1,0 +1,105 @@
+/*
+* Copyright (C) 2012 All rights reserved.
+* File name:  1043.cpp
+* Author:     Parabola_ds
+* Creat time: 2012.05.27
+*/
+#include <algorithm>
+#include <iostream>
+#include <cstdlib>
+#include <cstring>
+#include <climits>
+#include <vector>
+#include <cstdio>
+#include <queue>
+#include <cmath>
+#include <set>
+#include <map>
+#define MAXN 1000
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+const double pi = acos(-1.0);
+
+struct point{
+	double x, y;
+};
+
+struct circle{
+	point o;
+	double r;
+} c[MAXN + 10];
+
+double sum;
+int n, eventNum;
+bool cover[MAXN + 10];
+pair<double, double> event[MAXN * MAXN + 10];
+
+double dis(point a, point b){
+	return sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
+}
+
+bool intersect(circle a, circle b){
+	double distant = dis(a.o, b.o);
+	return distant < a.r + b.r && distant > fabs(a.r - b.r);
+}
+
+bool CompleteIn(circle a, circle b){
+	return a.r <= b.r && dis(a.o, b.o) <= b.r - a.r;
+}
+
+double around(double range){
+	if(range < 0)
+		range += 2.0 * pi;
+	if(range > 2.0 * pi)
+		range -= 2.0 * pi;
+	return range;
+}
+
+int main(){
+	scanf("%d", &n);
+	rep(i, n)
+		scanf("%lf%lf%lf", &c[i].r, &c[i].o.x, &c[i].o.y);
+	rep(i, n){
+		eventNum = 0;
+		for(int j = i + 1; j <= n; ++j){
+			if(CompleteIn(c[i], c[j])){
+				eventNum = 1;
+				event[1] = make_pair(0, 2 * pi);
+				break;
+			}
+			if(CompleteIn(c[j], c[i]))
+				continue;
+			if(!intersect(c[i], c[j]))
+				continue;
+			double distant = dis(c[i].o, c[j].o);
+			double hDis = (c[i].r * c[i].r + distant * distant - c[j].r * c[j].r) / (2.0 * distant);
+			double h = sqrt(c[i].r * c[i].r - hDis * hDis);
+			double arc1 = around(atan2(h, hDis)), arc2 = around(atan2(c[j].o.y - c[i].o.y, c[j].o.x - c[i].o.x));
+			double uRange = arc2 + arc1, dRange = arc2 - arc1;
+			if(uRange < dRange)
+				swap(uRange, dRange);
+			uRange = around(uRange);
+			dRange = around(dRange);
+			if(uRange < dRange){
+				event[++eventNum] = make_pair(dRange, 2 * pi);
+				event[++eventNum] = make_pair(0, uRange);
+			}
+			else
+				event[++eventNum] = make_pair(dRange, uRange);
+		}
+		sort(event + 1, event + 1 + eventNum);
+		double ed = event[1].first, tot = 0;
+		event[eventNum + 1] = make_pair(2 * pi, 0);
+		rep(j, eventNum){
+			ed = max(ed, event[j].first);
+			if(event[j].second > ed){
+				tot += event[j].second - ed;
+				ed = event[j].second;
+			}
+		}
+		sum += (2 * pi - tot) * c[i].r;
+	}
+	printf("%.3lf\n", sum);
+	return 0;
+}

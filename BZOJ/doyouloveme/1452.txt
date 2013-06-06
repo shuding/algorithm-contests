@@ -1,0 +1,64 @@
+#include <iostream>
+#include <cstdio>
+#define MAXN 300 + 1
+#define MAXC 100 + 1
+using namespace std;
+int n, m, _color[MAXN][MAXN], a[MAXC][MAXN][MAXN];
+
+int lowbit(int x){
+	return x & (-x);
+}
+
+void modify(int x, int y, int _num, int _val){
+	for(int i = x; i <= n; i += lowbit(i))
+		for(int j = y; j <= m; j += lowbit(j))
+			a[_num][i][j] += _val;
+}
+
+int query(int x, int y, int _num){
+	int sum = 0;
+	for(int i = x; i > 0; i -= lowbit(i))
+		for(int j = y; j > 0; j -= lowbit(j))
+			sum += a[_num][i][j];
+	return sum;
+}
+
+inline void read(int &x){
+	char c = getchar();
+	x = 0;
+	while(c < '0' || c > '9')
+		c = getchar();
+	while(c >= '0' && c <= '9'){
+		x = x * 10 + c - '0';
+		c = getchar();
+	}
+}
+
+int main(){
+	read(n);
+	read(m);
+	for(int i = 1; i <= n; i++)
+		for(int j = 1; j <= n; j++){
+			int _num;
+			read(_num);
+			modify(i, j, _num, 1);
+			_color[i][j] = _num;
+		}
+	int Q;
+	read(Q);
+	for(int i = 1; i <= Q; i++){
+		int cmd, x1, y1, x2, y2, c;
+		read(cmd);
+		if(cmd == 1){
+			read(x1); read(y1); read(c);
+			modify(x1, y1, _color[x1][y1], -1);
+			_color[x1][y1] = c;
+			modify(x1, y1, _color[x1][y1], 1);
+		}
+		else{
+			read(x1); read(x2); read(y1); read(y2); read(c);
+			printf("%d\n", query(x2, y2, c) - query(x1 - 1, y2, c) - query(x2, y1 - 1, c) + query(x1 - 1, y1 - 1, c));
+		}
+	}
+	return 0;
+}

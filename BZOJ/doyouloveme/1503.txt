@@ -1,0 +1,130 @@
+/*
+* Copyright (C) 2012 All rights reserved.
+* File name:  1503.cpp
+* Author:     Parabola_ds
+* Creat time: 2012.05.27
+*/
+#include <algorithm>
+#include <iostream>
+#include <cstdlib>
+#include <cstring>
+#include <climits>
+#include <vector>
+#include <cstdio>
+#include <queue>
+#include <cmath>
+#include <set>
+#include <map>
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+const int inf = ~0U >> 1;
+
+int n, lowerBound, delta, num;
+
+class treap{
+	struct node{
+		int value, size, key;
+		node(int value, node *n):
+			value(value){
+				size = 1;
+				key = rand() - 1;
+				c[0] = c[1] = n;
+			}
+		node *c[2];
+		void sz(){
+			size = c[0]->size + c[1]->size + 1;
+		}
+	} *root, *null;
+	void rot(node *&t, bool d){
+		node *r = t->c[d];
+		t->c[d] = r->c[!d];
+		r->c[!d] = t;
+		t->sz();
+		t = r;
+	}
+	void ins(node *&t, int x){
+		if(t == null){
+			t = new node(x, null);
+			return;
+		}
+		bool d = x > t->value;
+		ins(t->c[d], x);
+		if(t->c[d]->key < t->key)
+			rot(t, d);
+		t->sz();
+	}
+	int sel(node *&t, int x){
+		if(t == null)
+			return -1;
+		if(x <= t->c[1]->size)
+			return sel(t->c[1], x);
+		if(x == t->c[1]->size + 1)
+			return t->value;
+		return sel(t->c[0], x - t->c[1]->size - 1);
+	}
+	void adj(node *&t){
+		if(t == null)
+			return;
+		if(t->value < lowerBound){
+			t = t->c[1];
+			adj(t);
+		}
+		else{
+			adj(t->c[0]);
+			t->sz();
+		}
+	}
+public:
+	treap(){
+		null = new node(0, 0);
+		null->size = 0;
+		null->key = inf;
+		root = null;
+	}
+	void insert(int x){
+		ins(root, x);
+	}
+	int select(int x){
+		return sel(root, x);
+	}
+	void adjust(){
+		adj(root);
+	}
+	int size(){
+		return root->size;
+	}
+} T;
+
+int main(){
+	scanf("%d %d", &n, &lowerBound);
+	char c; int k;
+	while(n--){
+		c = getchar();
+		while(c < 'A' || c > 'Z') c = getchar();
+		scanf("%d", &k);
+		switch(c){
+			case 'I':
+				if(k - delta >= lowerBound){
+					T.insert(k - delta);
+					num++;
+				}
+				break;
+			case 'A':
+				lowerBound -= k;
+				delta += k;
+				T.adjust();
+				break;
+			case 'S':
+				lowerBound += k;
+				delta -= k;
+				T.adjust();
+				break;
+			case 'F':
+				int tmp = T.select(k);
+				printf("%d\n", tmp == -1 ? -1 : tmp + delta);
+		}
+	}
+	printf("%d\n", num - T.size());
+	return 0;
+}

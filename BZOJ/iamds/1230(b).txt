@@ -1,0 +1,82 @@
+
+program bzoj1230;
+
+type
+  Data = record
+    l, r, o: longint;
+    turn: boolean;
+  end;
+
+var
+  n, m, i, j, tp, x, y: longint;
+  t: array[1..400000] of Data;
+
+  procedure build(i, j, n: longint);
+  begin
+    t[n].l := i;
+    t[n].r := j;
+    t[n].o := 0;
+    t[n].turn := False;
+    if i = j then
+      exit;
+    build(i, (i + j) shr 1, n * 2);
+    build((i + j) shr 1 + 1, j, n * 2 + 1);
+  end;
+
+  procedure tt(i, j, n: longint);
+  var
+    tot: longint;
+  begin
+    if (i = t[n].l) and (j = t[n].r) then
+    begin
+      t[n].o := j - i + 1 - t[n].o;
+      t[n].turn := not t[n].turn;
+      exit;
+    end;
+    if j <= (t[n].l + t[n].r) shr 1 then
+      tt(i, j, 2 * n)
+    else
+    if i > (t[n].l + t[n].r) shr 1 then
+      tt(i, j, 2 * n + 1)
+    else
+    begin
+      tt(i, (t[n].l + t[n].r) shr 1, 2 * n);
+      tt((t[n].l + t[n].r) shr 1 + 1, j, 2 * n + 1);
+    end;
+    tot := t[2 * n].o + t[2 * n + 1].o;
+    if t[n].turn then
+      tot := t[n].r - t[n].l + 1 - tot;
+    t[n].o := tot;
+  end;
+
+  function qu(i, j, n: longint): longint;
+  var
+    tot: longint;
+  begin
+    if (t[n].l = i) and (t[n].r = j) then
+      exit(t[n].o);
+    if j <= (t[n].l + t[n].r) shr 1 then
+      tot := qu(i, j, 2 * n)
+    else
+    if i > (t[n].l + t[n].r) shr 1 then
+      tot := qu(i, j, 2 * n + 1)
+    else
+      tot := qu(i, (t[n].l + t[n].r) shr 1, 2 * n) + qu(
+        (t[n].l + t[n].r) shr 1 + 1, j, 2 * n + 1);
+    if t[n].turn then
+      tot := j - i + 1 - tot;
+    exit(tot);
+  end;
+
+begin
+  Read(n, m);
+  build(1, n, 1);
+  for i := 1 to m do
+  begin
+    Read(tp, x, y);
+    case tp of
+      0: tt(x, y, 1);
+      1: writeln(qu(x, y, 1));
+    end;
+  end;
+end.

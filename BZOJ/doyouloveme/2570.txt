@@ -1,0 +1,186 @@
+#include <algorithm>
+#include <iostream>
+#include <cstdlib>
+#include <cstring>
+#include <cstdio>
+#define debug(x) cout << #x << " = " << x << endl;
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+#define MAXN		1000 + 50
+#define NUMBER		1				// 0 ~ 9
+#define SIGN		2				// 10 ~ 11
+#define EQUAL_SIGN	3				// 12
+using namespace std;
+
+int n, type[15], ex[15], en[15], n1, n2, n3, st[50];
+bool v[15], u[15], pre[15][15], ord[13][15], ok;	// 13 == NULL
+
+long long get_ans(char s[], int l, int r){
+	long long ans = 0;
+	for(int i = l; i <= r; ++i)
+		if(en[s[i] - 'a'] == 10)
+			return get_ans(s, l, i - 1) + get_ans(s, i + 1, r);
+	for(int i = l; i <= r; ++i)
+		if(en[s[i] - 'a'] == 11)
+			return get_ans(s, l, i - 1) * get_ans(s, i + 1, r);
+	if(l < r && !en[s[l] - 'a']) ok = 0;
+	for(int i = l; i <= r; ++i)
+		ans = ans * 10 + en[s[i] - 'a'];
+	return ans;
+}
+
+struct equation{
+	int len, ext[13];
+	char s[15];
+	void init(){
+		len = strlen(s);
+		rep(i, len){
+			v[s[i - 1] - 'a'] = 1;
+			ext[s[i - 1] - 'a']++;
+			if(i > 1) pre[s[i - 1] - 'a'][s[i - 2] - 'a'] = 1;
+			if(i < len) ord[s[i - 1] - 'a'][s[i] - 'a'] = 1;
+		}
+		pre[s[0] - 'a'][13] = 1;
+		ord[s[len - 1] - 'a'][13] = 1;
+	}
+	bool equal(){
+		int a, b;
+		ok = 1;
+		rep(i, len)
+			if(en[s[i - 1] - 'a'] == 12){
+				a = get_ans(s, 0, i - 2);
+				b = get_ans(s, i, len - 1);
+				return a == b && ok;
+			}
+		return 0;
+	}
+} e[MAXN];
+
+void calc(){
+	rep(i, 13)
+		if(type[i - 1] == EQUAL_SIGN){
+			en[i - 1] = 12;
+			break;
+		}
+	rep(i, n)
+		if(!e[i].equal())
+			return;
+	rep(i, n){
+		rep(j, e[i].len){
+/*
+			if(en[e[i].s[j - 1] - 'a'] < 10) cout << en[e[i].s[j - 1] - 'a'];
+			if(en[e[i].s[j - 1] - 'a'] == 10) cout << '+';
+			if(en[e[i].s[j - 1] - 'a'] == 11) cout << '*';
+			if(en[e[i].s[j - 1] - 'a'] == 12) cout << '=';
+*/
+			if(ex[e[i].s[j - 1] - 'a'] == -1)
+				ex[e[i].s[j - 1] - 'a'] = en[e[i].s[j - 1] - 'a'];
+			else
+				if(ex[e[i].s[j - 1] - 'a'] != en[e[i].s[j - 1] - 'a'])
+					ex[e[i].s[j - 1] - 'a'] = -2;
+		}
+//		cout << endl;
+	}
+}
+
+void dfs_sign(int k){
+	if(k > 12) { calc(); return; }
+	if(type[k] != SIGN) { dfs_sign(k + 1); return; }
+	rep(i, 2)
+		if(!u[9 + i]){
+			en[k] = 9 + i;
+			u[9 + i] = 1;
+			dfs_sign(k + 1);
+			u[9 + i] = 0;
+		}
+}
+
+void dfs_number(int k){
+	if(k > 12) { dfs_sign(0); return; }
+	if(type[k] != NUMBER) {dfs_number(k + 1); return; }
+	rep(i, 10)
+		if(!u[i - 1]){
+			en[k] = i - 1;
+			u[i - 1] = 1;
+			dfs_number(k + 1);
+			u[i - 1] = 0;
+		}
+}
+
+void check(){
+	if(!n3) return;
+	memset(en, -1, sizeof(en));
+	memset(u, 0, sizeof(u));
+	dfs_number(0);
+}
+
+void dfs(int k){
+	if(k > 12){ check(); return; }
+	if(!v[k]){ dfs(k + 1); return; }
+	v[k] = 0;
+	if(n1 < 10){
+		type[k] = NUMBER;
+		n1++;
+		dfs(k + 1);
+		type[k] = 0;
+		n1--;
+	}
+	if(n2 < 2){
+		bool ok = 1;
+		rep(i, 14)
+			if(pre[k][i - 1] || ord[k][i - 1])
+				if(type[i - 1] && type[i - 1] != NUMBER){
+					ok = 0;
+					break;
+				}
+		if(ok){
+			type[k] = SIGN;
+			n2++;
+			dfs(k + 1);
+			type[k] = 0;
+			n2--;
+		}
+	}
+	if(n3 < 1){
+		bool ok = 1;
+		rep(i, 14)
+			if(pre[k][i - 1] || ord[k][i - 1])
+				if(type[i - 1] && type[i - 1] != NUMBER){
+					ok = 0;
+					break;
+				}
+		if(ok)
+			rep(i, n)
+				if(e[i].ext[k] != 1){
+					ok = 0;
+					break;
+				}
+		if(ok){
+			type[k] = EQUAL_SIGN;
+			n3++;
+			dfs(k + 1);
+			type[k] = 0;
+			n3--;
+		}
+	}
+	v[k] = 1;
+}
+
+int main(){
+	scanf("%d", &n);
+	rep(i, n){
+		scanf("%s", e[i].s);
+		e[i].init();
+	}
+	type[13] = SIGN;
+	memset(ex, -1, sizeof(ex));
+	dfs(0);
+	bool ok = 1;
+	rep(i, 13)
+		if(ex[i - 1] >= 0){
+			printf("%c%c\n", 'a' + i - 1, ex[i - 1] < 10 ? ('0' + ex[i - 1]) : (ex[i - 1] < 12 ? (ex[i - 1] == 10 ? '+' : '*') : '='));
+			ok = 0;
+		}
+	if(ok) printf("noway\n");
+	return 0;
+}
+

@@ -1,0 +1,85 @@
+#include <algorithm>
+#include <iostream>
+#include <cstdio>
+#define MAXN 1000
+#define rep(i, n) for(int i = 1; i <= n; i++)
+using namespace std;
+const int inf = 1000000000;
+int r, c, d, S, T, f, tot;
+int g[MAXN][MAXN], h[MAXN], hn[MAXN];
+
+int aug(int v, int lim)
+{
+	if(v == T || !lim)
+		return lim;
+	int left = lim, tmp = T - 1;
+	rep(i, T)
+	{
+		if(g[v][i] && h[v] == h[i] + 1)
+		{
+			int f = aug(i, min(left, g[v][i]));
+			left -= f;
+			g[v][i] -= f;
+			g[i][v] += f;
+			if(h[S] == T)
+				return lim - left;
+		}
+		if(g[v][i])
+			tmp = min(tmp, h[i]);
+	}
+	if(lim == left)
+	{
+		hn[h[v]]--;
+		if(!hn[h[v]])
+			h[S] = T;
+		else
+		{
+			h[v] = tmp + 1;
+			hn[h[v]]++;
+		}
+	}
+	return lim - left;
+}
+
+int dis(int a, int b, int c, int d)
+{
+	return (a - c) * (a - c) + (b - d) * (b - d);
+}
+
+int main()
+{
+	scanf("%d%d%d", &r, &c, &d);
+	S = r * c * 2 + 1;
+	T = S + 1;
+	rep(i, r)
+		rep(j, c)
+		{
+			int NOW = (i - 1) * c + j;
+			int _c = getchar();
+			while(_c < '0' || _c > '3')
+				_c = getchar();
+			g[NOW][NOW + r * c] = _c - '0';
+			for(int x = i - d; x <= i + d; x++)
+				for(int y = j - d; y <= j + d; y++)
+					if(dis(x, y, i, j) <= d * d && x > 0 && x <= r && y > 0 && y <= c && !(x == i && y == j))
+						g[NOW + r * c][(x - 1) * c + y] = inf;
+			if(i <= d || i + d > r)
+				g[NOW + r * c][T] = inf;
+			if(j <= d || j + d > c)
+				g[NOW + r * c][T] = inf;
+		}
+	rep(i, r)
+		rep(j, c)
+		{
+			int _c = getchar();
+			while(_c != '.' && _c != 'L')
+				_c = getchar();
+			g[S][(i - 1) * c + j] = _c == 'L';
+			tot += _c == 'L';
+		}
+	hn[0] = T;
+	while(h[S] != T)
+		f += aug(S, inf);
+	printf("%d\n", tot - f);
+	return 0;
+}

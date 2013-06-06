@@ -1,0 +1,80 @@
+#include <algorithm>
+#include <iostream>
+#include <cstdio>
+#define MAXW 100000 + 10
+#define MAXK 10 + 5
+#define mod 2147483648ll
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+struct coor{
+	long long x, y, l_num, r_num, bel;
+} p[MAXW], q[MAXW];
+
+bool cmp_x_rise(const coor &a, const coor &b){
+	return a.x < b.x || (a.x == b.x && a.y < b.y);
+}
+
+bool cmp_y_rise(const coor &a, const coor &b){
+	return a.y < b.y || (a.y == b.y && a.x < b.x);
+}
+
+int w, k, qn;
+long long n, m, C[MAXW][MAXK], ans, S[MAXW];
+
+void Plus(long long k, long long x){
+	while(k <= qn){
+		S[k] = (S[k] + x) % mod;
+		k += k & -k;
+	}
+}
+
+long long sum(long long k){
+	long long x = 0;
+	while(k){
+		x = (S[k] + x) % mod;
+		k -= k & -k;
+	}
+	return x;
+}
+
+int main(){
+	scanf("%lld%lld%d", &n, &m, &w);
+	rep(i, w)
+		scanf("%d%d", &p[i].x, &p[i].y);
+	scanf("%d", &k);
+	for(int i = 0; i <= w; ++i)
+		for(int j = 0; j <= min(k, i); ++j)
+			if(!j || j == i)
+				C[i][j] = 1;
+			else
+				C[i][j] = (C[i - 1][j] + C[i - 1][j - 1]) % mod;
+	sort(p + 1, p + 1 + w, cmp_y_rise);
+	rep(i, w){
+		if(i > 1 && p[i].y == p[i - 1].y)
+			q[qn].r_num++;
+		else{
+			q[++qn].y = p[i].y;
+			q[qn].r_num = 1;
+		}
+		p[i].bel = qn;
+	}
+	sort(p + 1, p + 1 + w, cmp_x_rise);
+	for(int i = 1, j; i <= w; i = j){
+		int t = 1;
+		for(j = i + 1; j <= w && p[j].x == p[i].x; ++j);
+		for(int s = i + 1; s < j; ++s){
+			t = p[s - 1].bel + 1;
+			while(t <= qn && q[t].y < p[s].y) ++t;
+			ans = (ans + (sum(t - 1) - sum(p[s - 1].bel) + mod) * C[s - i][k] % mod * C[j - s][k] % mod) % mod;
+		}
+		t = 1;
+		for(int s = i; s < j; ++s){
+			long long &a = q[p[s].bel].l_num, &b = q[p[s].bel].r_num;
+			a++; b--;
+			Plus(p[s].bel, (C[a][k] * C[b][k] % mod - C[a - 1][k] * C[b + 1][k] % mod + mod) % mod);
+		}
+	}
+	printf("%lld\n", ans);
+	return 0;
+}

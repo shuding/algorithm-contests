@@ -1,0 +1,13 @@
+#include <iostream>
+using namespace std;
+long long n, k, tot;
+int main(){
+	cin >> n >> k;
+	for(long long i = 1; i <= n; i++){
+		long long r = (k / i) ? k / (k / i) : n;
+		r = r > n ? n : r;
+		tot += (r - i + 1) * k - (k / i) * (i + r) * (r - i + 1) / 2;
+		i = r;
+	}
+	cout << tot << endl;
+}

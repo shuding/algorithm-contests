@@ -1,0 +1,98 @@
+// 精度竟然要调到1e-10
+#include <algorithm>
+#include <iostream>
+#include <cstdio>
+#include <cmath>
+#define MAXN 100000 + 10
+#define rep(i, n) for(int i = 1; i <= n; i++)
+using namespace std;
+
+const double eps = 1e-10;
+
+struct POINT{
+	double x, y;
+	POINT(){}
+	POINT(double _x, double _y): x(_x), y(_y){}
+} p[MAXN];
+
+struct CIRCLE{
+	POINT o;
+	double r;
+	CIRCLE(){}
+	CIRCLE(double _x, double _y, double _r): o(POINT(_x, _y)), r(_r){}
+} ans;
+
+int n;
+
+double dis(POINT a, POINT b){
+	return sqrt(pow(a.x - b.x, 2) + pow(a.y - b.y, 2));
+}
+
+CIRCLE circle_2_points(POINT a, POINT b){
+	return CIRCLE((a.x + b.x) / 2, (a.y + b.y) / 2, dis(a, b) / 2);
+}
+
+CIRCLE circle_3_points(POINT a, POINT b, POINT c){
+	double c1 = a.x * a.x - c.x * c.x + a.y * a.y - c.y * c.y;
+	double c2 = b.x * b.x - c.x * c.x + b.y * b.y - c.y * c.y;
+	double c3 = a.x * a.x - b.x * b.x + a.y * a.y - b.y * b.y;
+	double p1 = c.x - a.x, q1 = c.y - a.y;
+	double p2 = c.x - b.x, q2 = c.y - b.y;
+	double p3 = b.x - a.x, q3 = b.y - a.y;
+	double x0, y0;
+	CIRCLE _a = circle_2_points(a, b), _b = circle_2_points(b, c), _c = circle_2_points(c, a);
+	if(dis(_a.o, c) <= _a.r + eps)
+		return _a;
+	if(dis(_b.o, a) <= _b.r + eps)
+		return _b;
+	if(dis(_c.o, b) <= _c.r + eps)
+		return _c;
+	if(abs(q1 * p2 - q2 * p1) > eps)
+		y0 = (c1 * p2 - c2 * p1) / (2 * (q2 * p1 - q1 * p2));
+	else
+		if(abs(q1 * p3 - q3 * p1) > eps)
+			y0 = (c1 * p3 - c3 * p1) / (2 * (q3 * p1 - q1 * p3));
+		else
+			y0 = (c3 * p2 - c2 * p3) / (2 * (q2 * p3 - q3 * p2));
+	if(abs(p1) > eps)
+		x0 = -(c1 + 2 * q1 * y0) / (2 * p1);
+	else
+		if(abs(p2) > eps)
+			x0 = -(c2 + 2 * q2 * y0) / (2 * p2);
+		else
+			x0 = -(c3 + 2 * q3 * y0) / (2 * p3);
+	return CIRCLE(x0, y0, dis(POINT(x0, y0), a));
+}
+
+CIRCLE cover_2_points(int x, int y, int k){
+	CIRCLE c = circle_2_points(p[x], p[y]);
+	for(int i = 1; i <= k; i++)
+		if(dis(p[i], c.o) > c.r + eps)
+			c = circle_3_points(p[i], p[x], p[y]);
+	return c;
+}
+
+CIRCLE cover_1_point(int x, int k){
+	CIRCLE c = circle_2_points(p[1], p[x]);
+	for(int i = 1; i <= k; i++)
+		if(dis(p[i], c.o) > c.r + eps)
+			c = cover_2_points(i, x, i);
+	return c;
+}
+
+CIRCLE cover_n_points(){
+	CIRCLE c = circle_2_points(p[1], n > 1 ? p[2] : p[1]);
+	for(int i = 1; i <= n; i++)
+		if(dis(p[i], c.o) > c.r + eps)
+			c = cover_1_point(i, i);
+	return c;
+}
+
+int main(){
+	scanf("%d", &n);
+	rep(i, n)
+		scanf("%lf%lf", &p[i].x, &p[i].y);
+	ans = cover_n_points();
+	printf("%.3lf\n", ans.r);
+	return 0;
+}

@@ -1,0 +1,173 @@
+#include <iostream>
+#include <cstring>
+#include <cstdio>
+#define MAXL 100000
+#define mod 2000000333
+using namespace std;
+
+const int inf = ~0U >> 2;
+unsigned long long power[MAXL + 10];
+int len;
+
+struct node{
+	int size;
+	unsigned long long hash, value;
+	node *c[2];
+	inline node *rz();
+	node();
+} Tnull, *null = &Tnull, *root;
+
+node::node(){
+	size = 1;
+	c[0] = c[1] = null;
+}
+
+inline node *node::rz(){
+	size = c[0]->size + c[1]->size + 1;
+	hash = (c[0]->hash * power[c[1]->size + 1]+ value * power[c[1]->size] + c[1]->hash) % mod;
+	return this;
+}
+
+struct splayTree{
+	splayTree(){
+		null->size = null->value = 0;
+		root = new node();
+		root->c[1] = new node();
+		root->rz();
+	}
+	void finish(bool d){
+		node *t = null->c[d], *p = root->c[!d];
+		while(t != null){
+			t = null->c[d]->c[d];
+			null->c[d]->c[d] = p;
+			p = null->c[d]->rz();
+			null->c[d] = t;
+		}
+		root->c[!d] = p;
+		root->rz();
+	}
+	void zig(bool d){
+		node *t = root->c[d];
+		root->c[d] = null->c[d];
+		null->c[d] = root;
+		root = t;
+	}
+	void zigzig(bool d){
+		node *t = root->c[d]->c[d];
+		root->c[d]->c[d] = null->c[d];
+		null->c[d] = root->c[d];
+		root->c[d] = null->c[d]->c[!d];
+		root->rz();
+		null->c[d]->c[!d] = root;
+		root = t;
+	}
+	void splay(int k){
+		for(; ; ){
+			int r = root->c[0]->size + 1;
+			bool d = k > r, p;
+			if(k == r || root->c[d] == null) break;
+			if(d) k -= r;
+			r = root->c[d]->c[0]->size + 1;
+			p = k > r;
+			if(k == r || root->c[d]->c[p] == null){
+				zig(d); break;
+			}
+			if(p) k -= r;
+			p == d ? zigzig(d) : (zig(d), zig(p));
+		}
+		finish(0); finish(1);
+	}
+	void range(int l, int r){
+		splay(l);
+		node *_root = root;
+		root = root->c[1];
+		splay(r - l + 2);
+		_root->c[1] = root;
+		root = _root->rz();
+	}
+	void modify(int k, int x){
+		splay(k + 1);
+		root->value = x;
+		root->rz();
+	}
+	void insert(int k, int x){
+		range(k + 1, k);
+		node *t = new node();
+		t->value = t->hash = x;
+		root->c[1]->c[0] = t;
+		root->c[1]->rz();
+		root->rz();
+		len++;
+	}
+	void build(){
+		node *p = null, *t;
+		char c;
+		while((c = getchar()) != '\n'){
+			t = new node();
+			t->value = t->hash = c - 'a';
+			t->c[0] = p;
+			p = t->rz();
+			len++;
+		}
+		root->c[1]->c[0] = p;
+		root->c[1]->rz();
+		root->rz();
+	}
+	int hash(int l, int r){
+		if(l > r) return 0;
+		range(l, r);
+		return root->c[1]->c[0]->hash;
+	}
+	void debug(node *n){
+		if(n == null) return;
+		debug(n->c[0]);
+		cout << char(n->value + 'a');
+		debug(n->c[1]);
+	}
+} T;
+
+void init(){
+	power[0] = 1;
+	for(int i = 1; i <= MAXL; ++i)
+		power[i] = power[i - 1] * 27 % mod;
+}
+
+int main(){
+	init();
+	T.build();
+	int m, x, y, l, r, mid;
+	char cmd, d;
+	scanf("%d", &m);
+	while(m--){
+		//T.debug(root);
+		cmd = getchar();
+		while(cmd < 'A' || cmd > 'Z') cmd = getchar();
+		scanf("%d", &x);
+		switch(cmd){
+			case 'Q':
+				scanf("%d", &y);
+				if(x > y) swap(x, y);
+				l = 1; r = len - y + 1;
+				while(l <= r){
+					mid = (l + r) / 2;
+					if(T.hash(x, x + mid - 1) != T.hash(y, y + mid - 1))
+						r = mid - 1;
+					else
+						l = mid + 1;
+				}
+				printf("%d\n", (l + r) / 2);
+				break;
+			case 'R':
+				d = getchar();
+				while(d < 'a' || d > 'z') d = getchar();
+				T.modify(x, d - 'a');
+				break;
+			case 'I':
+				d = getchar();
+				while(d < 'a' || d > 'z') d = getchar();
+				T.insert(x, d - 'a');
+				break;
+		}
+	}
+	return 0;
+}

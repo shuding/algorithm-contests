@@ -1,0 +1,47 @@
+
+/***************************************************
+*
+*   Copyright (C) 2012 All rights reserved.
+*   File name:  chorus.cpp
+*   Author:     Parabola_ds
+*   Creat time: 2012.04.18
+*
+***************************************************/
+
+#include <iostream>
+#include <cstring>
+#include <cstdio>
+#define mod 19650827
+#define MAXN 1005
+using namespace std;
+
+int n, h[MAXN], f[MAXN][MAXN][2];
+
+int dp(int i, int j, int k){
+	if(f[i][j][k] != -1) return f[i][j][k];
+	if(i == j) return 1;
+	int ans = 0;
+	if(k){
+		if(h[i] < h[i + 1])
+			ans = (ans + dp(i + 1, j, 1)) % mod;
+		if(h[i] < h[j] && i + 1 != j)
+			ans = (ans + dp(i + 1, j, 0)) % mod;
+	}
+	else{
+		if(h[j] > h[j - 1])
+			ans = (ans + dp(i, j - 1, 0)) % mod;
+		if(h[j] > h[i] && i + 1 != j)
+			ans = (ans + dp(i, j - 1, 1)) % mod;
+	}
+	f[i][j][k] = ans;
+	return ans;
+}
+
+int main(){
+	scanf("%d", &n);
+	for(int i = 1; i <= n; ++i)
+		scanf("%d", &h[i]);
+	memset(f, -1, sizeof(f));
+	printf("%d\n", (dp(1, n, 0) + dp(1, n, 1)) % mod);
+	return 0;
+}

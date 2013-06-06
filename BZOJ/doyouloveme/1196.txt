@@ -1,0 +1,60 @@
+#include <algorithm>
+#include <iostream>
+#include <cstring>
+#include <cstdio>
+#define MAXN 10000 + 10
+#define MAXM 20000 + 10
+#define MAXC 30000
+#define rep(i, n) for(int i = 1; i <= n; i++)
+using namespace std;
+
+struct edge{
+	int a, b, c1, c2;
+} e[MAXM];
+
+int n, k, m, fa[MAXN];
+bool v[MAXM];
+
+int father(int i){
+	if(fa[i] == i)
+		return i;
+	return fa[i] = father(fa[i]);
+}
+
+bool success(int M){
+	rep(i, n)
+		fa[i] = i;
+	memset(v, 0, sizeof(v));
+	int tot = 0;
+	rep(i, m)
+		if(e[i].c1 <= M)
+			if(father(e[i].a) != father(e[i].b)){
+				fa[father(e[i].a)] = father(e[i].b);
+				v[i] = 1;
+				tot++;
+			}
+	if(tot < k)
+		return 0;
+	rep(i, m)
+		if(!v[i] && e[i].c2 <= M && father(e[i].a) != father(e[i].b)){
+			fa[father(e[i].a)] = father(e[i].b);
+			tot++;
+		}
+	return tot == n - 1;
+}
+
+int main(){
+	scanf("%d%d%d", &n, &k, &m);
+	rep(i, m)
+		scanf("%d%d%d%d", &e[i].a, &e[i].b, &e[i].c1, &e[i].c2);
+	int L = 0, R = MAXC, mid;
+	while(L <= R){
+		mid = (L + R) / 2;
+		if(success(mid))
+			R = mid - 1;
+		else
+			L = mid + 1;
+	}
+	printf("%d\n", L);
+	return 0;
+}

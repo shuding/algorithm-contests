@@ -1,0 +1,9 @@
+
+program bzoj1121;
+
+var n:longint;
+
+begin
+  read(n);
+  write(n shr 1);
+end.

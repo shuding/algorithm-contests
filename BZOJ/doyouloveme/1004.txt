@@ -1,0 +1,70 @@
+#include <iostream>
+#include <cstdio>
+#include <cstring>
+using namespace std;
+int r, g, b, m, p, n, per[61][61], tot = 0;
+
+inline void Plus(int &a, int b)
+{
+	a = (a + b) % p;
+}
+
+int calc(int k)
+{
+	int ran_l[61], ran_num = 0, f[21][21][21];
+	bool vst[61] = {0};
+	for(int i = 1; i <= n; i++)
+		if(!vst[per[k][i]])
+		{
+			int st = per[k][i];
+			vst[st] = 1;
+			ran_num++;
+			ran_l[ran_num] = 1;
+			while(st != i)
+			{
+				st = per[k][st];
+				vst[st] = 1;
+				ran_l[ran_num]++;
+			}
+		}
+	for(int t = 1; t <= ran_num; t++)
+		for(int i = 0; i <= r; i++)
+			for(int j = 0; j <= g; j++)
+				for(int k = 0; k <= b; k++)
+				{
+					f[i][j][k] = i + j + k == 0;
+					if(i >= ran_l[t])
+						Plus(f[i][j][k], f[i - ran_l[t]][j][k]);
+					if(j >= ran_l[t])
+						Plus(f[i][j][k], f[i][j - ran_l[t]][k]);
+					if(k >= ran_l[t])
+						Plus(f[i][j][k], f[i][j][k - ran_l[t]]);
+				}
+	return f[r][g][b];
+}
+
+int pow_mod(int a, int b)
+{
+	if(b == 1)
+		return a;
+	long long tmp = pow_mod(a, b / 2);
+	tmp = tmp * tmp % p;
+	if(b & 1)
+		tmp = tmp * a % p;
+	return tmp;
+}
+
+int main()
+{
+	scanf("%d%d%d%d%d", &r, &g, &b, &m, &p);
+	n = r + g + b;
+	for(int i = 1; i <= m; i++)
+		for(int j = 1; j <= n; j++)
+			scanf("%d", &per[i][j]);
+	for(int i = 1; i <= n; i++)
+		per[m + 1][i] = i;
+	for(int i = 1; i <= m + 1; i++)
+		Plus(tot, calc(i));
+	printf("%d\n", tot * pow_mod(m + 1, p - 2) % p);
+	return 0;
+}

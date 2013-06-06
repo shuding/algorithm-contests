@@ -1,0 +1,85 @@
+/*
+* Copyright (C) 2012 All rights reserved.
+* File name:  1142.cpp
+* Author:     Parabola_ds
+* Creat time: 2012.07.11
+*/
+#include <algorithm>
+#include <iostream>
+#include <cstdlib>
+#include <cstring>
+#include <climits>
+#include <vector>
+#include <cstdio>
+#include <queue>
+#include <cmath>
+#include <set>
+#include <map>
+#define MAXN 51
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+struct number{
+	unsigned long long d[50];
+	number(){
+		d[0] = 1;
+		d[1] = 0;
+	}
+	inline number operator + (const number b) const{
+		number c;
+		c.d[0] = max(d[0], b.d[0]);
+		rep(i, c.d[0]){
+			if(i <= d[0])
+				c.d[i] += d[i];
+			if(i <=b.d[0])
+				c.d[i] += b.d[i];
+			c.d[i + 1] = c.d[i] / 100000;
+			c.d[i] %= 100000;
+			if(i == c.d[0] && c.d[i + 1])
+				c.d[0]++;
+		}
+		return c;
+	}
+	inline number operator * (const int &b) const{
+		number c;
+		c.d[0] = d[0];
+		rep(i, c.d[0]){
+			if(i <= d[0])
+				c.d[i] += d[i] * b;
+			c.d[i + 1] = c.d[i] / 100000;
+			c.d[i] %= 100000;
+			if(i == c.d[0] && c.d[i + 1])
+				c.d[0]++;
+		}
+		return c;
+	}
+} f[MAXN][MAXN], ans;
+
+int n, testNum;
+
+int main(){
+	scanf("%d", &testNum);
+	rep(i, 50)
+		rep(j, 50)
+			f[i][j].d[0] = 1,
+			f[i][j].d[1] = 0;
+	f[1][1].d[1] = 1;
+	rep(i, 49)
+		rep(j, i){
+			f[i + 1][j] = f[i + 1][j] + f[i][j] * j;
+			f[i + 1][j + 1] = f[i + 1][j + 1] + f[i][j] * (j + 1);
+		}
+	while(testNum--){
+		scanf("%d", &n);
+		ans.d[0] = 1;
+		ans.d[1] = 0;
+		rep(i, n)
+			ans = ans + f[n][i];
+		printf("%lld", ans.d[ans.d[0]]);
+		for(int i = 2; i <= ans.d[0]; ++i)
+			printf("%05lld", ans.d[ans.d[0] - i + 1]);
+		puts("");
+	}
+	return 0;
+}
+

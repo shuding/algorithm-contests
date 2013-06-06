@@ -1,0 +1,89 @@
+#include <algorithm>
+#include <iostream>
+#include <cstring>
+#include <cstdio>
+#define rep(i, n) for(int i = 1; i <= n; i++)
+using namespace std;
+ 
+const int inf = ~0U >> 1;
+ 
+int n, k, T, S, f[500][500], h[500], hn[500];
+bool g[60][60];
+ 
+void adjust(int t){
+        memset(f, 0, sizeof(f));
+        memset(h, 0, sizeof(h));
+        memset(hn, 0, sizeof(hn));
+        rep(i, n){
+                f[S][i] = t;
+                f[i][n + i] = inf;
+                f[i][2 * n + i] = k;
+                f[3 * n + i][5 * n + i] = inf;
+                f[4 * n + i][5 * n + i] = k;
+                f[5 * n + i][T] = t;
+        }
+        rep(i, n)
+                rep(j, n)
+                        if(g[i][j])
+                                f[n + i][3 * n + j] = 1;
+                        else
+                                f[2 * n + i][4 * n + j] = 1;
+        hn[0] = T;
+}
+ 
+int sap(int v, int lim){
+        if(v == T || !lim)
+                return lim;
+        int left = lim, tmp = T - 1;
+        rep(i, T){
+                if(f[v][i] && h[v] == h[i] + 1){
+                        int F = sap(i, min(left, f[v][i]));
+                        left -= F;
+                        f[v][i] -= F;
+                        f[i][v] += F;
+                        if(h[S] == T)
+                                return lim - left;
+                }
+                if(f[v][i])
+                        tmp = min(tmp, h[i]);
+        }
+        if(lim == left){
+                hn[h[v]]--;
+                if(!hn[h[v]])
+                        h[S] = T;
+                else{
+                        h[v] = tmp + 1;
+                        hn[h[v]]++;
+                }
+        }
+        return lim - left;
+}
+ 
+int MaxFlow(){
+        int f = 0;
+        while(h[S] != T)
+                f += sap(S, inf);
+        return f;
+}
+ 
+int main(){
+        scanf("%d %d", &n, &k);
+        rep(i, n){
+                scanf("\n");
+                rep(j, n)
+                        g[i][j] = (getchar() == 'Y');
+        }
+        int L = 1, R = n, mid;
+        S = 6 * n + 1;
+        T = S + 1;
+        while(L <= R){
+                mid = (L + R) / 2;
+                adjust(mid);
+                if(MaxFlow() == n * mid)
+                        L = mid + 1;
+                else
+                        R = mid - 1;
+        }
+        printf("%d\n", L - 1);
+        return 0;
+}

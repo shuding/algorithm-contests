@@ -1,0 +1,47 @@
+/*
+* Copyright (C) 2012 All rights reserved.
+* File name:  1572.cpp
+* Author:     Parabola_ds
+* Creat time: 2012.05.23
+*/
+#include <algorithm>
+#include <iostream>
+#include <cstdlib>
+#include <cstring>
+#include <climits>
+#include <vector>
+#include <cstdio>
+#include <queue>
+#include <cmath>
+#include <set>
+#include <map>
+#define MAXN 100000
+#define min(x, y) (x < y ? x : y)
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+int n, d, p;
+vector<pair<int, int> > t;
+priority_queue<int> heap;
+
+int main(){
+	scanf("%d", &n);
+	rep(i, n){
+		scanf("%d%d", &d, &p);
+		t.push_back(make_pair(d, p));
+	}
+	sort(t.begin(), t.end());
+	heap.push(t[n - 1].second);
+	long long s = 0, l;
+	for(int i = n - 2; i >= 0; --i){
+		l = min(heap.size(), t[i + 1].first - t[i].first);
+		rep(j, l)
+			s += (long long)heap.top(), heap.pop();
+		heap.push(t[i].second);
+	}
+	l = min(heap.size(), t[0].first);
+	rep(j, l)
+		s += heap.top(), heap.pop();
+	printf("%lld\n", s);
+	return 0;
+}

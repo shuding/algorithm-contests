@@ -1,0 +1,137 @@
+/*
+* Copyright (C) 2012 All rights reserved.
+* File name:  pvz.cpp
+* Author:     Parabola_ds
+* Creat time: 2012.07.09
+*/
+#include <algorithm>
+#include <iostream>
+#include <cstdlib>
+#include <cstring>
+#include <climits>
+#include <vector>
+#include <cstdio>
+#include <queue>
+#include <cmath>
+#include <set>
+#include <map>
+#define MAXN 1000
+#define MAXM 1000000
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+ 
+const int inf = ~0U >> 2;
+ 
+struct edge{
+        int t, f, next;
+} e[MAXM];
+ 
+int n, m, S, T, etop, sum, st[MAXN];
+ 
+void addEdge(int s, int t, int f){
+        etop++;
+        e[etop].t = t;
+        e[etop].f = f;
+        e[etop].next = st[s];
+        st[s] = etop;
+}
+ 
+int h[MAXN], hn[MAXN];
+ 
+int sap(int v, int lim){
+        if(v == T || !lim) return lim;
+        int f, left = lim, tmp = T - 1;
+        for(int i = st[v]; i; i = e[i].next){
+                if(e[i].f && h[v] == h[e[i].t] + 1){
+                        f = sap(e[i].t, min(left, e[i].f));
+                        left -= f;
+                        e[i].f -= f;
+                        e[i + ((i & 1) ? 1 : -1)].f += f;
+                        if(h[S] == T)
+                                return lim - left;
+                }
+                if(e[i].f)
+                        tmp = min(tmp, h[e[i].t]);
+        }
+        if(lim == left){
+                hn[h[v]]--;
+                if(!hn[h[v]])
+                        h[S] = T;
+                else
+                        hn[h[v] = tmp + 1]++;
+        }
+        return lim - left;
+}
+ 
+int maxFlow(){
+        int f = 0;
+        hn[0] = T;
+        while(h[S] != T)
+                f += sap(S, inf);
+        return f;
+}
+ 
+int s[25][35], w[25][35], wx[25][35][1000], wy[25][35][1000], d[25][35], g[25][35][25][35];
+bool del[25][35];
+ 
+void init(){
+        bool flag = 1;
+        memset(del, 1, sizeof del);
+        while(flag){
+                flag = 0;
+                rep(i, n)
+                        rep(j, m)
+                                if(!d[i][j] && del[i][j]){
+                                        flag = 1;
+                                        del[i][j] = 0;
+                                        if(j > 1) d[i][j - 1]--;
+                                        rep(k, n)
+                                                rep(p, m)
+                                                        while(g[i][j][k][p]--)
+                                                                d[k][p]--;
+                                }
+        }
+}
+ 
+int main(){
+        scanf("%d%d", &n, &m);
+        S = n * m + 1; T = S + 1;
+        rep(i, n)
+                rep(j, m){
+                        scanf("%d%d", &s[i][j], &w[i][j]);
+                        rep(k, w[i][j]){
+                                scanf("%d%d", &wx[i][j][k], &wy[i][j][k]);
+                                wx[i][j][k]++; wy[i][j][k]++;
+                                g[i][j][wx[i][j][k]][wy[i][j][k]]++;
+                                d[wx[i][j][k]][wy[i][j][k]]++;
+                        }
+                        if(j < m)
+                                d[i][j]++;
+                }
+        init();
+        rep(i, n)
+                rep(j, m) if(!del[i][j]){
+                        if(s[i][j] > 0){
+                                addEdge(S, (i - 1) * m + j, s[i][j]);
+                                addEdge((i - 1) * m + j, S, 0);
+                                sum += s[i][j];
+                        }
+                        else if(s[i][j] < 0){
+                                addEdge((i - 1) * m + j, T, -s[i][j]);
+                                addEdge(T, (i - 1) * m + j, 0);
+                        }
+                        rep(k, w[i][j])
+                                if(!del[wx[i][j][k]][wy[i][j][k]]){
+                                        addEdge((wx[i][j][k] - 1) * m + wy[i][j][k], (i - 1) * m + j, inf);
+                                        addEdge((i - 1) * m + j, (wx[i][j][k] - 1) * m + wy[i][j][k], 0);
+                                }
+                        if(j < m && !del[i][j + 1]){
+                                addEdge((i - 1) * m + j, (i - 1) * m + j + 1, inf);
+                                addEdge((i - 1) * m + j + 1, (i - 1) * m + j, 0);
+                        }
+                }
+        int flow = sum - maxFlow();
+        printf("%d\n", max(flow, 0));
+        return 0;
+}
+ 

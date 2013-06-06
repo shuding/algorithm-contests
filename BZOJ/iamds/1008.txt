@@ -1,0 +1,21 @@
+
+const mo=100003;
+var n,m,ans:int64;
+function mi(n,m:int64):int64;
+var t:int64;
+begin
+  mi:=1;
+  t:=n;
+  while m<>0 do
+    begin
+      if m and 1 =1 then mi:=(mi*t)mod mo;
+      m:=m>>1;
+      t:=(t*t)mod mo;
+    end;
+end;
+begin
+  readln(m,n);
+  ans:=(mi(m,n)-((m*mi(m-1,n-1))mod mo))mod mo;
+  if ans<0 then inc(ans,mo);
+  writeln(ans);
+end.

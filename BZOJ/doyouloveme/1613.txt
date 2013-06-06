@@ -1,0 +1,28 @@
+program bzoj1613;
+
+var
+  n, m, i, j: longint;
+  d: array[0..10000] of longint;
+  f: array[0..10000, 0..500] of longint;
+
+begin
+  Read(n, m);
+  for i := 1 to n do
+  begin
+    Read(d[i]);
+    d[i] := d[i] + d[i - 1];
+  end;
+  for i := 1 to n do
+    for j := 0 to m do
+      if i >= j then
+      begin
+        if f[i - j, j] > f[i, 0] then
+          f[i, 0] := f[i - j, j];
+        if f[i - j, 0] + d[i] - d[i - j] > f[i, j] then
+          f[i, j] := f[i - j, 0] + d[i] - d[i - j];
+        if j = 0 then
+          if f[i - 1, 0] > f[i, 0] then
+            f[i, 0] := f[i - 1, 0];
+      end;
+  Write(f[n, 0]);
+end.

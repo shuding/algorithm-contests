@@ -1,0 +1,56 @@
+/*
+* Copyright (C) 2012 All rights reserved.
+* File name:  1068.cpp
+* Author:     Parabola_ds
+* Creat time: 2012.06.08
+*/
+#include <algorithm>
+#include <iostream>
+#include <cstdlib>
+#include <cstring>
+#include <climits>
+#include <vector>
+#include <cstdio>
+#include <queue>
+#include <cmath>
+#include <set>
+#include <map>
+#define rep(i, n) for(int i = 0; i < n; ++i)
+using namespace std;
+
+char s[100];
+int n, g[100][100];
+bool check[100][100];
+
+bool same(int a, int b, int c, int d){
+	for(int i = 0; i <= b - a; ++i)
+		if(s[a + i] != s[c + i]) return 0;
+	return 1;
+}
+
+int main(){
+	scanf("%s", s);
+	n = strlen(s);
+	int ans = n;
+	rep(i, n)
+		rep(j, n)
+			g[i][j] = n;
+	g[0][0] = 1;
+	rep(i, n)
+		rep(j, i)
+			check[j][i] = ((i - j) & 1) && same(j, (i + j) / 2, (i + j) / 2 + 1, i);
+	rep(i, n)
+		rep(j, i + 1){
+			if(j < i)
+				g[i][j] = g[i - 1][j] + 1;
+			else
+				rep(k, j)
+					g[i][j] = min(g[i][j], g[j - 1][k] + 2);
+			if(check[j][i])
+				g[i][j] = min(g[i][j], g[(i + j) / 2][j] + 1);
+		}
+	rep(j, n)
+		ans = min(ans, g[n - 1][j]);
+	printf("%d\n", ans);
+	return 0;
+}

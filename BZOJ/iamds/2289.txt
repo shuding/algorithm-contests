@@ -1,0 +1,76 @@
+
+program bzoj2289;
+
+var
+  n, i: longint;
+  l, r, mid, left, right: real;
+  x, y, ri: array[1..100000] of longint;
+
+  function across(p: real): boolean;
+  var
+    a, b: real;
+    f1, f2: boolean;
+  begin
+    a := maxlongint;
+    b := -a;
+    f1 := False;
+    f2 := False;
+    for i := 1 to n do
+    begin
+      if (x[i]>p) and (x[i] - p >= ri[i]) then
+        f2 := True;
+      if (x[i]<p) and (p - x[i] >= ri[i]) then
+        f1 := True;
+      if f1 and f2 then
+      begin
+        Write('NO');
+        halt;
+      end;
+      if sqr(ri[i]) - sqr((x[i] - p)) >= 0 then
+      begin
+        if y[i] + sqrt(sqr(ri[i]) - sqr((x[i] - p))) < a then
+          a := y[i] + sqrt(sqr(ri[i]) - sqr((x[i] - p)));
+        if y[i] - sqrt(sqr(ri[i]) - sqr((x[i] - p))) > b then
+          b := y[i] - sqrt(sqr(ri[i]) - sqr((x[i] - p)));
+      end;
+    end;
+    if (a > b) and (not f1) and (not f2) then
+      exit(True);
+    if f1 then
+      r := mid
+    else
+    if f2 then
+      l := mid
+    else
+    begin
+      write('NO');
+      halt;
+    end;
+    exit(False);
+  end;
+
+begin
+  Read(n);
+  left := maxlongint;
+  right := -maxlongint;
+  for i := 1 to n do
+  begin
+    Read(x[i], y[i], ri[i]);
+    if x[i] - ri[i] < left then
+      left := x[i] - ri[i];
+    if x[i] + ri[i] > right then
+      right := x[i] + ri[i];
+  end;
+  l := left;
+  r := right;
+  while l <= r do
+  begin
+    mid := (l + r) / 2;
+    if across(mid) then
+    begin
+      Write('YES');
+      halt;
+    end;
+  end;
+  Write('NO');
+end.

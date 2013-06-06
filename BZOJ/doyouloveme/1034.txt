@@ -1,0 +1,76 @@
+#include <iostream>
+#include <cstdio>
+#include <algorithm>
+#define MAXN 100010
+using namespace std;
+int n, p1[MAXN], p2[MAXN];
+int main()
+{
+    scanf("%d", &n);
+    for(int i = 0; i < n; i++)
+	scanf("%d", &p1[i]);
+    for(int i = 0; i < n; i++)
+	scanf("%d", &p2[i]);
+    sort(p1, p1 + n);
+    sort(p2, p2 + n);
+    int s1, s2, t1, t2, tot = 0;
+    s1 = s2 = 0;
+    t1 = t2 = n - 1;
+    for(int i = 1; i <= n; i++)
+    {
+	if(p1[s1] > p2[s2])
+	{
+	    tot += 2;
+	    s1++;
+	    s2++;
+	}
+	else
+	    if(p1[t1] > p2[t2])
+	    {
+		tot += 2;
+		t1--;
+		t2--;
+	    }
+	    else
+	    {
+		if(p1[s1] > p2[t2])
+		    tot += 2;
+		else
+		    if(p1[s1] == p2[t2])
+			tot++;
+		s1++;
+		t2--;
+	    }
+    }
+    printf("%d ", tot);
+    tot = 0;
+    s1 = s2 = 0;
+    t1 = t2 = n - 1;
+    for(int i = 1; i <= n; i++)
+    {
+	if(p1[s1] < p2[s2])
+	{
+	    tot += 2;
+	    s1++;
+	    s2++;
+	}
+	else
+	    if(p1[t1] < p2[t2])
+	    {
+		tot += 2;
+		t1--;
+		t2--;
+	    }
+	    else
+	    {
+		if(p1[t1] < p2[s2])
+		    tot += 2;
+		else
+		    if(p1[t1] == p2[s2])
+			tot++;
+		s2++;
+		t1--;
+	    }
+    }
+    printf("%d\n", n * 2 - tot);
+}

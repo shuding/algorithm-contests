@@ -1,0 +1,50 @@
+program bzoj1087;
+
+var
+  n, tot, i, j, k, p, q: longint;
+  t, num: array[1..100] of longint;
+  g: array[1..100, 1..100] of boolean;
+  f: array[0..1, 1..100, 0..100] of extended;
+  sum:extended;
+
+  procedure dfs(k, i, p: longint);
+  begin
+    if i = n then
+    begin
+      Inc(tot);
+      t[tot] := k;
+      num[tot] := p;
+      exit;
+    end;
+    dfs(k * 2, i + 1, p);
+    if k and 1 = 0 then
+      dfs(k * 2 + 1, i + 1, p + 1);
+  end;
+
+begin
+  Read(n, q);
+  dfs(0, 0, 0);
+  for i := 1 to tot do
+    for j := 1 to tot do
+      if (t[i] and t[j] = 0) and (t[i] shr 1 and t[j] = 0) and
+        (t[i] shl 1 and t[j] = 0) then
+        g[i, j] := True
+      else
+        g[i, j] := False;
+  for i := 1 to tot do
+    f[1, i, num[i]] := 1;
+  for i := 2 to n do
+    for p := 0 to q do
+      for j := 1 to tot do
+      begin
+        f[i and 1, j, p] := 0;
+        if num[j] <= p then
+          for k := 1 to tot do
+            if g[j, k] then
+              f[i and 1, j, p] := f[i and 1, j, p] + f[(i - 1) and 1, k, p - num[j]];
+      end;
+  sum := 0;
+  for i := 1 to tot do
+    sum := sum + f[n and 1, i, q];
+  Write(sum:0:0);
+end.

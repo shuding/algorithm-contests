@@ -1,0 +1,81 @@
+#include <iostream>
+#include <cstdio>
+#include <algorithm>
+#define rep(i, n) for(int i = 0; i < n; i++)
+using namespace std;
+const int inf = 1000000000;
+int tot = 0, n, S, T, w, g[1000][1000], h[1000], hn[1000];
+
+int Aug(int v, int lim)
+{
+    if(v == T || !lim)
+	return lim;
+    int left = lim, f, tmp = n - 1;
+    rep(i, n)
+    {
+	if(g[v][i] && h[v] == h[i] + 1)
+	{
+	    int MIN = min(left, g[v][i]);
+	    f = Aug(i, MIN);
+	    left -= f;
+	    g[v][i] -= f;
+	    g[i][v] += f;
+	    if(h[S] == n)
+		return lim - left;
+	}
+	if(g[v][i])
+	    tmp = min(tmp, h[i]);
+    }
+    if(lim == left)
+    {
+	hn[h[v]]--;
+	if(!hn[h[v]])
+	    h[S] = n;
+	else
+	{
+	    h[v] = tmp + 1;
+	    hn[h[v]]++;
+	}
+    }
+    return lim - left;
+}
+
+int MaxFlow()
+{
+    int F = 0;
+    hn[0] = n;
+    while(h[S] != n)
+	F += Aug(S, inf);
+    return F;
+}
+
+int main()
+{
+    scanf("%d", &n);
+    S = n * n;
+    T = S + 1;
+    rep(i, n)
+	rep(j, n)
+	{
+	    scanf("%d", &w);
+	    tot += w;
+	    if((i + j) % 2)
+		g[S][i * n + j] = w;
+	    else
+		g[i * n + j][T] = w;
+	    if((i + j) % 2)
+	    {
+		if(j < n - 1)
+		    g[i * n + j][i * n + j + 1] = inf;
+		if(i < n - 1)
+		    g[i * n + j][i * n + j + n] = inf;
+		if(j > 0)
+		    g[i * n + j][i * n + j - 1] = inf;
+		if(i > 0)
+		    g[i * n + j][i * n + j - n] = inf;
+	    }
+	}
+    n = T + 1;
+    printf("%d\n", tot - MaxFlow());
+    return 0;
+}

@@ -1,0 +1,79 @@
+#include <algorithm>
+#include <iostream>
+#include <cstdio>
+#define MAXM 20050 * 10
+#define MAXN 250 * 2
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+const int inf = ~0U >> 2;
+
+struct edge{
+	int t, flow, cost, next;
+	edge(){}
+	edge(int t, int f, int c, int n):
+		t(t), flow(f), cost(c), next(n){}
+} e[MAXM];
+
+int n, m, etop, S, T, FLOW, COST, st[MAXN];
+
+void add(int s, int t, int f, int c){
+	e[++etop] = edge(t, f, c, st[s]);
+	st[s] = etop;
+}
+
+int dis[MAXN], que[MAXN * 10], pre[MAXN], p, q;
+bool v[MAXN];
+
+bool spfa(){
+	rep(i, 2 * n) dis[i] = inf, v[i] = 0;
+	dis[S] = 0; v[S] = 1; que[1] = S;
+	p = q = 1;
+	while(p <= q){
+		for(int i = st[que[p]]; i; i = e[i].next)
+			if(e[i].flow && dis[e[i].t] > dis[que[p]] + e[i].cost){
+				dis[e[i].t] = dis[que[p]] + e[i].cost;
+				pre[e[i].t] = i;
+				if(!v[e[i].t]){
+					que[++q] = e[i].t;
+					v[e[i].t] = 1;
+				}
+			}
+		v[que[p++]] = 0;
+	}
+	return dis[T] != inf;
+}
+
+void do_min_cost_max_flow(){
+	FLOW = 0; COST = 0;
+	while(spfa()){
+		int f = inf;
+		for(int i = pre[T]; i; i = pre[e[i + (i & 1 ? 1 : -1)].t])
+			f = min(f, e[i].flow);
+		for(int i = pre[T]; i; i = pre[e[i + (i & 1 ? 1 : -1)].t]){
+			e[i].flow -= f;
+			e[i + (i & 1 ? 1 : -1)].flow += f;
+		}
+		COST += f * dis[T];
+		FLOW += f;
+	}
+}
+
+int main(){
+	scanf("%d%d", &n, &m);
+	rep(i, m){
+		int s, t, c;
+		scanf("%d%d%d", &s, &t, &c);
+		add(s + n, t, 1, c);
+		add(t, s + n, 0, -c);
+	}
+	rep(i, n){
+		add(i, i + n, 1, 0);
+		add(i + n, i, 0, 0);
+	}
+	S = n + 1; T = n;
+	do_min_cost_max_flow();
+	printf("%d %d\n", FLOW, COST);
+	return 0;
+}
+

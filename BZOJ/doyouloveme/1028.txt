@@ -1,0 +1,64 @@
+/*
+* Copyright (C) 2012 All rights reserved.
+* File name:  1028.cpp
+* Author:     Parabola_ds
+* Creat time: 2012.05.23
+*/
+#include <algorithm>
+#include <iostream>
+#include <cstdlib>
+#include <cstring>
+#include <climits>
+#include <vector>
+#include <cstdio>
+#include <queue>
+#include <cmath>
+#include <set>
+#include <map>
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+int n, m, tmp, t[450], s[450];
+bool no = 1;
+
+bool check(){
+	bool ok;
+	rep(i, n){
+		if(t[i] >= 2){
+			t[i] -= 2;
+			ok = 1;
+			rep(j, n) s[j] = t[j];
+			rep(j, n){
+				s[j] %= 3;
+				if(j + 2 <= n && s[j] > 0){
+					s[j + 1] -= s[j];
+					s[j + 2] -= s[j];
+					s[j] = 0;
+				}
+				if(s[j] != 0){
+					ok = 0;
+					break;
+				}
+			}
+			t[i] += 2;
+		}
+		if(ok) return 1;
+	}
+	return 0;
+}
+
+int main(){
+	scanf("%d%d", &n, &m);
+	rep(i, 3 * m + 1)
+		scanf("%d", &tmp), ++t[tmp];
+	rep(i, n){
+		t[i]++;
+		if(check()){
+			no = 0;
+			printf("%d ", i);
+		}
+		t[i]--;
+	}
+	if(no) puts("NO");
+	return 0;
+}

@@ -1,0 +1,32 @@
+#include <algorithm>
+#include <iostream>
+#include <cstdio>
+using namespace std;
+
+long long m, a, c, x, n, g;
+
+long long mul(long long a, long long b){
+	if(!b) return 0;
+	long long tmp = mul(a, b / 2);
+	tmp = (tmp + tmp) % m;
+	if(b & 1) tmp = (tmp + a) % m;
+	return tmp;
+}
+
+pair<long long, long long> calc(long long n){
+	if(!n) return make_pair(1, 0);
+	pair<long long, long long> tmp = calc(n / 2);
+	tmp.second = mul(tmp.second, tmp.first + 1);
+	tmp.first = mul(tmp.first, tmp.first);
+	if(n & 1)
+		tmp.second = (c + mul(a, tmp.second)) % m,
+		tmp.first = mul(a, tmp.first);
+	return tmp;
+}
+
+int main(){
+	cin >> m >> a >> c >> x >> n >> g;
+	pair<long long, long long> p = calc(n);
+	cout << ((mul(x, p.first) + p.second) % m) % g << endl;
+}
+

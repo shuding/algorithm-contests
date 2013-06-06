@@ -1,0 +1,63 @@
+//
+//  main.cpp
+//  BZOJ_1853_SCOI_2010_luckynumber
+//
+//  Created by ds on 12-8-23.
+//  Copyright (c) 2012年 ds. All rights reserved.
+//
+
+#include <algorithm>
+#include <iostream>
+#include <cstring>
+#include <cstdio>
+using namespace std;
+
+typedef long long int64;
+int tot, top;
+int64 a, b, num[10000];
+bool del[10000];
+
+inline void getPrime(int64 n){
+	if(n > b) return;
+	num[++tot] = n;
+	getPrime(n * 10 + 6);
+	getPrime(n * 10 + 8);
+}
+
+void init(){
+	getPrime(6);
+	getPrime(8);
+	sort(num + 1, num + tot + 1);
+	for(int i = 1; i <= tot; ++i)
+		for(int j = 1; j < i; ++j)
+			if(num[i] % num[j] == 0){
+				del[i] = 1;
+				break;
+			}
+	for(int i = 1; i <= tot; ++i)
+		if(!del[i])
+			num[++top] = num[i];
+	tot = top;
+}
+
+inline int64 gcd(int64 a, int64 b){
+	while(a ^= b ^= a ^= b %= a);
+	return b;
+}
+
+inline int64 dfs(int64 m, int sign, int n){
+	if(m > b || n > tot || m > b / (num[n] / min(815474LL, num[n]))) return 0;
+	int64 tmp = dfs(m, sign, n + 1);
+	m = m / gcd(m, num[n]) * num[n];
+	if(m <= b)
+		tmp += b / m - a / m - dfs(m, -sign, n + 1);
+	return tmp;
+}
+
+int main(){
+	scanf("%lld%lld", &a, &b); a--;
+	init();
+	printf("%lld\n", dfs(1, 1, 1));
+	return 0;
+}
+

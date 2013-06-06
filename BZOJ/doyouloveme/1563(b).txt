@@ -1,0 +1,103 @@
+#include <cstdio>
+#include <deque>
+#define MAXN 100001
+#define LIM 1000000000000000000.0
+using namespace std;
+
+typedef long long int64;
+
+struct range
+{
+	int s, t, num;
+	range(){}
+	range(int _s, int _t, int _num): s(_s), t(_t), num(_num){}
+};
+
+int t, n, l, p;
+int64 c[MAXN];
+long double f[MAXN];
+
+long double power(int64 n)
+{
+	long double _p = 1;
+	for(int i = 1; i <= p; i++, _p *= n);
+	return _p;
+}
+
+int read_poem_len()
+{
+	int _len = 0;
+	char c = getchar();
+	while(c == ' ' || c == '\n' || c == '\0')
+		c = getchar();
+	while(c != ' ' && c != '\n' && c != '\0')
+	{
+		_len++;
+		c = getchar();
+	}
+	return _len;
+}
+
+long double cost(int _l, int _r)
+{
+	int64 _c = c[_r] - c[_l - 1] - l;
+	if(_c < 0)
+		_c = -_c;
+	return power(_c);
+}
+
+int binary_seek(int l, int r, int num, int i)
+{
+	while(l <= r)
+	{
+		int mid = (l + r) / 2;
+		if(f[i] + cost(i + 1, mid) <= f[num] + cost(num + 1, mid))
+			r = mid - 1;
+		else
+			l = mid + 1;
+	}
+	return l;
+}
+
+void calc()
+{
+	deque<range> que;
+	que.push_back(range(1, n, 0));
+	f[0] = 0;
+	for(int i = 1; i <= n; i++)
+	{
+		f[i] = f[que.front().num] + cost(que.front().num + 1, i);
+		if(que.front().s < que.front().t)
+			que.front().s++;
+		else
+			que.pop_front();
+		while(!que.empty() && i < que.back().s && f[i] + cost(i + 1, que.back().s) <= f[que.back().num] + cost(que.back().num + 1, que.back().s))
+			que.pop_back();
+		if(que.empty())
+			que.push_back(range(i + 1, n, i));
+		else
+		{
+			que.back().t = binary_seek(que.back().s, que.back().t, que.back().num, i) - 1;
+			if(que.back().t < n)
+				que.push_back(range(que.back().t + 1, n, i));
+		}
+	}
+	if(f[n] <= LIM)
+		printf("%lld\n", (int64)f[n]);
+	else
+		printf("Too hard to arrange\n");
+}
+
+int main()
+{
+	scanf("%d", &t);
+	while(t--)
+	{
+		scanf("%d%d%d", &n, &l, &p);
+		l++;
+		for(int i = 1; i <= n; i++)
+			c[i] = read_poem_len() + c[i - 1] + 1;
+		calc();
+		printf("--------------------\n");
+	}
+}

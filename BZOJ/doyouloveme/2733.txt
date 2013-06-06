@@ -1,0 +1,133 @@
+#include <algorithm>
+#include <iostream>
+#include <cstdlib>
+#include <cstdio>
+#define MAXN 100050
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+const int inf = ~0U >> 1;
+
+class treap{
+	struct node{
+		int key, value, rank, size;
+		node(int v, int r, node *n){
+			value = v;
+			size = 1;
+			rank = r;
+			key = rand() - 1;
+			c[0] = c[1] = n;
+		}
+		void rz(){
+			size = c[0]->size + c[1]->size + 1;
+		}
+		node *c[2];
+	} *root, *null;
+	void Rot(node *&t, bool d){
+		node *c = t->c[d];
+		t->c[d] = c->c[!d];
+		c->c[!d] = t;
+		t->rz();
+		c->rz();
+		t = c;
+	}
+	void Insert(node *&t, int x, int y){
+		if(t == null){
+			t = new node(x, y, null);
+			return;
+		}
+		bool d = x > t->value;
+		Insert(t->c[d], x, y);
+		if(t->c[d]->key < t->key)
+			Rot(t, d);
+		else
+			t->rz();
+	}
+	int Rank(node *&t, int k){
+		int r = t->c[0]->size + 1;
+		if(k < r) return Rank(t->c[0], k);
+		if(k == r) return t->rank;
+		return Rank(t->c[1], k - r);
+	}
+	void Union(node *&t, treap &T){
+		if(t == null) return;
+		T.Ins(t->value, t->rank);
+		Union(t->c[0], T);
+		Union(t->c[1], T);
+	}
+public:
+	treap(){
+		null = new node(0, 0, 0);
+		null->size = 0;
+		null->key = inf;
+		root = null;
+	}
+	void Ins(int x, int y){
+		Insert(root, x, y);
+	}
+	void Uni(treap &t){
+		Union(root, t);
+	}
+	int Rk(int k){
+		if(root->size < k) return -1;
+		return Rank(root, k);
+	}
+	int sz(){
+		return root->size;
+	}
+} T[MAXN];
+
+int n, m, k, fa[MAXN];
+
+inline int Father(int i){
+	return fa[i] == i ? i : fa[i] = Father(fa[i]);
+}
+
+inline void read(int &n){
+	char c = getchar(); n = 0;
+	while(c < '0' || c > '9') c = getchar();
+	while(c >= '0' && c <= '9'){
+		n = n * 10 + c - '0';
+		c = getchar();
+	}
+}
+
+int main(){
+	scanf("%d%d", &n, &m);
+	rep(i, n){
+		read(k);
+		T[i].Ins(k, i);
+		fa[i] = i;
+	}
+	int a, b, q;
+	rep(i, m){
+		read(a); read(b);
+		a = Father(a);
+		b = Father(b);
+		if(a == b) continue;
+		if(T[a].sz() > T[b].sz())
+			swap(a, b);
+		T[a].Uni(T[b]);
+		fa[a] = b;
+	}
+	scanf("%d", &q);
+	char cmd;
+	while(q--){
+		cmd = getchar();
+		while(cmd != 'Q' && cmd != 'B') cmd = getchar();
+		read(a); read(b);
+		if(cmd == 'Q')
+			printf("%d\n", T[Father(a)].Rk(b));
+		else{
+			a = Father(a);
+			b = Father(b);
+			if(a == b) continue;
+			if(T[a].sz() > T[b].sz())
+				swap(a, b);
+			T[a].Uni(T[b]);
+			fa[a] = b;
+		}
+	}
+	return 0;
+}
+

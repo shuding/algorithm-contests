@@ -1,0 +1,51 @@
+#include <iostream>
+#include <cstring>
+#include <cstdio>
+ 
+#define FOR(i, L, R) for (int i = (L); i <= (R); ++i) 
+#define ROF(i, R, L) for (int i = (R); i >= (L); --i) 
+ 
+using namespace std; 
+ 
+#define MXN 1007 
+
+int n; 
+int v[MXN], b[MXN]; 
+int f[MXN][1 << 8][20]; 
+ 
+inline int value(int a, int b) 
+{
+  if (a <= 0) return 0;
+  return v[a] ^ v[b];
+} 
+ 
+inline void renew(int &a, int b) 
+{ 
+  if (b < a) a = b; 
+} 
+ 
+int main() 
+{ 
+ int T; 
+  for (scanf("%d", &T); T--;) { 
+  scanf("%d", &n); 
+    FOR(i, 1, n) scanf("%d%d", v + i, b + i); 
+    memset(f, 0x7f, sizeof f); 
+    f[1][(1 << 8) - 1][7] = 0; 
+    FOR(i, 1, n) ROF(j, (1 << 8) - 1, 0) 
+   FOR(k, -8, 7) if (f[i][j][k + 8] < (0x7f << 24)) { 
+        if (!(j & 1)) renew(f[i + 1][(j >> 1)  | (1 << 7)][k - 1 + 8], f[i][j][k + 8]); 
+    else { 
+     int mx = ~0U >> 1; 
+          FOR(l, 0, 7) if ((j >> l) & 1) { 
+      if (i + l > mx) break; 
+      renew(mx, i + l + b[i + l]); 
+      renew(f[i][j & ~(1 << l)][l + 8], f[i][j][k + 8] + value(i + k, i + l)); 
+     } 
+    } 
+   } 
+    int ans = ~0U >> 1; 
+    FOR(i, -8, -1) renew(ans, f[n + 1][(1 << 8) - 1][i + 8]); 
+  printf("%d\n", ans); 
+ } 
+} 

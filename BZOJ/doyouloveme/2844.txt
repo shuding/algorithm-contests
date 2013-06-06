@@ -1,0 +1,80 @@
+#include <algorithm>
+#include <iostream>
+#include <cstdio>
+#define mod 10086
+#define MAXN 100010
+#define MAXM 40
+using namespace std;
+
+int n, q, a[MAXN], e[MAXM][MAXN], r[MAXM];
+
+int main(){
+	int digit = 0, ans = 0, cnt;
+	scanf("%d", &n);
+	for(int i = 1; i <= n; ++i){
+		scanf("%d", &a[i]);
+		while(a[i] > (1 << digit))
+			++digit;
+	}
+	scanf("%d", &q);
+	for(int i = digit; i >= 0; --i)
+		if(q & (1 << i)){
+			for(int j = digit; j >= i; --j){
+				for(int k = 1; k <= n; ++k)
+					e[j][k] = (a[k] & (1 << j)) ? 1 : 0;
+				r[j] = (q & (1 << j)) ? 1 : 0;
+			}
+			cnt = r[i] = 0;
+			int p = digit;
+			for(int j = 1; j <= n; ++j){
+				int tmp = -1;
+				for(int k = p; k >= i; --k)
+					if(e[k][j]){
+						tmp = k;
+						break;
+					}
+				if(tmp != -1){
+					for(int k = j; k <= n; ++k)
+						swap(e[tmp][k], e[p][k]);
+					swap(r[tmp], r[p]);
+					for(int k = p - 1; k >= i; --k)
+						if(e[k][j]){
+							for(int s = j; s <= n; ++s)
+								e[k][s] ^= e[p][s];
+							r[k] ^= r[p];
+						}
+					p--;
+					if(p < i){
+						cnt += n - j;
+						break;
+					}
+				}
+				else
+					cnt++;
+			}
+			bool checkSol = 1;
+			for(int j = digit; j >= i; --j)
+				if(r[j]){
+					bool check = 0;
+					for(int k = 1; k <= n; ++k)
+						if(e[j][k] == 1){
+							check = 1;
+							break;
+						}
+					if(!check){
+						checkSol = 0;
+						break;
+					}
+				}
+			if(checkSol){
+				int tmp = 1;
+				while(cnt--)
+					tmp = tmp * 2 % mod;
+				ans = (ans + tmp) % mod;
+			}
+		}
+	ans = (ans + 1) % mod;
+	cout << ans << endl;
+	return 0;
+}
+

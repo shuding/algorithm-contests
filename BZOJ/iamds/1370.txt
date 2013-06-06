@@ -1,0 +1,60 @@
+
+program bzoj1370;
+
+var
+  n, m, x, y, i, tot: integer;
+  fa: array[-1000..1000] of integer;
+  v: array[-1000..1000] of boolean;
+  c: char;
+
+  function father(i: longint): integer;
+  var
+    f: integer;
+  begin
+    if fa[i] = i then
+      exit(i);
+    f := father(fa[i]);
+    fa[i] := f;
+    exit(f);
+  end;
+
+  procedure merge(a, b: integer);
+  var
+    f1, f2: integer;
+  begin
+    f1 := father(a);
+    f2 := father(b);
+    fa[f1] := f2;
+  end;
+
+begin
+  Readln(n);
+  readln(m);
+  for i := 1 to n do
+  begin
+    fa[i] := i;
+    fa[-i] := -i;
+    v[i] := False;
+    v[-i] := False;
+  end;
+  for i := 1 to m do
+  begin
+    Read(c);
+    readln(x, y);
+    if c = 'F' then
+      merge(x, y)
+    else
+    begin
+      merge(x, -y);
+      merge(-x, y);
+    end;
+  end;
+  tot := 0;
+  for i := 1 to n do
+    if not v[father(i)] then
+    begin
+      v[father(i)] := True;
+      Inc(tot);
+    end;
+  Write(tot);
+end.

@@ -1,0 +1,69 @@
+/*
+* Copyright (C) 2012 All rights reserved.
+* File name:  prob.cpp
+* Author:     Parabola_ds
+* Creat time: 2012.05.25
+*/
+#include <algorithm>
+#include <iostream>
+#include <cstdlib>
+#include <cstring>
+#include <climits>
+#include <vector>
+#include <cstdio>
+#include <queue>
+#include <cmath>
+#include <set>
+#include <map>
+#define rep(i, n) for(int i = 0; i < n; ++i)
+using namespace std;
+
+long long a, b, dig[10], ans[10], power[15];
+
+void digCalc(long long x){
+	long long tmp = x, b[15], d;;
+	if(!x){
+		dig[0] = 1;
+		return;
+	}
+	d = 0;
+	while(x){
+		b[++d] = x % 10ll;
+		x /= 10ll;
+	}
+	if(d > 1){
+		rep(i, b[d]){
+			dig[i] += power[d - 1];
+			rep(j, 10)
+				dig[j] += power[d - 1] * (d - 1) / 10;
+		}
+		for(int i = 1; i < d; ++i)
+			dig[0] -= power[d - i];
+		dig[b[d]] += tmp % power[d - 1] + 1;
+		d--;
+	}
+	while(d){
+		rep(i, b[d]){
+			dig[i] += power[d - 1];
+			rep(j, 10)
+				dig[j] += power[d - 1] * (d - 1) / 10;
+		}
+		dig[b[d]] += tmp % power[d - 1] + 1;
+		d--;
+	}
+}
+
+int main(){
+	scanf("%lld%lld", &a, &b);
+	power[0] = 1;
+	rep(i, 18)
+		power[i + 1] = power[i] * 10;
+	digCalc(b);
+	rep(i, 10)
+		ans[i] = dig[i],
+		dig[i] = 0;
+	digCalc(a - 1);
+	rep(i, 10)
+		printf("%lld ", ans[i] - dig[i]);
+	return 0;
+}

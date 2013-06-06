@@ -1,0 +1,42 @@
+/*
+* Copyright (C) 2012 All rights reserved.
+* File name:  1600.cpp
+* Author:     Parabola_ds
+* Creat time: 2012.05.31
+*/
+#include <algorithm>
+#include <iostream>
+#include <cstdlib>
+#include <cstring>
+#include <climits>
+#include <vector>
+#include <cstdio>
+#include <queue>
+#include <cmath>
+#include <set>
+#include <map>
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+int n, f[3000][5];
+
+int dfs(int t, int k){
+	if(!k){
+		if(t) return 0;
+		return 1;
+	}
+	if(t < k) return 0;
+	if(f[t][k] != -1) return f[t][k];
+	int tot = 0;
+	for(int i = t; i; --i) if(i * 2 < n)
+		tot += dfs(t - i, k - 1);
+	f[t][k] = tot;
+	return tot;
+}
+
+int main(){
+	scanf("%d", &n);
+	memset(f, -1, sizeof(f));
+	cout << dfs(n, 4) << endl;
+	return 0;
+}

@@ -1,0 +1,45 @@
+#include <algorithm>
+#include <iostream>
+#include <cstring>
+#include <cstdio>
+#define MAXN 100050
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+struct range{
+	int L, R, D;
+	inline bool operator < (const range &r) const{
+		return R < r.R || (R == r.R && L < r.L);
+	}
+} r[MAXN];
+
+int n, m, k(1), tot, f[MAXN];
+
+int main(){
+	scanf("%d", &n);
+	rep(i, n){
+		++m;
+		scanf("%d%d", &r[m].L, &r[m].R);
+		r[m].L++; r[m].R = n - r[m].R; r[m].D = 1;
+		if(r[m].L > r[m].R) --m;
+	}
+	sort(r + 1, r + 1 + m);
+	tot = 0;
+	rep(i, m)
+		if(r[i].L != r[i - 1].L || r[i].R != r[i - 1].R)
+			r[++tot] = r[i];
+		else
+			++r[tot].D;
+	rep(i, tot)
+		r[i].D = min(r[i].D, r[i].R - r[i].L + 1);
+	rep(i, n){
+		f[i] = f[i - 1];
+		while(k <= tot && r[k].R == i){
+			f[i] = max(f[i], f[r[k].L - 1] + r[k].D);
+			++k;
+		}
+	}
+	printf("%d\n", n - f[n]);
+	return 0;
+}
+

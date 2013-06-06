@@ -1,0 +1,53 @@
+#include <algorithm>
+#include <iostream>
+#include <cstdio>
+#define MAXN 1000010
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+struct point{
+	long long pos;
+	int next, color;
+	bool operator < (const point p) const{
+		return pos < p.pos;
+	}
+} p[MAXN];
+
+const int inf = ~0U >> 1;
+
+int tot, top[100], n, k, t;
+long long ans(inf), m(inf);
+
+inline void read(long long &n){
+	char c = getchar();
+	n = 0;
+	while(c < '0' || c > '9')
+		c = getchar();
+	while(c >= '0' && c <= '9'){
+		n = n * 10 + c - '0';
+		c = getchar();
+	}
+}
+
+int main(){
+	scanf("%d%d", &n, &k);
+	p[0].pos = -inf;
+	rep(i, k){
+		scanf("%d", &t);
+		rep(j, t){
+			read(p[++tot].pos);
+			p[tot].color = i;
+		}
+		m = min(m, p[tot].pos);
+	}
+	sort(p + 1, p + 1 + n);
+	rep(i, n){
+		p[i].next = top[p[i].color];
+		top[p[i].color] = i;
+	}
+	for(int i = n; i >= 1; --i){
+		ans = min(ans, p[i].pos - m);
+		m = min(m, p[p[i].next].pos);
+	}
+	printf("%lld\n", ans);
+}

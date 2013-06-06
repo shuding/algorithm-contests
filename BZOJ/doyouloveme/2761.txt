@@ -1,0 +1,46 @@
+#include <iostream>
+#include <cstring>
+#include <cstdio>
+#define mod 67787
+using namespace std;
+
+const long long inf = ~0U >> 1;
+int T, n;
+long long a, h[mod];
+
+inline void find(long long n){
+	long long a = (long long)n + inf;
+	int j = a % mod;
+	while(h[j] && h[j] != a) ++j;
+	if(h[j] == a) return;
+	h[j] = a;
+	printf("%lld ", n);
+	return;
+}
+
+inline void read(long long &n){
+	char c = getchar(); n = 0;
+	bool F = 0;
+	while((c < '0' || c > '9') && c != '-') c = getchar();
+	if(c == '-') F = 1, c = getchar();
+	while(c >= '0' && c <= '9'){
+		n = n * 10 + c - '0';
+		c = getchar();
+	}
+	if(F) n *= -1;
+}
+
+int main(){
+	scanf("%d", &T);
+	while(T--){
+		memset(h, 0, sizeof(h));
+		scanf("%d", &n);
+		while(n--){
+			read(a);
+			find(a);
+		}
+		printf("\n");
+	}
+	return 0;
+}
+

@@ -1,0 +1,15 @@
+#include <algorithm>
+#include <iostream>
+#include <cstdio>
+using namespace std;
+
+int n, tot;
+
+int main(){
+	scanf("%d", &n);
+	for(int i = 1; i <= n; ++i)
+		tot += n / i;
+	printf("%d\n", tot);
+	return 0;
+}
+

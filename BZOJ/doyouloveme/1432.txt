@@ -1,0 +1,19 @@
+#include <algorithm>
+#include <iostream>
+#include <cstdio>
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+ 
+const int inf = ~0U >> 2;
+ 
+int n, k;
+ 
+int main(){
+    scanf("%d%d", &n, &k);
+    if(n == 1) printf("1\n");
+    else{
+        k = min(k, n + 1 - k);
+        printf("%d\n", 2 * k);
+    }
+    return 0;
+}

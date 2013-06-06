@@ -1,0 +1,37 @@
+/*
+*Problem    HAOI_2008
+*Author     DS
+*Algorithm  Math
+*Complexity O(nlogn)
+*Date       2012/1/3 15:35
+*IO外挂
+*/
+#include <cstdio> 
+#include <algorithm>
+#include <cmath>
+#define rep(i, n) for(int i = 1; i <= n; i++)
+using namespace std;
+int n, a;
+long long avg = 0, tot = 0, s[1000005];
+inline void read(int&t)
+{
+    char c;while(c=getchar(),c<'0'||c>'9');t=c-'0';
+    while(c=getchar(),c>='0'&&c<='9')t=t*10+c-'0';
+}
+int main()
+{
+    scanf("%d", &n);
+    rep(i, n)
+    {
+        read(a);
+        avg += a;
+        s[i] = s[i - 1] + a;
+    }
+    avg /= n;
+    rep(i, n)
+        s[i] -= avg * (i - 1);
+    sort(s + 1, s + n + 1);
+    rep(i, n)
+        tot += abs(s[(n + 1) / 2] - s[i]);
+    printf("%lld\n", tot);
+}

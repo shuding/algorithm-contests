@@ -1,0 +1,71 @@
+#include <algorithm>
+#include <iostream>
+#include <cstring>
+#include <cstdio>
+#define MAXN 1500000
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+int n, m, len, _len, ans, tot;
+char s[MAXN], _s[50];
+bool f[MAXN];
+
+struct node{
+	node *c[26];
+	bool st;
+	void clear(){
+		st = 0;
+		memset(c, 0, sizeof(c));
+	}
+} num[MAXN], *root;
+
+node *build(){
+	node *p = &num[++tot];
+	p->clear();
+	return p;
+}
+
+void insert(char *s){
+	node *p = root;
+	for(int i = 0; s[i]; ++i){
+		if(!p->c[s[i] - 'a'])
+			p->c[s[i] - 'a'] = build();
+		p = p->c[s[i] - 'a'];
+	}
+	p->st = 1;
+}
+
+void reverse(char *s){
+	int len = strlen(s);
+	for(int i = 0; i < len / 2; ++i)
+		swap(s[i], s[len - i - 1]);
+}
+
+int main(){
+	scanf("%d%d", &n, &m);
+	root = build();
+	rep(i, n){
+		scanf("%s", s);
+		reverse(s);
+		insert(s);
+	}
+	while(m--){
+		scanf("%s", s);
+		memset(f, 0, sizeof(f));
+		ans = 0;
+		for(int i = 0; s[i]; ++i){
+			node *p = root->c[s[i] - 'a'];
+			int j = i;
+			while(p && j >= 0){
+				if(p->st && (!j || f[j - 1])){
+					f[i] = 1;
+					ans = i + 1;
+					break;
+				}
+				p = p->c[s[--j] - 'a'];
+			}
+		}
+		printf("%d\n", ans);
+	}
+	return 0;
+}

@@ -1,0 +1,130 @@
+/*
+* Copyright (C) 2012 All rights reserved.
+* File name:  car.cpp
+* Author:     Parabola_ds
+* Creat time: 2012.07.14
+*/
+#include <algorithm>
+#include <iostream>
+#include <cstdlib>
+#include <cstring>
+#include <climits>
+#include <vector>
+#include <cstdio>
+#include <queue>
+#include <cmath>
+#include <set>
+#include <map>
+#define MAXN 2012
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+const double inf = 1e10;
+
+struct edge{
+	int t, next;
+	double dis;
+} e[MAXN * MAXN];
+
+struct point{
+	long long x, y, mark;
+	point(){}
+	point(int _x, int _y):
+		x(_x), y(_y){ mark = 0; }
+} p[MAXN * 4];
+
+int n, S, T, eTop, st[MAXN * 4];
+double v;
+
+double dis(const point &p, const point &q){
+	return sqrt((p.x - q.x) * (p.x - q.x) + (p.y - q.y) * (p.y - q.y));
+}
+
+int det(const point &p, const point &q, const point &r){
+	long long tmp = p.x * (q.y - r.y) + r.x * (p.y - q.y) + q.x * (r.y - p.y);
+	return tmp < 0 ? -1 : (tmp > 0);
+}
+
+void addEdge(int s, int t){
+	eTop++;
+	e[eTop].t = t;
+	e[eTop].next = st[s];
+	e[eTop].dis = dis(p[s], p[t]);
+	st[s] = eTop;
+}
+
+void initEdge(int v){
+	int u, d;
+	u = d = v;
+	for(int i = v + 1; i <= T; ++i){
+		if(det(p[v], p[d], p[i]) < 0){
+			if(p[i].mark == 3)
+				break;
+			else
+				continue;
+		}
+		if(det(p[v], p[u], p[i]) > 0){
+			if(p[i].mark == 4)
+				break;
+			else
+				continue;
+		}
+		addEdge(v, i);
+		if(p[i].mark == 3) u = i;
+		if(p[i].mark == 4) d = i;
+	}
+}
+
+int que[MAXN * 500];
+double d[MAXN * 4];
+
+void spfa(){
+	rep(i, n * 4 + 2)
+		d[i] = inf;
+	int top = 1;
+	que[1] = S;
+	d[S] = 0;
+	rep(i, top)
+		for(int j = st[que[i]]; j; j = e[j].next)
+			if(d[e[j].t] > d[que[i]] + e[j].dis){
+				d[e[j].t] = d[que[i]] + e[j].dis;
+				que[++top] = e[j].t;
+			}
+	printf("%.10lf\n", d[T] / v);
+}
+
+int main(){
+	scanf("%d", &n);
+	int x1, y1, x2, y2, x, y;
+	rep(i, n){
+		scanf("%d%d%d%d", &x1, &y1, &x2, &y2);
+		p[i * 4 - 3] = point(x1, y2);
+		p[i * 4 - 2] = point(x1, y1);
+		p[i * 4 - 1] = point(x2, y2);
+		p[i * 4 - 0] = point(x2, y1);
+		p[i * 4 - 3].mark = 3;
+		p[i * 4 - 2].mark = 4;
+		p[i * 4 - 1].mark = 3;
+		p[i * 4 - 0].mark = 4;
+	}
+
+	scanf("%d%d", &x, &y);
+	for(S = 1; S <= n * 4 && p[S].x < x; ++S);
+	for(int j = n * 4 + 1; j > S; --j)
+		p[j] = p[j - 1];
+	p[S] = point(x, y);
+	p[S].mark = 1;
+	scanf("%d%d", &x, &y);
+	for(T = 1; T <= n * 4 + 1 && p[T].x <= x; ++T);
+	for(int j = n * 4 + 2; j > T; --j)
+		p[j] = p[j - 1];
+	p[T] = point(x, y);
+	p[T].mark = 2;
+
+	for(int i = S; i < T; ++i)
+		initEdge(i);
+	scanf("%lf", &v);
+	spfa();
+	return 0;
+}
+

@@ -1,0 +1,27 @@
+
+program ant;
+
+const prime:array[1..10] of longint
+           =(2,3,5,7,11,13,17,19,23,29);
+
+var n,max,ans:longint;
+
+  procedure seek(i:extended;j,k,p:longint);
+  var q:longint;
+  begin
+    if i>n then exit;
+    if (k>max) or ((k=max) and (i<ans)) then
+    begin
+      max:=k;
+      ans:=trunc(i);
+    end;
+    for q:=1 to p do
+      seek(i*round(exp(q*ln(prime[j]))),j+1,k*(q+1),q);
+  end;
+
+begin
+  read(n);
+  max:=0;
+  seek(1,1,1,trunc(ln(n)/ln(2)));
+  write(ans);
+end.

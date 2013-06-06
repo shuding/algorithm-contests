@@ -1,0 +1,57 @@
+/*
+*	Copyright (C) Ds ds303077135@gmail.com
+*	File Name     : BZOJ_2982_Combination.cpp
+*	Creation Time : 2013/01/02 20:26:20
+*	Environment   : MacBook Air OS X 10.8
+*/
+#include <algorithm>
+#include <iostream>
+#include <cstdio>
+#define MOD 10007
+using namespace std;
+
+int t, m, n, ret, fact[MOD];
+
+void init(){
+	fact[0] = 1;
+	for(int i = 1; i < MOD; ++i)
+		fact[i] = fact[i - 1] * i % MOD;
+}
+
+int x, y, tmp;
+
+void solve(int a, int b){
+	if(!b){
+		x = 1;
+		y = 0;
+		return;
+	}
+	solve(b, a % b);
+	tmp = y;
+	y = x - (a / b) * y;
+	x = tmp;
+}
+
+int C(int n, int m){
+	if(n < m) return 0;
+	if(m == 0 || m == n) return 1;
+	solve(fact[m] * fact[n - m] % MOD, MOD);
+	return (x + MOD) * fact[n] % MOD;
+}
+
+int main(){
+	init();
+	scanf("%d", &t);
+	while(t--){
+		scanf("%d%d", &n, &m);
+		ret = 1;
+		while(n && m){
+			ret = ret * C(n % MOD, m % MOD) % MOD;
+			n /= MOD;
+			m /= MOD;
+		}
+		printf("%d\n", ret);
+	}
+	return 0;
+}
+

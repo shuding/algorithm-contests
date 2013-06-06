@@ -1,0 +1,135 @@
+#include <iostream>
+#include <algorithm>
+#include <cstdio>
+#include <cstring>
+#define rep(i, n) for(int i = 1; i <= n; i++)
+#define debug(x) cout << #x << " = " << x << endl;
+using namespace std;
+ 
+struct data
+{
+    int l, r;
+    bool g[3][3], ll, rr;
+} tree[300000];
+
+bool connect[100010][3];
+
+void build(int n, int L, int R)
+{
+    tree[n].l = L;
+    tree[n].r = R;
+    if(L == R)
+    {
+        tree[n].g[1][1] = tree[n].g[2][2] = 1;
+        return;
+    }
+    build(n * 2, L, (L + R) / 2);
+    build(n * 2 + 1, (L + R) / 2 + 1, R);
+}
+
+void Open(int n, int r1, int c1, int r2, int c2, int Tp)
+{
+	if(tree[n].l == c1 && tree[n].r == c2 && c1 == c2)
+	{
+		tree[n].ll = tree[n].rr = tree[n].g[1][2] = tree[n].g[2][1] = Tp;
+		return;
+	}
+	int m = (tree[n].l + tree[n].r) / 2;
+	if(c2 <= m)
+		Open(n * 2, r1, c1, r2, c2, Tp);
+	else
+		if(c1 > m)
+			Open(n * 2 + 1, r1, c1, r2, c2, Tp);
+		else
+			connect[m][r1] = Tp;
+	tree[n].ll = tree[n * 2].ll 
+			|| (tree[n * 2].g[1][1] && tree[n * 2].g[2][2] && tree[n * 2 + 1].ll && connect[m][1] && connect[m][2]);
+	tree[n].rr = tree[n * 2 + 1].rr 
+			|| (tree[n * 2 + 1].g[1][1] && tree[n * 2 + 1].g[2][2] && tree[n * 2].rr && connect[m][1] && connect[m][2]);
+	rep(i, 2)
+		rep(j, 2)
+		{
+			tree[n].g[i][j] = 0;
+			rep(k, 2)
+				tree[n].g[i][j] |= tree[n * 2].g[i][k] && tree[n * 2 + 1].g[k][j] && connect[m][k];
+		}
+	rep(i, 2)
+		rep(j, 2)
+		{
+			tree[n].g[i][j] |= tree[n].g[3 - i][j] && tree[n].ll;
+			tree[n].g[i][j] |= tree[n].g[i][3 - j] && tree[n].rr;
+		}
+}
+
+bool Ask(int n, int r1, int c1, int r2, int c2)
+{
+	if(tree[n].l == c1 && tree[n].r == c2)
+		return tree[n].g[r1][r2];
+	int m = (tree[n].l + tree[n].r) / 2;
+	if(c2 <= m)
+	{
+		bool _ok = 0;
+		rep(i, 2)
+		{
+			_ok |= connect[m][1] && connect[m][2] && tree[n * 2 + 1].ll
+				&&Ask(n * 2, r1, c1, i, m) && Ask(n * 2, r2, c2, 3 - i, m);
+			if(_ok)
+				break;
+		}
+		return _ok || Ask(n * 2, r1, c1, r2, c2);
+	}
+	else
+		if(c1 > m)
+		{
+			bool _ok = 0;
+			rep(i, 2)
+			{
+				_ok |= connect[m][1] && connect[m][2] && tree[n * 2].rr
+				   	&& Ask(n * 2 + 1, i, m + 1, r1, c1) && Ask(n * 2 + 1, 3 - i, m + 1, r2, c2);
+				if(_ok)
+					break;
+			}
+			return _ok || Ask(n * 2 + 1, r1, c1, r2, c2);
+		}
+		else
+		{
+			bool _ok = 0;
+			rep(i, 2)
+			{
+				_ok |= connect[m][i] && Ask(n * 2, r1, c1, i, m) && Ask(n * 2 + 1, i, m + 1, r2, c2);
+				if(_ok)
+					break;
+			}
+			return _ok;
+		}
+}
+ 
+int main()
+{
+    int c, c1, c2, r1, r2;
+    char m;
+    scanf("%d", &c);
+    build(1, 1, c);
+    while(scanf("%c", &m))
+    {
+        while(m == ' ' || m == '\n')
+            m = getchar();
+        if(m == 'E')
+            break;
+        while(getchar() != ' ');
+        scanf("%d%d%d%d", &r1, &c1, &r2, &c2);
+        if(c1 > c2)
+        {
+            swap(c1, c2);
+            swap(r1, r2);
+        }
+        if(m == 'O')
+            Open(1, r1, c1, r2, c2, 1);
+        else
+            if(m == 'C')
+                Open(1, r1, c1, r2, c2, 0);
+            else
+                printf("%c\n", Ask(1, r1, c1, r2, c2) ? 'Y' : 'N');
+    }
+    return 0;
+}

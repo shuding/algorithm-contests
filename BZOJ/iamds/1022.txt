@@ -1,0 +1,35 @@
+
+program bzoj1022;
+
+var
+  t, tt, i, j, k, n, tot: longint;
+  f: boolean;
+
+begin
+  Read(t);
+  for i := 1 to t do
+  begin
+    Read(n);
+    tot := 0;
+    tt := 0;
+    f := True;
+    for j := 1 to n do
+    begin
+      Read(k);
+      tot := tot xor k;
+      if k > 1 then
+        f := False;
+      if k = 1 then
+        tt := tt + 1;
+    end;
+    if f then
+      if tt and 1 = 1 then
+        writeln('Brother')
+      else
+        writeln('John')
+    else if tot = 0 then
+      writeln('Brother')
+    else
+      writeln('John');
+  end;
+end.

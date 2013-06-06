@@ -1,0 +1,97 @@
+/*
+* Copyright (C) 2012 All rights reserved.
+* File name:  altitude.cpp
+* Author:     Parabola_ds
+* Creat time: 2012.07.10
+*/
+#include <algorithm>
+#include <iostream>
+#include <cstdlib>
+#include <cstring>
+#include <climits>
+#include <vector>
+#include <cstdio>
+#include <queue>
+#include <cmath>
+#include <set>
+#include <map>
+#define MAXN 510
+#define MAXQ 8000000
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+ 
+const int inf = ~0U >> 1;
+int n, top = 1, d[MAXN][MAXN], l[MAXN][MAXN], r[MAXN][MAXN], u[MAXN][MAXN];
+int dis[MAXN][MAXN], qx[MAXQ], qy[MAXQ];
+bool vst[MAXN][MAXN];
+ 
+void add(int x, int y){
+    if(!vst[x][y]){
+        qx[top] = x;
+        qy[top] = y;
+        top++;
+        if(top >= MAXQ) top = 1;
+    }
+    vst[x][y] = 1;
+}
+ 
+int spfa(){
+    for(int i = 0; i <= n + 1; ++i)
+        for(int j = 0; j <= n + 1; ++j){
+            dis[i][j] = inf;
+            vst[i][j] = 0;
+        }
+    for(int i = 1; i <= n; ++i){
+        vst[qx[top] = 0][qy[top] = i] = 1;
+        dis[0][i] = 0;
+        top++;
+        vst[qx[top] = i][qy[top] = n + 1] = 1;
+        dis[i][n + 1] = 0;
+        top++;
+    }
+    int ret = inf;
+    for(int i = 1; i != top; ++i){
+        if(i >= MAXQ) i = 1;
+        if(qx[i] == n + 1 || qy[i] == 0)
+            ret = min(ret, dis[qx[i]][qy[i]]);
+        else{
+            if(l[qx[i]][qy[i]] >= 0 && dis[qx[i]][qy[i] - 1] - dis[qx[i]][qy[i]] > l[qx[i]][qy[i]]){
+                dis[qx[i]][qy[i] - 1] = dis[qx[i]][qy[i]] + l[qx[i]][qy[i]];
+                add(qx[i], qy[i] - 1);
+            }
+            if(d[qx[i]][qy[i]] >= 0 && dis[qx[i] + 1][qy[i]] - dis[qx[i]][qy[i]] > d[qx[i]][qy[i]]){
+                dis[qx[i] + 1][qy[i]] = dis[qx[i]][qy[i]] + d[qx[i]][qy[i]];
+                add(qx[i] + 1, qy[i]);
+            }
+            if(r[qx[i]][qy[i]] >= 0 && dis[qx[i]][qy[i] + 1] - dis[qx[i]][qy[i]] > r[qx[i]][qy[i]]){
+                dis[qx[i]][qy[i] + 1] = dis[qx[i]][qy[i]] + r[qx[i]][qy[i]];
+                add(qx[i], qy[i] + 1);
+            }
+            if(u[qx[i]][qy[i]] >= 0 && dis[qx[i] - 1][qy[i]] - dis[qx[i]][qy[i]] > u[qx[i]][qy[i]]){
+                dis[qx[i] - 1][qy[i]] = dis[qx[i]][qy[i]] + u[qx[i]][qy[i]];
+                add(qx[i] - 1, qy[i]);
+            }
+        }
+        vst[qx[i]][qy[i]] = 0;
+    }
+    return ret;
+}
+ 
+int main(){
+    scanf("%d", &n);
+    memset(d, -1, sizeof d);
+    memset(l, -1, sizeof l);
+    memset(u, -1, sizeof u);
+    memset(r, -1, sizeof r);
+    rep(i, n * (n + 1))
+        scanf("%d", &d[(i - 1) / n][(i - 1) % n + 1]);
+    rep(i, n * (n + 1))
+        scanf("%d", &l[(i - 1) / (n + 1) + 1][(i - 1) % (n + 1) + 1]);
+    rep(i, n * (n + 1))
+        scanf("%d", &u[(i - 1) / n + 1][(i - 1) % n + 1]);
+    rep(i, n * (n + 1))
+        scanf("%d", &r[(i - 1) / (n + 1) + 1][(i - 1) % (n + 1)]);
+    printf("%d\n", spfa());
+    return 0;
+}
+

@@ -1,0 +1,42 @@
+#include <iostream>
+#include <cstdio>
+#include <cstring>
+#include <algorithm>
+#include <queue>
+#define rep(i, n) for(int i = 0; i <= n; i++)
+using namespace std;
+const int inf = ~0U >> 1;
+long long f[200050];
+int n, k;
+queue<int> que;
+int main()
+{
+	scanf("%d%d", &n, &k);
+	rep(i, 200000)
+		f[i] = inf;
+	que.push(n);
+	f[n] = 0;
+	while(!que.empty() && que.front() != k)
+	{
+		if(que.front() + 1 <= 200000)
+			if(f[que.front()] + 1 < f[que.front() + 1])
+			{
+				f[que.front() + 1] = f[que.front()] + 1;
+				que.push(que.front() + 1);
+			}
+		if(que.front() > 0)
+			if(f[que.front()] + 1 < f[que.front() - 1])
+			{
+				f[que.front() - 1] = f[que.front()] + 1;
+				que.push(que.front() - 1);
+			}
+		if(que.front() <= 100000)
+			if(f[que.front()] + 1 < f[que.front() * 2])
+			{
+				f[que.front() * 2] = f[que.front()] + 1;
+				que.push(que.front() * 2);
+			}
+		que.pop();
+	}
+	printf("%lld\n", f[k]);
+}

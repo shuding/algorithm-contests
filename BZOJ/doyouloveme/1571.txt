@@ -1,0 +1,42 @@
+#include <algorithm>
+#include <iostream>
+#include <cstring>
+#include <vector>
+#include <cstdio>
+#define LIM 10010
+using namespace std;
+
+const int inf = ~0U >> 2;
+int t, s, n;
+vector<int> ti[LIM];
+int m[LIM], l[LIM], a[LIM], c[LIM], d[LIM];
+int f[LIM][101], g[101];
+
+int main(){
+	scanf("%d%d%d", &t, &s, &n);
+	for(int i = 0; i <= 100; ++i)
+		g[i] = inf;
+	for(int i = 1; i <= s; ++i){
+		scanf("%d%d%d", &m[i], &l[i], &a[i]);
+		ti[m[i]].push_back(i);
+	}
+	for(int i = 1; i <= n; ++i){
+		scanf("%d%d", &c[i], &d[i]);
+		for(int j = c[i]; j <= 100; ++j)
+			g[j] = min(g[j], d[i]);
+	}
+	int ans = 0;
+	memset(f, -1, sizeof f);
+	f[0][1] = 0;
+	for(int i = 0; i <= t; ++i)
+		for(int j = 0; j <= 100; ++j) if(f[i][j] != -1){
+			ans = max(ans, f[i][j]);
+			f[i + 1][j] = max(f[i + 1][j], f[i][j]);
+			if(i + g[j] <= t)
+				f[i + g[j]][j] = max(f[i + g[j]][j], f[i][j] + 1);
+			for(vector<int>::iterator it = ti[i].begin(); it != ti[i].end(); ++it)
+				f[i + l[*it]][a[*it]] = max(f[i + l[*it]][a[*it]], f[i][j]);
+		}
+	printf("%d\n", ans);
+	return 0;
+}

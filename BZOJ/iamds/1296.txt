@@ -1,0 +1,37 @@
+
+program project1296;
+
+var n,m,t,i,j,k,p:longint;
+    f:array[0..50,0..2500] of longint;
+    g:array[1..50,0..50,0..2500] of longint;
+    a:array[1..50,0..50] of longint;
+    ch:char;
+
+begin
+  readln(n,m,t);
+  for i:=1 to n do
+  begin
+    for j:=1 to m do
+    begin
+      read(ch);
+      if ch='1' then a[i,j]:=a[i,j-1]+1 else a[i,j]:=a[i,j-1];
+    end;
+    readln;
+  end;
+  for i:=1 to n do
+    for j:=1 to m do
+      for k:=1 to t do
+        for p:=0 to j-1 do
+        begin
+          if g[i,p,k-1]+a[i,j]-a[i,p]>g[i,j,k] then
+            g[i,j,k]:=g[i,p,k-1]+a[i,j]-a[i,p];
+          if g[i,p,k-1]+j-p-a[i,j]+a[i,p]>g[i,j,k] then
+            g[i,j,k]:=g[i,p,k-1]+j-p-a[i,j]+a[i,p];
+        end;
+  for i:=1 to n do
+    for j:=1 to t do
+      for k:=0 to j do
+        if f[i-1,k]+g[i,m,j-k]>f[i,j] then
+            f[i,j]:=f[i-1,k]+g[i,m,j-k];
+  write(f[n,t]);
+end.

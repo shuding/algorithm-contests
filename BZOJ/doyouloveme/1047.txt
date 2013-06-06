@@ -1,0 +1,36 @@
+#include <cstdio>
+#include <algorithm>
+#define rep(i, n) for(int i = 1; i <= n; i++)
+using namespace std;
+const int inf = ~0U >> 1;
+int a, b, n, Num[1010][1010], Max[1010][1010], Min[1010][1010];
+int main()
+{
+    scanf("%d%d%d", &a, &b, &n);
+    rep(i, a)
+	rep(j, b)
+	    scanf("%d", &Num[i][j]);
+    for(int i = a; i >= 1; i--)
+	rep(j, b - n + 1)
+	{
+	    Max[i][j] = 0;
+	    Min[i][j] = inf;
+	    rep(k, n)
+	    {
+		Max[i][j] = max(Max[i][j], Num[i][j + k - 1]);
+		Min[i][j] = min(Min[i][j], Num[i][j + k - 1]);
+	    }
+	}
+    rep(i, a - n + 1)
+	rep(j, b - n + 1)
+	    rep(k, n)
+	    {
+	        Max[i][j] = max(Max[i][j], Max[i + k - 1][j]);
+	        Min[i][j] = min(Min[i][j], Min[i + k - 1][j]);
+	    }
+    int ans = inf;
+    rep(i, a - n + 1)
+	rep(j, b - n + 1)
+	    ans = min(ans, Max[i][j] - Min[i][j]);
+    printf("%d", ans);
+}

@@ -1,0 +1,62 @@
+#include <iostream>
+#include <cstdio>
+#include <set>
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+#define MAXN 100010
+using namespace std;
+
+const int inf = 1000000001;
+
+struct section{
+	int p, l;
+	section(){}
+	section(int _p, int _l): p(_p), l(_l){}
+	bool operator < (const section s) const{
+		return l < s.l || l == s.l && p < s.p;
+	}
+};
+
+set<section> s;
+int n, k, ans, v[MAXN], p[MAXN], l[MAXN], r[MAXN];
+
+inline void read(int &n){
+	char c = getchar();
+	while(c < '0' || c > '9')
+		c = getchar();
+	while(c >= '0' && c <= '9'){
+		n = n * 10 + c - '0';
+		c = getchar();
+	}
+}
+
+int main(){
+	scanf("%d%d", &n, &k);
+	rep(i, n)
+		read(p[i]);
+	rep(i, n - 1){
+		s.insert(section(i, v[i] = p[i + 1] - p[i]));
+		l[i] = i - 1;
+		r[i] = i + 1;
+	}
+	v[0] = v[n] = inf;
+	r[0] = 1; l[n] = n - 1;
+	s.insert(section(0, v[0]));
+	s.insert(section(n, v[n]));
+	rep(i, k){
+		set<section>::iterator q = s.begin();
+		ans += (*q).l;
+		int P = (*q).p;
+		int pl = l[P], pr = r[P];
+		s.erase(*q);
+		s.erase(section(pl, v[pl]));
+		s.erase(section(pr, v[pr]));
+		v[P] = v[pl] + v[pr] - v[P];
+		l[P] = l[pl];
+		r[l[P]] = P;
+		r[P] = r[pr];
+		l[r[P]] = P;
+		s.insert(section(P, v[P]));
+	}
+	printf("%d\n", ans);
+	return 0;
+}

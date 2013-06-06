@@ -1,0 +1,52 @@
+
+program flower;
+
+const
+  val: array[0..9] of integer = (1, 1, 2, 6, 4, 4, 4, 8, 4, 6);
+
+var
+  s: array[1..500] of longint;
+  n, i, j, k, tot, mo, t: longint;
+  ch: string;
+  c: char;
+
+begin
+  while not seekeoln do
+  begin
+    n := 0;
+    ch := '';
+    while not seekeoln do
+    begin
+      Inc(n);
+      Read(c);
+      ch := ch + c;
+    end;
+    readln;
+    for i := 1 to n do
+      s[i] := Ord(ch[n - i + 1]) - Ord('0');
+    tot := 1;
+    mo := 0;
+    while True do
+    begin
+      tot := tot * val[s[1]] mod 10;
+      if n > 1 then
+        tot := tot * 6 mod 10;
+      j := s[n] mod 5;
+      s[n] := s[n] div 5;
+      for i := n - 1 downto 1 do
+      begin
+        k := s[i];
+        s[i] := (j * 10 + s[i]) div 5;
+        j := (j * 10 + k) mod 5;
+      end;
+      while (n >= 1) and (s[n] = 0) do
+        Dec(n);
+      if n = 0 then
+        break;
+      mo := (mo + s[1] + s[2] * 10) mod 4;
+    end;
+    for i := 1 to mo do
+      tot := tot * 8 mod 10;
+    Writeln(tot);
+  end;
+end.

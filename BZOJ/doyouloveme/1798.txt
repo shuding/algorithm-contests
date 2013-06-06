@@ -1,0 +1,113 @@
+#include <iostream>
+#include <cstdio>
+#define MAXN 200000
+using namespace std;
+ 
+typedef long long ll;
+ 
+struct Tree
+{
+    ll l, r, s, _add, _mul;
+} t[MAXN * 2];
+ 
+ll p, n, m;
+ 
+void build(ll n, ll l, ll r)
+{
+    t[n].l = l;
+    t[n].r = r;
+    t[n]._add = 0;
+    t[n]._mul = 1;
+    if(l == r)
+    {
+        scanf("%lld", &t[n].s);
+        return;
+    }
+    ll m = (l + r) / 2;
+    build(n * 2, l, m);
+    build(n * 2 + 1, m + 1, r);
+    t[n].s = (t[n * 2].s + t[n * 2 + 1].s) % p;
+}
+ 
+void trans(ll n, ll mul, ll add)
+{
+    t[n * 2]._mul *= mul;
+    t[n * 2]._add = t[n * 2]._add * mul + add;
+    t[n * 2].s = t[n * 2].s * mul + add * (t[n * 2].r - t[n * 2].l + 1);
+    t[n * 2 + 1]._mul *= mul;
+    t[n * 2 + 1]._add = t[n * 2 + 1]._add * mul + add;
+    t[n * 2 + 1].s = t[n * 2 + 1].s * mul + add * (t[n * 2 + 1].r - t[n * 2 + 1].l + 1);
+    t[n * 2]._mul %= p;
+    t[n * 2]._add %= p;
+    t[n * 2].s %= p;
+    t[n * 2 + 1]._mul %= p;
+    t[n * 2 + 1]._add %= p;
+    t[n * 2 + 1].s %= p;
+}
+ 
+void update(ll n, ll l, ll r, ll mul, ll add)
+{
+    if(t[n].l == l && t[n].r == r)
+    {
+        t[n].s = (t[n].s * mul + add * (r - l + 1)) % p;
+        t[n]._mul = t[n]._mul * mul % p;
+        t[n]._add = (t[n]._add * mul + add) % p;
+        return;
+    }
+    trans(n, t[n]._mul, t[n]._add);
+    t[n]._mul = 1;
+    t[n]._add = 0;
+    ll m = (t[n].l + t[n].r) / 2;
+    if(r <= m)
+        update(n * 2, l, r, mul, add);
+    else
+        if(l > m)
+            update(n * 2 + 1, l, r, mul, add);
+        else
+        {
+            update(n * 2, l, m, mul, add);
+            update(n * 2 + 1, m + 1, r, mul, add);
+        }
+    t[n].s = (t[n * 2].s + t[n * 2 + 1].s) % p;
+}
+ 
+ll ans(ll n, ll l, ll r)
+{
+    if(t[n].l == l && t[n].r == r)
+        return t[n].s;
+    ll m = (t[n].l + t[n].r) / 2;
+    if(r <= m)
+        return (ans(n * 2, l, r) * t[n]._mul + t[n]._add * (r - l + 1)) % p;
+    else
+        if(l > m)
+            return (ans(n * 2 + 1, l, r) * t[n]._mul + t[n]._add * (r - l + 1)) % p;
+        else
+            return ((ans(n * 2, l, m) + ans(n * 2 + 1, m + 1, r)) * t[n]._mul + t[n]._add * (r - l + 1)) % p;
+}
+ 
+int main()
+{
+    scanf("%lld%lld", &n, &p);
+    build(1, 1, n);
+    scanf("%lld", &m);
+    while(m--)
+    {
+        ll cmd, t, g, c;
+        scanf("%lld%lld%lld", &cmd, &t, &g);
+        if(cmd == 1)
+        {
+            scanf("%lld", &c);
+            update(1, t, g, c, 0);
+        }
+        else
+            if(cmd == 2)
+            {
+                scanf("%lld", &c);
+                update(1, t, g, 1, c);
+            }
+            else
+                printf("%lld\n", ans(1, t, g));
+    }
+    return 0;
+}
+ 

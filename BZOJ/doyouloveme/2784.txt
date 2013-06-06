@@ -1,0 +1,44 @@
+#include<cstdio>
+#include<cstring>
+#include<algorithm>
+using namespace std;
+
+double p;
+int a[30], n, t;
+double k[51][30], b[51][30];
+bool used[51][30];
+
+void cal(int e, int n)
+{
+	double kk, bb;
+	if(used[e][n]) return;
+	used[e][n] = 1;
+	if(e != 0) k[e][n] = p;
+	else k[e][n] = 0.0;
+	b[e][n] = 1.0;
+	kk = bb = 0.0;
+	for(int i = 0; i <= n && e + a[i] <= t; i++){
+		cal(e + a[i], i);
+		kk += k[e + a[i]][i];
+		bb += b[e + a[i]][i];
+	}
+	bb *= (1 - k[e][n]) / (n + 1);
+	kk *= (1 - k[e][n]) / (n + 1);
+	b[e][n] += bb;
+	k[e][n] /= (1 - kk);
+	b[e][n] /= (1 - kk);
+	return;
+}
+
+int main(){
+	while (scanf("%lf %d %d",&p,&t,&n)!=EOF){
+		for(int i = 0; i < n; i++)
+			scanf("%d", a + i);
+		sort(a, a + n);
+		memset(used, 0, sizeof(used));
+		cal(0, n - 1);
+		printf("%.3lf\n", b[0][n - 1]);
+	}
+	return 0;
+}
+

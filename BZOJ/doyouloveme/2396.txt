@@ -1,0 +1,53 @@
+#include <algorithm>
+#include <iostream>
+#include <cstdio>
+#include <cstring>
+#include <cstdlib>
+#define rep(i, n) for(int i = 0; i < n; ++i)
+using namespace std;
+
+int n;
+long long m[3][1000][1000], _m[1000], __m[1000];
+
+inline void read(long long &n){
+	n = 0;
+	char c = getchar();
+	while(c < '0' || c > '9')
+		c = getchar();
+	while(c >= '0' && c <= '9'){
+		n = n * 10 + c - '0';
+		c = getchar();
+	}
+}
+
+bool test(){
+	rep(i, n)
+		_m[i] = rand() % 1000;
+	memset(__m, 0, sizeof(__m));
+	rep(i, n)
+		rep(j, n)
+			__m[i] += m[1][i][j] * _m[j];
+	rep(i, n){
+		int t1 = 0, t2 = 0;
+		rep(j, n){
+			t1 += m[0][i][j] * __m[j];
+			t2 += m[2][i][j] * _m[j];
+		}
+		if(t1 != t2)
+			return 0;
+	}
+	return 1;
+}
+
+int main(){
+	srand(0);
+	while(scanf("%d", &n) == 1){
+		rep(i, 3)
+			rep(j, n)
+				rep(k, n)
+					read(m[i][j][k]);
+		printf("%s\n", test() ? "Yes" : "No");
+	}
+	return 0;
+}
+

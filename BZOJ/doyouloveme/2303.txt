@@ -1,0 +1,80 @@
+#include <iostream>
+#include <vector>
+#include <cstdio>
+#define MAXN 1000005
+#define mod 1000000000
+#define halt {cout << 0 << endl; return 0;}
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+int n, m, k, x, y, z, ans(1);
+int fa[MAXN * 4], t[MAXN * 2];
+bool v[MAXN * 2];
+vector<pair<int, pair<int, int> > > data;
+
+int father(int i){
+	return fa[i] == i ? i : fa[i] = father(fa[i]);
+}
+
+int main(){
+	scanf("%d%d%d", &n, &m, &k);
+	rep(i, (n + m) * 2)
+		fa[i] = i, t[i] = -1;
+	rep(i, k){
+		scanf("%d%d%d", &x, &y, &z);
+		if(x == 1)
+			t[y] = z;
+		else if(y == 1)
+			t[m + x - 1] = z;
+		else if((x & 1) + (y & 1) == 0)
+			data.push_back(make_pair(!z, make_pair(m + x - 1, y)));
+		else
+			data.push_back(make_pair(z, make_pair(m + x - 1, y)));
+	}
+	if(t[1] == 1)
+		for(vector<pair<int, pair<int, int> > >::iterator it = data.begin(); it != data.end(); ++it){
+			if((*it).first){
+				int f1 = father((*it).second.first), f2 = father((*it).second.second);
+				fa[f1] = f2;
+				fa[father((*it).second.first + n + m - 1)] = father((*it).second.second + n + m - 1);
+			}
+			else{
+				int f1 = father((*it).second.first + n + m - 1), f2 = father((*it).second.second + n + m - 1);
+				fa[f2] = father((*it).second.first), fa[f1] = father((*it).second.second);
+			}
+		}
+	else
+		for(vector<pair<int, pair<int, int> > >::iterator it = data.begin(); it != data.end(); ++it){
+			if(!(*it).first){
+				int f1 = father((*it).second.first), f2 = father((*it).second.second);
+				fa[f1] = f2;
+				fa[father((*it).second.first + n + m - 1)] = father((*it).second.second + n + m - 1);
+			}
+			else{
+				int f1 = father((*it).second.first + n + m - 1), f2 = father((*it).second.second + n + m - 1);
+				fa[f2] = father((*it).second.first), fa[f1] = father((*it).second.second);
+			}
+		}
+	rep(i, n + m - 1){
+		if(t[i] != -1){
+			int f = father(i);
+			if(t[f] == -1) t[f] = t[i];
+			else if(t[f] != t[i]) halt
+			f = father(i + n + m - 1);
+			if(t[f] == -1) t[f] = !t[i];
+			else if(t[f] == t[i]) halt
+		}
+		if(father(i) == father(i + n + m - 1)) halt
+	}
+	rep(i, n + m - 1){
+		int f = father(i);
+		if(!v[f]){
+			v[f] = 1;
+			v[father(i + n + m - 1)] = 1;
+			if(t[f] == -1)
+				ans = ans * 2 % mod;
+		}
+	}
+	printf("%d\n", ans);
+}
+

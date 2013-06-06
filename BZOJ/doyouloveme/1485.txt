@@ -1,0 +1,41 @@
+#include <algorithm>
+#include <iostream>
+#include <cstdio>
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+int n, p, pn, prime[500000], times[500000];
+bool not_prime[3000000];
+
+void init_prime(int n){
+	for(int i = 2; i <= n; ++i)
+		if(!not_prime[i]){
+			prime[++pn] = i;
+			rep(j, n / i)
+				not_prime[i * j] = 1;
+		}
+}
+
+void add_prime_fact(int d, int n){
+	rep(i, pn){
+		if(prime[i] > n)
+			break;
+		int tmp = n;
+		while(tmp >= prime[i])
+			times[i] += d * (tmp /= prime[i]);
+	}
+}
+
+int main(){
+	scanf("%d%d", &n, &p);
+	init_prime(2 * n);
+	add_prime_fact(1, 2 * n);
+	add_prime_fact(-1, n + 1);
+	add_prime_fact(-1, n);
+	long long ans = 1;
+	rep(i, pn)
+		rep(j, times[i])
+			ans = ans * (long long)prime[i] % p;
+	printf("%lld\n", ans);
+	return 0;
+}

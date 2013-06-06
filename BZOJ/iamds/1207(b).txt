@@ -1,0 +1,25 @@
+
+#include <iostream>
+#include <cstdlib>
+#include <cstdio>
+#include <cmath>
+#define MAXM 10050
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+int n, m, ans, t[MAXM], x[MAXM], y[MAXM], f[MAXM];
+
+int main(){
+	scanf("%d%d", &n, &m);
+	rep(i, m)
+		scanf("%d%d%d", &t[i], &x[i], &y[i]);
+	rep(i, m){
+		f[i] = 1;
+		rep(j, i - 1)
+			if(t[i] - t[j] >= abs(x[i] - x[j]) + abs(y[i] - y[j]))
+				f[i] = max(f[i], f[j] + 1);
+		ans = max(ans, f[i]);
+	}
+	printf("%d\n", ans);
+	return 0;
+}

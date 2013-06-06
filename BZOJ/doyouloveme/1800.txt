@@ -1,0 +1,22 @@
+#include <iostream>
+#include <cstdio>
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+int n, tot, s[100];
+
+int main(){
+	scanf("%d", &n);
+	rep(i, n){
+		scanf("%d", &s[i]);
+		s[i] += s[i - 1];
+	}
+	rep(i, n)
+		rep(j, i - 1)
+			rep(k, j - 1)
+				rep(p, k - 1)
+					if(s[n] - s[i] + s[p] == s[j] - s[k])
+						if(s[i] - s[j] == s[k] - s[p])
+							tot++;
+	printf("%d\n", tot);
+}

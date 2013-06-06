@@ -1,0 +1,43 @@
+#include <algorithm>
+#include <iostream>
+#include <cstdio>
+#include <vector>
+#include <set>
+#define MAXN 100001
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+int n, m;
+vector<int> s[MAXN];
+set<int> u;
+
+int main(){
+	scanf("%d%d", &n, &m);
+	rep(i, n)
+		u.insert(i);
+	rep(i, m){
+		int a, b;
+		scanf("%d%d", &a, &b);
+		s[a].push_back(b);
+		s[b].push_back(a);
+	}
+	int k = 1;
+	while(1){
+		printf("%d\n", k);
+		u.erase(k);
+		sort(s[k].begin(), s[k].end());
+		s[k].push_back(n + 1);
+		vector<int>::iterator sit = s[k].begin();
+		for(set<int>::iterator it = u.begin(); it != u.end(); it++){
+			if(*it == *sit) continue;
+			else while(*it > *sit)sit++;
+			if(*it < *sit){
+				k = *it;
+				goto next;
+			}
+		}
+		return 0;
+		next:{}
+	}
+	return 0;
+}

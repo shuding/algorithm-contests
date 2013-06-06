@@ -1,0 +1,70 @@
+#include <iostream>
+#include <cstring>
+#include <cstdio>
+#define MAXN 10000 + 10
+#define MAXC 50000 + 10
+#define MAXSTATE 33
+#define rep(i, n) for(int i = 1; i <= n; i++)
+using namespace std;
+
+const int inf = 1000000000;
+int n, c, ans, f[MAXN][MAXSTATE], w[MAXN][MAXSTATE];
+
+void READ_IN()
+{
+	int j, h, l, x, Hate, Like, Pos;
+	scanf("%d%d", &n, &c);
+	rep(i, c)
+	{
+		Hate = Like = 0;  
+	    scanf("%d%d%d", &Pos, &h, &l);
+	    while(h--)
+			scanf("%d", &x), Hate |= (1 << (4 - (x + n - Pos) % n));    
+		while(l --)
+			scanf("%d", &x), Like |= (1 << (4 - (x + n - Pos) % n));    
+		for (j = 0 ;j < 32 ;j ++)
+			if ((j & Hate) || (~j & Like))
+        w[Pos][j]++;   
+    }
+}
+
+void CALC()
+{
+	/*for(int state = 0; state < MAXSTATE; state++)
+	{
+		memset(f, 0, sizeof(f));
+		for(int i = 0; i < state; i++)
+			f[4][i] = -inf;
+		f[4][state] = 0;
+		for(int i = 5; i <= n; i++)
+			for(int _state = 0; _state < MAXSTATE; _state++)
+			{
+				f[i][(_state * 2) & 31] = max(f[i][(_state * 2) & 31], f[i - 1][_state] + w[i][_state * 2]);
+				f[i][(_state * 2 + 1) & 31] = max(f[i][(_state * 2 + 1) & 31], f[i - 1][_state] + w[i][_state * 2 + 1]);
+			}
+		for(int i = 1; i <= 4; i++)
+			for(int _state = 0; _state < (1 << (5 - i)); _state++)
+			{
+				int __state = (_state << i) + (state >> (4 - i));
+				f[i][__state & 31] = max(f[i][__state & 31], f[i - 1][__state >> 1] + w[i][__state]);
+			}
+		printf("%d\n", f[4][state]);
+	}*/
+	for(int i = 0; i < 32 ; i++)
+	{
+		for(int j = 0; j < 32; j++)
+			f[1][j] = -1 << 30;
+		f[1][i] = w[1][i];
+		for(int j = 2; j <= n; j++)
+			for(int k = 0; k < 32; k++)
+				f[j][k] = max(f[j - 1][k >> 1],f[j - 1][(k >> 1) | 16]) + w[j][k];  
+		ans = max(ans, max(f[n][i >> 1],f[n][(i >> 1) | 16]));  
+	}
+	printf("%d\n", ans);
+}
+
+int main()
+{
+	READ_IN();
+	CALC();
+}

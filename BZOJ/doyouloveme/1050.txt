@@ -1,0 +1,61 @@
+// 暴力真的能过。。。囧
+#include <algorithm>
+#include <iostream>
+#include <cstring>
+#include <cstdio>
+#define MAXN 600
+#define MAXM 6000
+#define rep(i, n) for(int i = 1; i <= n; i++)
+using namespace std;
+
+int n, m, fa[MAXN], s, t, x = 1, y = 1, k;
+double ans = 1e10;
+
+struct edge{
+	int s, t, w;
+	bool operator < (const edge &e)const{
+		return w < e.w;
+	}
+} e[MAXM];
+
+int father(int i){
+	if(fa[i] == i)
+		return i;
+	return fa[i] = father(fa[i]);
+}
+
+int gcd(int a, int b){
+	return b == 0 ? a : gcd(b, a % b);
+}
+
+int main(){
+	scanf("%d%d", &n, &m);
+	rep(i, m)
+		scanf("%d%d%d", &e[i].s, &e[i].t, &e[i].w);
+	sort(e + 1, e + 1 + m);
+	scanf("%d%d", &s, &t);
+	rep(i, m){
+		rep(j, n)
+			fa[j] = j;
+		fa[father(e[i].s)] = father(e[i].t);
+		for(k = i + 1; father(s) != father(t) && k <= m; k++)
+			fa[father(e[k].s)] = father(e[k].t);
+		if(father(s) == father(t) && double(e[k - 1].w) / e[i].w < ans){
+			x = e[k - 1].w;
+			y = e[i].w;
+			ans = double(e[k - 1].w) / e[i].w;
+		}
+	}
+	int g = gcd(x, y);
+	x /= g;
+	y /= g;
+	if(ans >= 1e9)
+		printf("IMPOSSIBLE");
+	else{
+		printf("%d", x);
+		if(y != 1)
+			printf("/%d", y);
+	}
+	printf("\n");
+	return 0;
+}

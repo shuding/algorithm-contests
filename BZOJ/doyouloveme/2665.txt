@@ -1,0 +1,77 @@
+#include"cstdio"
+#include"iostream"
+#include"algorithm"
+using namespace std;
+
+int n;
+bool h[21][16][16][16][16][16];
+
+#define P(x)  \
+    do  \
+    {   \
+        if(x <= 9)   printf("%d" , x);   \
+            else printf("%c" , x + 'a' - 10);   \
+    }while(0)
+
+int main()
+{
+    scanf("%d" , &n);
+    for(int a = 0 ; a < 16 ; a++)
+        for(int b = 0 ; b < 16 ; b++)
+            for(int c = 0 ; c < 16 ; c++)
+                for(int d = 0 ; d < 16 ; d++)
+                    for(int e = 0 ; e < 16 ; e++)
+                        for(int f = 0 ; f < 16 ; f++)
+                            for(int g = 0 ; g < 16 ; g++)
+                                if(!(h[0][a][b][c][d][e] || 
+                                     h[1][a][b][c][d][f] || 
+                                     h[2][a][b][c][d][g] || 
+                                     h[3][a][b][c][e][f] || 
+                                     h[4][a][b][c][e][g] || 
+                                     h[5][a][b][c][f][g] || 
+                                     h[6][a][b][d][e][f] || 
+                                     h[7][a][b][d][e][g] || 
+                                     h[8][a][b][d][f][g] || 
+                                     h[9][a][b][e][f][g] || 
+                                     h[10][a][c][d][e][f] || 
+                                     h[11][a][c][d][e][g] || 
+                                     h[12][a][c][d][f][g] || 
+                                     h[13][a][c][e][f][g] || 
+                                     h[14][a][d][e][f][g] || 
+                                     h[15][b][c][d][e][f] || 
+                                     h[16][b][c][d][e][g] || 
+                                     h[17][b][c][d][f][g] || 
+                                     h[18][b][c][e][f][g] || 
+                                     h[19][b][d][e][f][g] || 
+                                     h[20][c][d][e][f][g]))
+                                     {
+                                             h[0][a][b][c][d][e] = 
+                                             h[1][a][b][c][d][f] = 
+                                             h[2][a][b][c][d][g] = 
+                                             h[3][a][b][c][e][f] = 
+                                             h[4][a][b][c][e][g] = 
+                                             h[5][a][b][c][f][g] = 
+                                             h[6][a][b][d][e][f] = 
+                                             h[7][a][b][d][e][g] = 
+                                             h[8][a][b][d][f][g] = 
+                                             h[9][a][b][e][f][g] = 
+                                             h[10][a][c][d][e][f] = 
+                                             h[11][a][c][d][e][g] = 
+                                             h[12][a][c][d][f][g] = 
+                                             h[13][a][c][e][f][g] = 
+                                             h[14][a][d][e][f][g] = 
+                                             h[15][b][c][d][e][f] = 
+                                             h[16][b][c][d][e][g] = 
+                                             h[17][b][c][d][f][g] = 
+                                             h[18][b][c][e][f][g] = 
+                                             h[19][b][d][e][f][g] = 
+                                             h[20][c][d][e][f][g] = true;
+                                             if(--n == 0)
+                                             {
+                                                    P(a);P(b);P(c);P(d);P(e);P(f);P(g);
+                                                    printf("\n");
+                                                    return 0;
+                                             }
+                                     }
+}
+

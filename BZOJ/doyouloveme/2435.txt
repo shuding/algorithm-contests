@@ -1,0 +1,73 @@
+/*
+* Copyright (C) 2012 All rights reserved.
+* File name:  road.cpp
+* Author:     Parabola_ds
+* Creat time: 2012.07.11
+*/
+#include <algorithm>
+#include <iostream>
+#include <cstdlib>
+#include <cstring>
+#include <climits>
+#include <vector>
+#include <cstdio>
+#include <queue>
+#include <cmath>
+#include <set>
+#include <map>
+#define MAXN 1000010
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+struct edge{
+	int t, next;
+	long long c;
+} e[MAXN * 2];
+
+int n, a, b, c, tmp;
+long long tot;
+
+int etop, st[MAXN], que[MAXN], sn[MAXN], f[MAXN];
+bool vst[MAXN];
+
+void add(int a, int b, int c){
+	etop++;
+	e[etop].t = b;
+	e[etop].c = c;
+	e[etop].next = st[a];
+	st[a] = etop;
+}
+
+void build(){
+	int top = 1;
+	que[1] = 1; vst[1] = 1;
+	for(int i = 1; i <= top; ++i)
+		for(int j = st[que[i]]; j; j = e[j].next)
+			if(!vst[e[j].t]){
+				top++;
+				f[e[j].t] = que[i];
+				que[top] = e[j].t;
+				vst[e[j].t] = 1;
+			}
+	for(int i = top; i; --i){
+		sn[que[i]]++;
+		sn[f[que[i]]] += sn[que[i]];
+	}
+}
+
+int main(){
+	scanf("%d", &n);
+	rep(i, n - 1){
+		scanf("%d%d%d", &a, &b, &c);
+		add(a, b, c);
+		add(b, a, c);
+	}
+	build();
+	rep(i, n - 1){
+		tmp = sn[e[i * 2].t] > sn[e[i * 2 - 1].t] ? e[i * 2 - 1].t : e[i * 2].t;
+		tot += e[i * 2].c * abs(n - 2 * sn[tmp]);
+	}
+	printf("%lld\n", tot);
+	return 0;
+}
+

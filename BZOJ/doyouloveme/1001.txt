@@ -1,0 +1,90 @@
+/**
+*Source     Beijing2006
+*Author     DS
+*Algorithm  Graph
+*Complexity O(mn)
+*Date       2011/12/4 19:28
+*/
+#include <iostream>
+#include <cstdio>
+#include <algorithm>
+#define rep(i, n) for(int i  =0;  i< n; i++)
+#define debug(x) cout << #x << " = " << x << endl;
+#define MAXN 10000000
+#define QueLen MAXN
+const int inf = ~0U >> 1;
+using namespace std;
+long n, m, ans, p, q, s[2002][2002], dis[2002][2002], x[MAXN], y[MAXN];
+void adjust(int a, int b)
+{
+    int x1 = x[p] + a, y1 = y[p] + b;
+    if(x1 <= 2 * n - 2 && x1 >= 0 && y1 <= 2 * m - 2 && y1 >= 0)
+        if(dis[x[p]][y[p]] + s[x1][y1] < dis[x1][y1])
+        {
+            dis[x1][y1] = dis[x[p]][y[p]] + s[x1][y1];
+            q = (q + 1) % QueLen;
+            x[q] = x1;
+            y[q] = y1;
+        }
+    if(x[p] == 2 * n - 2 || y[p] == 0)
+        ans = min(ans, dis[x[p]][y[p]]);
+}
+int main()
+{
+    //freopen("1001.log", "r", stdin);
+    //freopen("1001.out", "w", stdout);
+    scanf("%d%d", &n, &m);
+    rep(i, 2 * n)
+        rep(j, 2 * m)
+            dis[i][j] = inf;
+    rep(i, n)
+        rep(j, m - 1)
+            scanf("%d", &s[i * 2][j * 2 + 1]);
+    rep(i, n - 1)
+        rep(j, m)
+            scanf("%d", &s[i * 2 + 1][j * 2]);
+    rep(i, n - 1)
+        rep(j, m - 1)
+            scanf("%d", &s[i * 2 + 1][j * 2 + 1]);
+    p = 0;
+    q = -1;
+    ans = inf;
+    rep(i, n - 1)
+        rep(j, m - 1)
+            dis[i][j] = inf;
+    rep(i, m - 1)
+    {
+        y[++q] = i * 2 + 1;
+        x[q] = 0;
+        dis[x[q]][y[q]] = s[x[q]][y[q]];
+    }
+    rep(i, n - 1)
+    {
+        y[++q] = m * 2 - 2;
+        x[q] = i * 2 + 1;
+        dis[x[q]][y[q]] = s[x[q]][y[q]];
+    }
+    while(p <= q)
+    {
+        if(x[p] % 2 == 1)
+        {
+            adjust(0, 1);
+            adjust(0, -1);
+        }
+        if(y[p] % 2 == 1)
+        {
+            adjust(1, 0);
+            adjust(-1, 0);
+        }
+        if((x[p] + y[p]) % 2 == 1)
+        {
+            adjust(-1, -1);
+            adjust(1, 1);
+        }
+        p = (p + 1) % QueLen;
+    }
+    if(n * m == 1)
+        ans = 0;
+    printf("%d", ans);
+    return 0;
+}

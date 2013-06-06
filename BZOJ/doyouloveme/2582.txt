@@ -1,0 +1,61 @@
+/*
+* Copyright (C) 2012 All rights reserved.
+* File name:  2582.cpp
+* Author:     Parabola_ds
+* Creat time: 2012.07.11
+*/
+#include <algorithm>
+#include <iostream>
+#include <cstdlib>
+#include <cstring>
+#include <climits>
+#include <vector>
+#include <cstdio>
+#include <queue>
+#include <cmath>
+#include <set>
+#include <map>
+#define MAXN 100010
+#define MOD 1000000007
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+vector<pair<int, int> > e[MAXN];
+int n, m, a, b, _n, _m;
+long long ans = 1;
+bool vst[MAXN], _vst[MAXN];
+
+void dfs(int v){
+	vst[v] = 1;
+	_n++;
+	for(vector<pair<int, int> >::iterator it = e[v].begin(); it != e[v].end(); ++it){
+		if(!_vst[it->second])
+			_m++, _vst[it->second] = 1;
+		if(!vst[it->first])
+			dfs(it->first);
+	}
+}
+
+int main(){
+	scanf("%d%d", &n, &m);
+	rep(i, m){
+		scanf("%d%d", &a, &b);
+		e[a].push_back(make_pair(b, i));
+		e[b].push_back(make_pair(a, i));
+	}
+	rep(i, n)
+		if(!vst[i]){
+			_n = _m = 0;
+			dfs(i);
+			if(_n == _m + 1)
+				ans = ans * _n % MOD;
+			else
+				if(_n == _m)
+					ans = ans * 2 % MOD;
+				else
+					ans = 0;
+		}
+	printf("%lld\n", ans);
+	return 0;
+}
+

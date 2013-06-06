@@ -1,0 +1,90 @@
+#include <algorithm>
+#include <iostream>
+#include <cstring>
+#include <cstdio>
+#define MAXN 200800
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+struct line{
+	int a, b, p;
+	line(){}
+	line(int a, int b, int p): a(a), b(b), p(p){}
+	bool operator < (const line l) const{
+		return a < l.a || (a == l.a && b < l.b);
+	}
+} l[MAXN * 3];
+
+struct edge{
+	int t, next;
+	edge(){}
+	edge(int t, int n): t(t), next(n){}
+} e[MAXN * 6];
+
+int n, p, q, r, tot, etop, st[MAXN], que[MAXN * 6], dis[MAXN * 6];
+
+void add(int s, int t){
+	e[++etop] = edge(t, st[s]);
+	st[s] = etop;
+}
+
+int v[MAXN];
+
+void bfs(){
+	int p = 1, q = 1, S = 0, T = 0;
+	que[1] = 1; dis[1] = 0; v[1] = 1;
+	while(p <= q){
+		for(int i = st[que[p]]; i; i = e[i].next)
+			if(!v[e[i].t]){
+				v[e[i].t] = 1;
+				que[++q] = e[i].t;
+				dis[e[i].t] = dis[que[p]] + 1;
+				if(dis[e[i].t] > dis[S])
+					S = e[i].t;
+			}
+		p++;
+	}
+	memset(dis, 0, sizeof(dis));
+	p = q = 1;
+	que[1] = S; v[S] = 2;
+	while(p <= q){
+		for(int i = st[que[p]]; i; i = e[i].next)
+			if(v[e[i].t] != 2){
+				v[e[i].t] = 2;
+				que[++q] = e[i].t;
+				dis[e[i].t] = dis[que[p]] + 1;
+				if(dis[e[i].t] > dis[T])
+					T = e[i].t;
+			}
+		p++;
+	}
+	printf("%d\n", dis[T] + 1);
+}
+
+inline void read(int &n){
+	char c = getchar(); n = 0;
+	while(c < '0' || c > '9') c = getchar();
+	while(c >= '0' && c <= '9'){
+		n = n * 10 + c - '0';
+		c = getchar();
+	}
+}
+
+int main(){
+	scanf("%d", &n);
+	rep(i, n - 2){
+		read(p); read(q); read(r);
+		l[++tot] = line(min(p, q), max(p, q), i);
+		l[++tot] = line(min(p, r), max(p, r), i);
+		l[++tot] = line(min(q, r), max(q, r), i);
+	}
+	sort(l + 1, l + 1 + tot);
+	rep(i, tot - 1)
+		if(l[i].a == l[i + 1].a && l[i].b == l[i + 1].b){
+			add(l[i].p, l[i + 1].p);
+			add(l[i + 1].p, l[i].p);
+		}
+	bfs();
+	return 0; 
+}
+

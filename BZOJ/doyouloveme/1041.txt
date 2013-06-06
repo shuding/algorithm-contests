@@ -1,0 +1,49 @@
+#include <iostream>
+#include <cstdio>
+#include <cmath>
+using namespace std;
+const double eps = 0.000000001;
+
+int gcd(int a, int b)
+{
+	return !b ? a : gcd(b, a % b);
+}
+
+int abs(int x)
+{
+	return x > 0 ? x : -x;
+}
+
+int main()
+{
+	int r, tot = 0;
+	scanf("%d", &r);
+	for(int k = 1; k <= sqrt(r); k++)
+		if(r % k == 0)
+		{
+			for(int a = 1; a * a * k < r; a++)
+			{
+				double b = sqrt((double)r / k - a * a);
+				if(abs(b - floor(b)) > eps || a >= b)
+					continue;
+				int x = (int)(a * a - b * b), y = 2 * a * (int)b;
+				x = abs(x);
+				y = abs(y);
+				if(gcd(x, y) == 1)
+					tot++;
+			}
+			if(k * k != r)
+				for(int a = 1; a * a < k; a++)
+				{
+					double b = sqrt((double)k - a * a);
+					if(abs(b - floor(b)) > eps || a >= b)
+						continue;
+					int x = (int)(a * a - b * b), y = 2 * a * (int)b;
+					x = abs(x);
+					y = abs(y);
+					if(gcd(x, y) == 1)
+						tot++;
+				}
+		}
+	printf("%d\n", tot * 8 + 4);
+}

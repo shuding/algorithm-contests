@@ -1,0 +1,14 @@
+/*
+*Problem    A plus B
+*Author     DS
+*Date       2011/12/15 22:09
+*/
+#include <cstdio>
+#include <iostream>
+int main()
+{
+    int a, b;
+    scanf("%d%d", &a, &b);
+    printf("%d", a + b);
+    return 0;
+} 

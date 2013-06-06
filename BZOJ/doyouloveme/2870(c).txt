@@ -1,0 +1,130 @@
+/*
+* Copyright (C) 2012 All rights reserved.
+* File name:  2870.cpp
+* Author:     Parabola_ds
+* Creat time: 2012.07.21
+*/
+#include <algorithm>
+#include <iostream>
+#include <cstdlib>
+#include <cstring>
+#include <climits>
+#include <vector>
+#include <cstdio>
+#include <queue>
+#include <cmath>
+#include <set>
+#include <map>
+#define MAXN 50002
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+struct edge{
+	int t, next;
+} e[MAXN * 2];
+
+struct data{
+	int dis, minV, root;
+	inline bool operator > (const data &d) const{
+		return minV > d.minV;
+	}
+} path[MAXN];
+
+int n, a, b, tot, w[MAXN];
+int eTop, st[MAXN], sn[MAXN];
+long long ans;
+bool del[MAXN];
+
+inline void addEdge(int a, int b){
+	eTop++;
+	e[eTop].t = b;
+	e[eTop].next = st[a];
+	st[a] = eTop;
+}
+
+inline void initS(int v, int f){
+	sn[v] = 1;
+	for(int i = st[v]; i; i = e[i].next)
+		if(e[i].t != f && !del[e[i].t]){
+			initS(e[i].t, v);
+			if(!del[e[i].t])
+				sn[v] += sn[e[i].t];
+		}
+}
+
+int divN, minN, orz[MAXN];
+
+inline void getDivPoint(int v, int f, int F){
+	int m = sn[F] - sn[v];
+	for(int i = st[v]; i; i = e[i].next)
+		if(!del[e[i].t] && e[i].t != f){
+			getDivPoint(e[i].t, v, F);
+			m = max(m, sn[e[i].t]);
+		}
+	if(m < minN)
+		divN = v, minN = m;
+}
+
+inline void initD(int v, int f, int d, int m, int F){
+	if(del[v])
+		return;
+	tot++;
+	m = min(m, w[v]);
+	path[tot].root = F;
+	path[tot].minV = m;
+	path[tot].dis = d;
+	for(int i = st[v]; i; i = e[i].next)
+		if(e[i].t != f)
+			initD(e[i].t, v, d + 1, m, F);
+}
+
+inline void calc(int v, int f){
+	int dn;
+	if(del[v])
+		return;
+	initS(v, f);
+	minN = n;
+	getDivPoint(v, f, v);
+	dn = divN;
+	del[dn] = 1;
+	for(int i = st[dn]; i; i = e[i].next)
+		calc(e[i].t, dn);
+	tot = 0;
+	for(int i = st[dn]; i; i = e[i].next)
+		initD(e[i].t, dn, 1, w[dn], e[i].t);
+	sort(path + 1, path + 1 + tot, greater<data>());
+	for(int i = st[dn]; i; i = e[i].next)
+		orz[e[i].t] = 0;
+	for(int i = 1; i <= tot; ++i){
+		ans = max(ans, (long long)(path[i].dis + 1 + orz[path[i].root]) * path[i].minV);
+		for(int j = st[dn]; j; j = e[j].next)
+			if(e[j].t != path[i].root)
+				orz[e[j].t] = max(orz[e[j].t], path[i].dis);
+	}
+	del[dn] = 0;
+}
+
+inline void read(int &n){
+	char c = getchar(); n = 0;
+	while(c < '0' || c > '9') c = getchar();
+	while(c >= '0' && c <= '9'){
+		n = n * 10 + c - '0';
+		c = getchar();
+	}
+}
+
+int main(){
+	scanf("%d", &n);
+	rep(i, n){
+		read(w[i]);
+		ans = max(ans, (long long)w[i]);
+	}
+	rep(i, n - 1){
+		read(a); read(b);
+		addEdge(a, b);
+		addEdge(b, a);
+	}
+	calc(1, 0);
+	cout << ans << endl;
+}
+

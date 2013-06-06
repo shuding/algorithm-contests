@@ -1,0 +1,120 @@
+#include <algorithm>
+#include <cstdio>
+#include <cmath>
+#include <set>
+#define MAXN 100050
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+struct point{
+	long long x, y;
+	point(){}
+	point(long long x, long long y): x(x), y(y){}
+	bool operator < (const point &p) const{
+		if(x != p.x)
+			return x < p.x;
+		if(!x) return y < p.y;
+		return y > p.y;
+	}
+} p[MAXN];
+
+int m, n, x, y, q, cmd[MAXN * 2];
+double tot, ans[MAXN * 2];
+bool del[MAXN];
+set<point> s;
+
+int cross(point a, point b, point c){
+	long long tmp = a.x * b.y + a.y * c.x + b.x * c.y - a.y * b.x - a.x * c.y - b.y * c.x;
+	return tmp < 0 ? -1 : tmp > 0;
+}
+
+double dis(point a, point b){
+	return sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
+}
+
+void ins(point p){
+	pair<set<point>::iterator, bool> it = s.insert(p);
+	point l, r;
+	bool lsuc = 1, rsuc = 1;
+	if(it.first != s.begin()){
+		it.first--;
+		l = *(it.first);
+		it.first++;
+	}
+	else lsuc = 0;
+	it.first++;
+	if(it.first != s.end())
+		r = *(it.first);
+	else rsuc = 0;
+	it.first--;
+	if(lsuc && rsuc){
+		if(cross(l, p, r) != -1){
+			s.erase(it.first);
+			return;
+		}
+		tot -= dis(l, r);
+	}
+	if(lsuc){
+		set<point>::iterator I = it.first, J; I--;
+		while(I != s.begin()){
+			J = I;
+			J--;
+			if(cross(*J, *I, *(it.first)) != -1){
+				tot -= dis(*J, *I);
+				s.erase(I);
+			}
+			else break;
+			I = J;
+		}
+		l = *I;
+		tot += dis(l, p);
+	}
+	if(rsuc){
+		set<point>::iterator I = it.first, J; I++;
+		J = I; J++;
+		while(J != s.end()){
+			if(cross(*(it.first), *I, *J) != -1){
+				tot -= dis(*I, *J);
+				s.erase(I);
+			}
+			else break;
+			I = J;
+			J++;
+		}
+		r = *I;
+		tot += dis(p, r);
+	}
+}
+
+int main(){
+	scanf("%d%d%d", &n, &x, &y);
+	ins(point(0, 0));
+	ins(point(x, y));
+	ins(point(n, 0));
+	scanf("%d", &m);
+	rep(i, m)
+		scanf("%lld%lld", &p[i].x, &p[i].y);
+	scanf("%d", &q);
+	rep(i, q){
+		scanf("%d", &cmd[i]);
+		if(cmd[i] == 1){
+			scanf("%d", &cmd[i]);
+			del[cmd[i]] = 1;
+		}
+		else
+			cmd[i] = 0;
+	}
+	rep(i, m)
+		if(!del[i])
+			ins(p[i]);
+	for(int i = q; i; --i)
+		if(cmd[i])
+			ins(p[cmd[i]]);
+		else
+			ans[i] = tot;
+	rep(i, q)
+		if(!cmd[i])
+			printf("%.2lf\n", ans[i]);
+	return 0;
+}
+

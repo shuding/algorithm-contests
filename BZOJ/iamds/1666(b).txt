@@ -1,0 +1,20 @@
+
+program bzoj1666;
+
+var n,tot:longint;
+
+begin
+  read(n);
+  while n<>1 do
+    if n and 1=1 then
+      begin
+        n:=n*3+1;
+        inc(tot);
+      end
+      else
+      begin
+        n:=n shr 1;
+        inc(tot);
+      end;
+  write(tot);
+end.

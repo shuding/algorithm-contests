@@ -1,0 +1,50 @@
+
+program bzoj1724;
+
+var
+  n, i: longint;
+  a: array[1..20000] of int64;
+  tot, s: int64;
+
+  procedure heap(i, n: longint);
+  var
+    s: int64;
+    j: longint;
+  begin
+    s := a[i];
+    while i * 2 <= n do
+    begin
+      j := i * 2;
+      if (j < n) and (a[j] > a[j + 1]) then
+        Inc(j);
+      if a[j] < s then
+      begin
+        a[i] := a[j];
+        i := j;
+      end
+      else
+        break;
+    end;
+    a[i] := s;
+  end;
+
+begin
+  Read(n);
+  for i := 1 to n do
+    Read(a[i]);
+  for i := n div 2 downto 1 do
+    heap(i, n);
+  tot := 0;
+  while n > 1 do
+  begin
+    s := a[1];
+    tot := tot + a[1];
+    a[1] := a[n];
+    Dec(n);
+    heap(1, n);
+    tot := tot + a[1];
+    a[1] := a[1] + s;
+    heap(1, n);
+  end;
+  Write(tot);
+end.

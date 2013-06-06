@@ -1,0 +1,70 @@
+
+program Maxnumber;
+
+var
+  n, i, m, d, t, l, top: longint;
+  ans, fa, line: array[-1..200000] of longint;
+  ch: char;
+
+  function father(n: longint): longint;
+  var
+    f: longint;
+  begin
+    if fa[n] = n then
+      exit(n);
+    f := father(fa[n]);
+    fa[n] := f;
+    exit(f);
+  end;
+
+  procedure union(a, b, n: longint);
+  var
+    f1, f2: longint;
+  begin
+    f1 := father(a);
+    f2 := father(b);
+    fa[f1] := f2;
+    ans[f1] := n;
+  end;
+
+  procedure add(n: longint);
+  var
+    i, j: longint;
+  begin
+    n := n mod d;
+    Inc(l);
+    ans[l] := n;
+    fa[l]:=l;
+    j := l;
+    while (ans[line[top]]<ans[l]) do
+    begin
+      fa[line[top]]:=l;
+      dec(top);
+    end;
+    inc(top);
+    line[top]:=l;
+  end;
+
+  procedure query(n: longint);
+  begin
+    t := ans[father(l - n + 1)];
+    writeln(t);
+  end;
+
+begin
+  readln(m, d);
+  t := 0;
+  l := 0;
+  top:=0;
+  line[0]:=0;
+  ans[0]:=maxlongint;
+  for i := 1 to m do
+  begin
+    Read(ch);
+    readln(n);
+    case ch of
+      'A': add((n mod d) + (t mod d));
+      'Q': query(n);
+    end;
+  end;
+end.

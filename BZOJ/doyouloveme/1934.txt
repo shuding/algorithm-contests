@@ -1,0 +1,83 @@
+#include <algorithm>
+#include <iostream>
+#include <cstdio>
+#define rep(i, n) for(int i = 1; i <= n; i++)
+using namespace std;
+
+const int inf = ~0U >> 1;
+
+struct edge{
+	int t, f, next;
+	edge(){}
+	edge(int _t, int _f, int _n):
+		t(_t), f(_f), next(_n){}
+} e[100000];
+
+int n, m, S, T, etop, st[310], h[310], hn[310];
+
+void add(int s, int t, int f){
+	e[++etop] = edge(t, f, st[s]);
+	st[s] = etop;
+}
+
+int sap(int v, int lim){
+	if(v == T || !lim)
+		return lim;
+	int left = lim, tmp = T - 1;
+	for(int i = st[v]; i; i = e[i].next){
+		if(e[i].f && h[v] == h[e[i].t] + 1){
+			int f = sap(e[i].t, min(left, e[i].f));
+			left -= f;
+			e[i].f -= f;
+			e[i + (i & 1 ? 1 : -1)].f += f;
+			if(h[S] == T)return lim - left;
+		}
+		if(e[i].f)
+			tmp = min(tmp, h[e[i].t]);
+	}
+	if(lim == left){
+		hn[h[v]]--;
+		if(!hn[h[v]])
+			h[S] = T;
+		else{
+			h[v] = tmp + 1;
+			hn[h[v]]++;
+		}
+	}
+	return lim - left;
+}
+
+int MaxFlow(){
+	int f = 0;
+	hn[0] = T;
+	while(h[S] != T)
+		f += sap(S, inf);
+	return f;
+}
+
+int main(){
+	scanf("%d%d", &n, &m);
+	S = n + 1;
+	T = S + 1;
+	rep(i, n){
+		int tp;
+		scanf("%d", &tp);
+		if(tp){
+			add(S, i, 1);
+			add(i, S, 0);
+		}
+		else{
+			add(i, T, 1);
+			add(T, i, 0);
+		}
+	}
+	rep(i, m){
+		int s, t;
+		scanf("%d%d", &s, &t);
+		add(s, t, 1);
+		add(t, s, 1);
+	}
+	printf("%d\n", MaxFlow());
+	return 0;
+}
+

@@ -1,0 +1,53 @@
+
+#include <iostream>
+#include <cstdio>
+#define MAXN 100005
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+int n, m, cmd, x, y, s, c[MAXN], next[MAXN];
+int a[MAXN * 10], h[MAXN * 10], f[MAXN * 10];
+
+int main(){
+	scanf("%d%d", &n, &m);
+	rep(i, n){
+		scanf("%d", &c[i]);
+		a[c[i]]++;
+		next[i] = h[c[i]];
+		h[c[i]] = i;
+		s += c[i] != c[i - 1];
+	}
+	rep(i, MAXN * 10 - 1) f[i] = i;
+	while(m--){
+		scanf("%d", &cmd);
+		if(cmd == 2) printf("%d\n", s);
+		else{
+			scanf("%d%d", &x, &y);
+			if(x != y){
+				if(a[f[x]] > a[f[y]])
+					swap(f[x], f[y]);
+				x = f[x]; y = f[y];
+				if(a[x]){
+					for(int j = h[x]; j; j = next[j]){
+						s -= c[j] != c[j - 1];
+						if(j < n && c[j] != c[j + 1]) s--;
+					}
+					for(int j = h[x]; j; j = next[j])
+						c[j] = y;
+					int tmp = 0;
+					for(int j = h[x]; j; j = next[j]){
+						s += c[j] != c[j - 1];
+						if(j < n && c[j] != c[j + 1]) s++;
+						tmp = j;
+					}
+					a[y] += a[x];
+					a[x] = 0;
+					next[tmp] = h[y];
+					h[y] = h[x];
+					h[x] = 0;
+				}
+			}
+		}
+	}
+	return 0;
+}

@@ -1,0 +1,45 @@
+/***************************************************
+*
+*   Copyright (C) 2012 All rights reserved.
+*   File name:  2711.cpp
+*   Author:     Parabola_ds
+*   Creat time: 2012.04.18
+*
+***************************************************/
+
+#include <iostream>
+#include <cstring>
+#include <cstdio>
+#define rep(i, s, t) for(int i = s; i <= t; ++i)
+using namespace std;
+
+const int inf = ~0U >> 2;
+int n, x[250], y[250], f[2][80050];
+
+int dp(int x[]){
+	memset(f, 0, sizeof(f));
+	int sum = 0, ans = inf;
+	rep(i, 1, n) sum += x[i];
+	rep(i, 0, sum * 2) f[0][i] = inf;
+	f[0][sum] = 0;
+	rep(i, 1, n)
+		rep(j, 0, sum * 2){
+			f[i & 1][j] = inf;
+			if(j - x[i] >= 0 && j - x[i] <= sum * 2)
+				f[i & 1][j] = min(f[i & 1][j], f[!(i & 1)][j - x[i]] + (j - sum - x[i]) * x[i]);
+			if(j + x[i] >= 0 && j + x[i] <= sum * 2)
+				f[i & 1][j] = min(f[i & 1][j], f[!(i & 1)][j + x[i]] + (sum - j - x[i]) * x[i]);
+		}
+	rep(j, 0, sum * 2)
+		ans = min(ans, f[n & 1][j]);
+	return ans;
+}
+
+int main(){
+	scanf("%d", &n);
+	rep(i, 1, n)
+		scanf("%d%d", &x[i], &y[i]);
+	printf("%d.00\n", dp(x) + dp(y));
+	return 0;
+}
+

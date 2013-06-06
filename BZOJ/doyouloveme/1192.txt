@@ -1,0 +1,9 @@
+#include <cstdio>
+#include <cmath>
+using namespace std;
+int m;
+int main()
+{
+	scanf("%d", &m);
+	printf("%.0lf\n", trunc(log(m) / log(2.0)) + 1);
+}

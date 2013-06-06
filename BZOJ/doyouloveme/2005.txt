@@ -1,0 +1,18 @@
+#include <iostream>
+#include <cstdio>
+using namespace std;
+
+long long n, m, ans, f[100050];
+
+int main(){
+	scanf("%lld%lld", &n, &m);
+	for(long long i = min(n, m); i; --i){
+		f[i] = (n / i) * (m / i);
+		for(long long j = 2; j * i <= min(n, m); ++j)
+			f[i] -= f[i * j];
+		ans += (2 * i - 1) * f[i];
+	}
+	printf("%lld\n", ans);
+	return 0;
+}
+

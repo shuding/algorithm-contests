@@ -1,0 +1,97 @@
+#include <iostream>
+#include <cstdio>
+#include <cstring>
+#define rep(i, n) for(int i = 0; i < n; i++)
+using namespace std;
+bool v[65536], l[70000][16], e[16];;
+int p = 0, q = 0, step[70000];
+char c;
+
+int turn(int p)
+{
+    int n = 0;
+    rep(i, 16)
+        n = n * 2 + l[p][i];
+    return n;
+}
+
+bool succ()
+{
+    rep(i, 16)
+        if(l[p][i] != e[i])
+            return 0;
+    return 1;
+}
+
+void adjust(int delta, int i)
+{
+    q++;
+    step[q] = step[p] + 1;
+    rep(j, 16)
+        l[q][j] = l[p][j];
+    swap(l[q][i], l[q][i + delta]);
+    int t = turn(q);
+    if(v[t])
+        q--;
+    else
+        v[t] = 1;
+}
+
+void add()
+{
+    rep(i, 16)
+    {
+        if(l[p][i])
+        {
+            if(i > 3 && !l[p][i - 4])
+                adjust(-4, i);
+            if(i < 12 && !l[p][i + 4])
+                adjust(4, i);
+            if(i % 4 > 0 && !l[p][i - 1])
+                adjust(-1, i);
+            if(i % 4 < 3 && !l[p][i + 1])
+                adjust(1, i);
+        }
+    }
+}
+
+int main()
+{
+    rep(i, 16)
+    {
+        c = getchar();
+        while(c != '1' && c != '0')
+            c = getchar();
+        l[0][i] = c == '1';
+    }
+    rep(i, 16)
+    {
+        c = getchar();
+        while(c != '1' && c != '0')
+            c = getchar();
+        e[i] = c == '1';
+    }
+    memset(v, 0, sizeof(v));
+    v[turn(0)] = 1;
+    while(true)
+    {
+        if(succ())
+        {
+            printf("%d", step[p]);
+            return 0;
+        }
+        add();
+/*
+    rep(i, 16)
+    {
+        cout << l[p][i];
+        if(i % 4 == 3)
+            cout << endl;
+    }
+    cout << "Step = " << step[p] << endl;
+    system("pause");
+*/
+        p++;
+    }
+    return 0;
+}

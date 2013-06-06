@@ -1,0 +1,72 @@
+// unlimited ym WJMZBMR's Tarray!!!!!
+// Tarray可以修改区间值,但是这样就不能求区间和了,只能求一个点
+
+#include <algorithm>
+#include <iostream>
+#include <cstdio>
+#define MAXN 50000 + 10
+#define MAXM 200000 + 10
+#define RANGE 1000000 + 10
+using namespace std;
+ 
+struct QUERY{
+    int a, b, _no, next;
+} q[MAXM];
+ 
+int n, m, top[RANGE], last[MAXN], num[MAXN], px[MAXN];
+long long s[MAXN], ans[MAXM];
+
+void modify(int x, int val){
+    for(int i = x; i > 0; i -= i & (-i))
+        s[i] += val;
+}
+ 
+long long query(int x){
+    long long sum = 0;
+    for(int i = x; i <= n; i += i & (-i))
+        sum += s[i];
+    return sum;
+}
+ 
+inline void read(int &x){
+    x = 0;
+    char c = getchar();
+    while(c < '0' || c > '9')
+        c = getchar();
+    while(c >= '0' && c <= '9'){
+        x = x * 10 + c - '0';
+        c = getchar();
+    }
+}
+
+int main(){
+    read(n);
+    for(int i = 1; i <= n; i++){
+        read(num[i]);
+        last[i] = top[num[i]];
+        top[num[i]] = i;
+    }
+    read(m);
+    for(int i = 1; i <= m; i++)
+    {
+        read(q[i].a);
+        read(q[i].b);
+        q[i]._no = i;
+        q[i].next = px[q[i].b];
+        px[q[i].b] = i;
+    }
+    int t;
+    for(int i = 1; i <= n ; i++){
+        t = px[i];
+        while(t){
+            ans[q[t]._no] = query(q[t].a) + (q[t].a > last[i]);
+            t = q[t].next;
+        }
+		modify(last[i], -1);
+		modify(i, 1);
+        top[num[i]] = i;
+    }
+    for(int i = 1; i <= m; i++)
+        printf("%lld\n", ans[i]);
+}
+

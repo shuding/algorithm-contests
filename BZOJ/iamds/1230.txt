@@ -1,0 +1,81 @@
+
+program P1230;
+var
+ Left,Right,light:array[0..400400] of longint;
+ flag:array[0..400400] of 0..1;
+ n,m:longint;
+ 
+procedure build_tree(root,x,y:longint);
+var
+ mid:longint;
+ 
+begin
+ Left[root]:=x;
+ Right[root]:=y;
+ if x=y then exit;
+ mid:=(x+y) shr 1;
+ build_tree(root*2,x,mid);
+ build_tree(root*2+1,mid+1,y);
+end;
+ 
+procedure init;
+begin
+ readln(n,m);
+ build_tree(1,1,n);
+end;
+ 
+procedure modify(root,x,y:longint);
+var
+ mid:longint;
+ 
+begin
+ if (Left[root]=x) and (Right[root]=y) then begin
+  flag[root]:=1-flag[root];
+  light[root]:=y-x+1-light[root];
+  exit;
+ end;
+ mid:=(Left[root]+Right[root]) shr 1;
+ if y<=mid then modify(2*root,x,y)
+ else if x>mid then modify(2*root+1,x,y)
+ else begin
+  modify(2*root,x,mid);
+  modify(2*root+1,mid+1,y);
+ end;
+ light[root]:=light[root*2]+light[root*2+1];
+ if flag[root]=1 then light[root]:=Right[root]-Left[root]+1-light[root];
+end;
+ 
+function getans(root,x,y:longint):longint;
+var
+ mid:longint;
+ 
+begin
+ if (Left[root]=x) and (Right[root]=y) then 
+  exit(light[root]);
+ mid:=(Left[root]+Right[root]) shr 1;
+ if y<=mid then getans:=getans(2*root,x,y)
+ else if x>mid then getans:=getans(2*root+1,x,y)
+ else getans:=getans(2*root,x,mid)+getans(2*root+1,mid+1,y);
+ if flag[root]=1 then
+  getans:=y-x+1-getans;
+end;
+ 
+procedure main;
+var
+ i,step,s,e:longint;
+ 
+begin
+ for i:=1 to m do
+ begin
+  readln(step,s,e);
+  case step of
+   0:modify(1,s,e);
+   1:writeln(getans(1,s,e));
+  end;
+ end;
+end;
+ 
+begin
+ init;
+ main;
+end.

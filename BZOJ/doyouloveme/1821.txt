@@ -1,0 +1,56 @@
+#include <algorithm>
+#include <iostream>
+#include <cstdio>
+#include <cmath>
+#define MAXN 1010
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+struct point{
+	double x, y;
+} p[MAXN];
+
+double dis(point a, point b){
+	return (a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y);
+}
+
+int sn, n, k, fa[MAXN];
+double d[MAXN][MAXN], l, r;
+	
+int father(int i){
+	return fa[i] == i ? i : fa[i] = father(fa[i]);
+}
+
+void Union(int i, int j){
+	int f1 = father(i), f2 = father(j);
+	if(f1 != f2){
+		fa[f1] = f2;
+		sn--;
+	}
+}
+	
+bool check(double m){
+	sn = n;
+	rep(i, n) fa[i] = i;
+	rep(i, n)
+		rep(j, i - 1) 
+			if(d[i][j] <= m)
+				Union(i, j);
+	return sn >= k;
+}
+
+int main(){
+	scanf("%d%d", &n, &k);
+	rep(i, n) scanf("%lf%lf", &p[i].x, &p[i].y);
+	rep(i, n) rep(j, i - 1) d[i][j] = dis(p[i], p[j]), r = max(r, d[i][j]);
+	if(k == 1){ printf("0.00\n"); return 0; }
+	while(l + 0.001 < r){
+		double mid = (l + r) / 2.0;
+		if(check(mid))
+			l = mid;
+		else
+			r = mid;
+	}
+	printf("%.2lf\n", sqrt(l));
+	return 0;
+}

@@ -1,0 +1,87 @@
+/***************************************************
+*
+*   Copyright (C) 2012 All rights reserved.
+*   File name:  1177.cpp
+*   Author:     Parabola_ds
+*   Creat time: 2012.04.27
+*
+***************************************************/
+
+#include <iostream>
+#include <cstdio>
+#define MAXN 1800
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+#define repd(i, n) for(int i = n; i; --i)
+using namespace std;
+
+int r, c, k;
+long long s[MAXN][MAXN];
+int LU[MAXN][MAXN], LD[MAXN][MAXN], RU[MAXN][MAXN], RD[MAXN][MAXN],
+	LR[MAXN][MAXN], UD[MAXN][MAXN], S[MAXN][MAXN];
+
+int main(){
+	scanf("%d%d%d", &r, &c, &k);
+	rep(i, r)
+		rep(j, c){
+			scanf("%lld", &s[i][j]);
+			s[i][j] += s[i - 1][j] + s[i][j - 1] - s[i - 1][j - 1];
+			if(i >= k && j >= k)
+				S[i][j] = s[i][j] - s[i - k][j] - s[i][j - k] + s[i - k][j - k];
+		}
+	rep(i, r){
+		rep(j, c){
+			LU[i][j] = max(LU[i - 1][j], LU[i][j - 1]);
+			LU[i][j] = max(LU[i][j], S[i][j]);
+		}
+		repd(j, c){
+			RU[i][j] = max(RU[i - 1][j], RU[i][j + 1]);
+			if(j + k - 1 <= c)
+				RU[i][j] = max(RU[i][j], S[i][j + k - 1]);
+		}
+	}
+	repd(i, r){
+		rep(j, c){
+			LD[i][j] = max(LD[i + 1][j], LD[i][j - 1]);
+			if(i + k - 1 <= c)
+				LD[i][j] = max(LD[i][j], S[i + k - 1][j]);
+		}
+		repd(j, c){
+			RD[i][j] = max(RD[i + 1][j], RD[i][j + 1]);
+			if(i + k - 1 <= r && j + k - 1 <= c)
+				RD[i][j] = max(RD[i][j], S[i + k - 1][j + k - 1]);
+		}
+	}
+	int tmp, ans(0);
+	rep(i, r){
+		tmp = 0;
+		rep(j, c)
+			tmp = max(tmp, S[i][j]);
+		rep(j, i - k + 1)
+			UD[j][i] = max(tmp, UD[j][i - 1]);
+	}
+	rep(i, c){
+		tmp = 0;
+		rep(j, r)
+			tmp = max(tmp, S[j][i]);
+		rep(j, i - k + 1)
+			LR[j][i] = max(tmp, LR[j][i - 1]);
+	}
+	rep(i, r){
+		rep(j, i)
+			ans = max(ans, LU[j - 1][c] + UD[j][i] + LD[i + 1][c]);
+		rep(j, c){
+			ans = max(ans, LU[i - 1][c] + LD[i][j] + RD[i][j + 1]);
+			ans = max(ans, LD[i][c] + LU[i - 1][j] + RU[i - 1][j + 1]);
+		}
+	}
+	rep(i, c){
+		rep(j ,i)
+			ans = max(ans, LU[r][j - 1] + LR[j][i] + RU[r][i + 1]);
+		rep(j, r){
+			ans = max(ans, LU[j][i] + LD[j + 1][i] + RU[r][i + 1]);
+			ans = max(ans, RU[j][i] + RD[j + 1][i] + LU[r][i - 1]);
+		}
+	}
+	printf("%d\n", ans);
+	return 0;
+}

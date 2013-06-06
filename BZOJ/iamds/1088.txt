@@ -1,0 +1,52 @@
+
+program bzoj1088;
+
+var
+  n, i: longint;
+  num: array[1..100000] of longint;
+  f: array[0..1, 0..1, 0..1] of int64;
+
+begin
+  Read(n);
+  for i := 1 to n do
+    Read(num[i]);
+  f[0, 0, 0] := 1;
+  f[0, 0, 1] := 1;
+  for i := 1 to n do
+    case num[i] of
+      0:
+      begin
+        f[i and 1, 0, 0] := f[1 - i and 1, 0, 0];
+        f[i and 1, 1, 0] := 0;
+        f[i and 1, 0, 1] := 0;
+        f[i and 1, 1, 1] := 0;
+      end;
+      1:
+      begin
+        f[i and 1, 0, 0] := f[1 - i and 1, 1, 0];
+        f[i and 1, 1, 0] := f[1 - i and 1, 0, 1];
+        f[i and 1, 0, 1] := f[1 - i and 1, 0, 0];
+        f[i and 1, 1, 1] := 0;
+      end;
+      2:
+      begin
+        f[i and 1, 1, 0] := f[1 - i and 1, 1, 1];
+        f[i and 1, 0, 1] := f[1 - i and 1, 1, 0];
+        f[i and 1, 1, 1] := f[1 - i and 1, 0, 1];
+        f[i and 1, 0, 0] := 0;
+      end;
+      3:
+      begin
+        f[i and 1, 1, 1] := f[1 - i and 1, 1, 1];
+        f[i and 1, 1, 0] := 0;
+        f[i and 1, 0, 1] := 0;
+        f[i and 1, 0, 0] := 0;
+      end;
+      else
+      begin
+        Write(0);
+        halt;
+      end;
+    end;
+  Write(f[n and 1, 1, 0] + f[n and 1, 0, 0]);
+end.

@@ -1,0 +1,46 @@
+
+#include <algorithm>
+#include <iostream>
+#include <cstdio>
+#define MAXN 160
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+const long long inf = 100000000000000000ll;
+
+int n, d, t(0);
+long long sum, tot(1), C[MAXN][MAXN];
+
+void halt(){
+	printf("0\n");
+	exit(0);
+}
+
+int main(){
+	scanf("%d", &n);
+	if(n == 1){
+		scanf("%d", &d);
+		if(d) halt();
+		printf("1\n");
+		return 0;
+	}
+	sum = n - 2;
+	for(int i  = 0; i <= n; ++i)
+		for(int j = 0; j <= i; ++j)
+			if(!j || i == j)
+				C[i][j] = 1;
+			else
+				C[i][j] = C[i - 1][j] + C[i - 1][j - 1];
+	rep(i, n){
+		scanf("%d", &d);
+		d--; t += d;
+		if(d < 0 || t > n - 2) halt();
+		tot = tot * C[sum][d];
+		sum -= d;
+	}
+	if(t < n - 2)
+		halt();
+	else
+		cout << tot << endl;
+	return 0;
+}

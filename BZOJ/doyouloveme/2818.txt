@@ -1,0 +1,63 @@
+/*
+* Copyright (C) 2012 All rights reserved.
+* File name:  gcd.cpp
+* Author:     Parabola_ds
+* Creat time: 2012.05.25
+*/
+#include <algorithm>
+#include <iostream>
+#include <cstdlib>
+#include <cstring>
+#include <climits>
+#include <vector>
+#include <cstdio>
+#include <queue>
+#include <cmath>
+#include <ctime>
+#include <set>
+#include <map>
+#define MAXN 10000000
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+int n, pn, prime[MAXN + 10], phi[MAXN + 10];
+long long tot, fhi[MAXN + 10];
+
+void init(int n){
+	long long tmp;
+	phi[1] = 1;
+	for(int i = 2; i <= n; ++i){
+		if(!phi[i]) 
+			prime[++pn] = i,
+			phi[i] = i - 1,
+			fhi[i] = 1;
+		for(int j = 1; j <= pn && i * prime[j] <= n; ++j){
+			tmp = i * prime[j];
+			if(i % prime[j] == 0){
+				phi[tmp] = phi[i] * prime[j];
+				if(i / prime[j] % prime[j] == 0)
+					fhi[tmp] = fhi[i] * prime[j];
+				else
+					fhi[tmp] = (fhi[i] - phi[i / prime[j]]) * prime[j] + phi[i];
+				break;
+			}
+			phi[tmp] = phi[i] * (prime[j] - 1);
+			fhi[tmp] = fhi[i] * (prime[j] - 1) + phi[i];
+		}
+	}
+}
+
+void solve(int n){
+	rep(i, n)
+		tot += fhi[i];
+	tot = 2ll * tot - (long long)pn;
+}
+
+int main(){
+	scanf("%d", &n);
+	init(n);
+	solve(n);
+	printf("%lld\n", tot);
+	return 0;
+}
+

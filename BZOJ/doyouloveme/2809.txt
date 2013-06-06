@@ -1,0 +1,64 @@
+#include <algorithm>
+#include <iostream>
+#include <cstring>
+#include <vector>
+#include <cstdio>
+#define MAXN 100050
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+int n, m, root, b[MAXN], c[MAXN], l[MAXN], ch[MAXN][2], h[MAXN];
+long long ans(0);
+vector<int> s[MAXN];
+
+int UNION(int a, int b){
+	if(!a) return b;
+	if(!b) return a;
+	if(c[a] > c[b]) swap(a, b);
+	ch[a][1] = UNION(ch[a][1], b);
+	if(h[ch[a][1]] > h[ch[a][0]])
+		swap(ch[a][1], ch[a][0]);
+	h[a] = h[ch[a][1]] + 1;
+	return a;
+}
+
+int dfs(int root){
+	int v = root, tot = 0, sum = 0, tmp;
+	ch[root][0] = ch[root][1] = 0;
+	for(vector<int>::iterator it = s[root].begin(); it != s[root].end(); ++it)
+		v = UNION(v, dfs(*it));
+	tmp = v;
+	while(v && tot + c[v] <= m){
+		tot += c[v];
+		sum++;
+		ch[v][0] = UNION(ch[v][0], ch[v][1]);
+		ch[v][1] = 0;
+		v = ch[v][0];
+	}
+	ans = max(ans, (long long)sum * (long long)l[root]);
+	return tmp;
+}
+
+void read(int &n){
+	char c = getchar(); n = 0;
+	while(c < '0' || c > '9') c = getchar();
+	while(c >= '0' && c <= '9'){
+		n = n * 10 + c - '0';
+		c = getchar();
+	}
+}
+
+int main(){
+	scanf("%d%d", &n, &m);
+	rep(i, n){
+		read(b[i]);
+		read(c[i]);
+		read(l[i]);
+		s[b[i]].push_back(i);
+	}
+	root = *s[0].begin();
+	dfs(root);
+	cout << ans << endl;
+	return 0;
+}
+

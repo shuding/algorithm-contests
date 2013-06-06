@@ -1,0 +1,73 @@
+/*
+* Copyright (C) 2012 All rights reserved.
+* File name:  savage.cpp
+* Author:     Parabola_ds
+* Creat time: 2012.05.30
+*/
+#include <algorithm>
+#include <iostream>
+#include <cstdlib>
+#include <cstring>
+#include <climits>
+#include <vector>
+#include <cstdio>
+#include <queue>
+#include <cmath>
+#include <set>
+#include <map>
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+int n, m, c[20], p[20], l[20];
+
+int extGcd(int a, int b, int &x, int &y){
+	if(!b){
+		x = 1;
+		y = 0;
+		return a;
+	}
+	int tmp, d;
+	d = extGcd(b, a % b, x, y);
+	tmp = x;
+	x = y;
+	y = tmp - (a / b) * y;
+	return d;
+}
+
+bool check(int i, int j, int m){
+	int d, a, b, t, x, y;
+	a = p[i] - p[j];
+	b = m;
+	t = c[j] - c[i];
+	if(a < 0)
+		a = -a, t = -t;
+	d = extGcd(a, b, x, y);
+	if(t % d != 0) return 0;
+	a /= d;
+	b /= d;
+	t /= d;
+	extGcd(a, b, x, y);
+	x *= t;
+	while(x < 0) x += b;
+	x %= b;
+	return x <= l[i] && x <= l[j];
+}
+
+int main(){
+	scanf("%d", &n);
+	rep(i, n)
+		scanf("%d%d%d", &c[i], &p[i], &l[i]), m = max(m, c[i]);
+	for(; ; ++m){
+		bool ok = 1;
+		rep(i, n) if(ok)
+			rep(j, i - 1)
+				if(check(i, j, m)){
+					ok = 0;
+					break;
+				}
+		if(ok){
+			printf("%d\n", m);
+			break;
+		}
+	}
+}

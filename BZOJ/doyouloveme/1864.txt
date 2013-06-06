@@ -1,0 +1,53 @@
+#include <iostream>
+#include <cstring>
+#include <cstdio>
+#define MAXN 15000
+using namespace std;
+
+const int inf = ~0U >> 1;
+int c[MAXN][2], tot, root, f[MAXN][2];
+
+void build(int &n){
+	n = ++tot;
+	char C = getchar();
+	switch(C){
+		case '0':
+			break;
+		case '1':
+			build(c[n][0]);
+			break;
+		case '2':
+			build(c[n][0]);
+			build(c[n][1]);
+			break;
+	}
+}
+
+int comp(int a, int b, int t){
+	return t ? max(a, b) : min(a, b);
+}
+
+int calc(int n, int x, int t){
+	if(!n)
+		return f[n][x];
+	if(t && f[n][x])
+		return f[n][x];
+	if(!t && f[n][x] != inf)
+		return f[n][x];
+	int tot = x;
+	if(x)
+		tot += calc(c[n][0], 0, t) + calc(c[n][1], 0, t);
+	else
+		tot += comp(calc(c[n][0], 1, t) + calc(c[n][1], 0, t), calc(c[n][0], 0, t) + calc(c[n][1], 1, t), t);
+	f[n][x] = tot;
+	return tot;
+}
+
+int main(){
+	build(root);
+	cout << max(calc(root, 0, 1), calc(root, 1, 1));
+	for(int i = 1; i <= tot; i++)
+		f[i][0] = f[i][1] = inf;
+	cout << " " << min(calc(root, 0, 0), calc(root, 1, 0)) << endl;
+}
+

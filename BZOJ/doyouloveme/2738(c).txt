@@ -1,0 +1,104 @@
+/*
+* Copyright (C) 2012 All rights reserved.
+* File name:  2738.cpp
+* Author:     Parabola_ds
+* Creat time: 2012.07.12
+*/
+#include <algorithm>
+#include <iostream>
+#include <cstdlib>
+#include <cstring>
+#include <climits>
+#include <vector>
+#include <cstdio>
+#include <queue>
+#include <cmath>
+#include <set>
+#include <map>
+#define MAXN 510
+#define MAXQ 60010
+#define MAX_SIZE 500 * 500 + 10
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+struct elem{
+	int v, x, y;
+	inline bool operator < (const elem& e) const{
+		return v < e.v;
+	}
+} e[MAX_SIZE];
+
+struct query{
+	int x1, y1, x2, y2, k, next, prev;
+} q[MAXQ];
+
+int N, Q, SIZE, tot;
+int sum[MAXN][MAXN], delta[MAXN][MAXN];
+
+inline void addSum(){
+	for(int i = 1; i <= N; ++i)
+		for(int j = 1; j <= N; ++j)
+			sum[i][j] = -sum[i - 1][j - 1] + sum[i - 1][j] + sum[i][j - 1] + delta[i][j];
+}
+
+inline void read(int &n){
+	char c = getchar(); n = 0;
+	while(c < '0' || c > '9') c = getchar();
+	while(c >= '0' && c <= '9'){
+		n = n * 10 + c - '0';
+		c = getchar();
+	}
+}
+
+int main(){
+	scanf("%d%d", &N, &Q);
+	rep(i, N)
+		rep(j, N){
+			read(e[++tot].v);
+			e[tot].x = i;
+			e[tot].y = j;
+		}
+	sort(e + 1, e + 1 + tot);
+	rep(i, Q){
+		read(q[i].x1);
+		read(q[i].y1);
+		read(q[i].x2);
+		read(q[i].y2);
+		read(q[i].k);
+		q[i].next = i + 1;
+		q[i].prev = i - 1;
+	}
+	q[0].next = 1;
+
+	SIZE = int(N * N / sqrt(Q));
+	static int ans[MAXQ];
+	for(int i = 1, j; i <= tot; ){
+		for(j = i; j <= min(tot, i + SIZE - 1); ++j)
+			delta[e[j].x][e[j].y]++;
+		addSum();
+		i = j--;
+		for(int t = q[0].next; t <= Q; t = q[t].next){
+			int tmp = sum[q[t].x2][q[t].y2] + sum[q[t].x1 - 1][q[t].y1 - 1]
+					- sum[q[t].x2][q[t].y1 - 1] - sum[q[t].x1 - 1][q[t].y2];
+			if(tmp >= q[t].k){
+				int p = j;
+				while(tmp >= q[t].k){
+					if(e[p].x >= q[t].x1 && e[p].x <= q[t].x2 && e[p].y >= q[t].y1 && e[p].y <= q[t].y2){
+						if(tmp == q[t].k)
+							ans[t] = e[p].v;
+						tmp--;
+					}
+					p--;
+				}
+				q[q[t].prev].next = q[t].next;
+				q[q[t].next].prev = q[t].prev;
+			}
+		}
+	}
+	rep(i, Q)
+		printf("%d\n", ans[i]);
+	return 0;
+}
+
+// writed with Canon In D by pachelbel :)
+

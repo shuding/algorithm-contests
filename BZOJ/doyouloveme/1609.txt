@@ -1,0 +1,63 @@
+// 水题……不想写
+#include <iostream>
+#define INF 0x7FFFFFFF
+#define MAX 30001
+ 
+using namespace std;
+ 
+int F[MAX][4];
+int S[MAX];
+int N,Ans=INF;
+ 
+void init()
+{
+	int i;
+	cin >> N;
+	for (i=1;i<=N;i++)
+		cin >> S[i];
+}
+ 
+void dynamic()
+{
+	int i,j,k;
+	for (j=1;j<=3;j++)
+	{
+		for (i=1;i<=N;i++)
+		{
+			F[i][j]=INF;
+			for (k=1;k<=j;k++)
+			{
+				if (F[i-1][k]<F[i][j])
+					F[i][j]=F[i-1][k];
+			}
+			if (S[i]!=j)
+				F[i][j]++;
+		}
+		if (F[N][j]<Ans)
+			Ans=F[N][j];
+	}
+	for (j=3;j>=1;j--)
+	{
+		for (i=1;i<=N;i++)
+		{
+			F[i][j]=INF;
+			for (k=j;k<=3;k++)
+			{
+				if (F[i-1][k]<F[i][j])
+					F[i][j]=F[i-1][k];
+			}
+			if (S[i]!=j)
+				F[i][j]++;
+		}
+		if (F[N][j]<Ans)
+			Ans=F[N][j];
+	}
+}
+ 
+int main()
+{
+	init();
+	dynamic();
+	cout << Ans << endl;
+	return 0;
+}

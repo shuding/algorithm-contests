@@ -1,0 +1,66 @@
+
+program chain;
+
+var
+  n, i: longint;
+  f: array[0..100] of string;
+
+  function mul(a: string; b: longint): string;
+  var
+    c: array[1..100] of longint;
+    s: string;
+    i: longint;
+  begin
+    fillchar(c, sizeof(c), 0);
+    for i := 1 to length(a) do
+      c[i] := (Ord(a[length(a) - i + 1]) - Ord('0')) * b;
+    s := '';
+    for i := 1 to length(a) do
+    begin
+      c[i + 1] := c[i + 1] + c[i] div 10;
+      c[i] := c[i] mod 10;
+      s := chr(c[i] + Ord('0')) + s;
+    end;
+    if c[length(a) + 1] <> 0 then
+      s := chr(c[length(a) + 1] + Ord('0')) + s;
+    exit(s);
+  end;
+
+  function del(a, b: string): string;
+  var
+    c: array[1..100] of longint;
+    i, len: longint;
+    s: string;
+  begin
+    fillchar(c, sizeof(c), 0);
+    for i := 1 to length(a) do
+      c[i] := Ord(a[length(a) - i + 1]) - Ord('0');
+    for i := 1 to length(b) do
+      c[i] := c[i] - (Ord(b[length(b) - i + 1]) - Ord('0'));
+    s := '';
+    len := length(a);
+    if length(b) > len then
+      len := length(b);
+    for i := 1 to len do
+    begin
+      if c[i] < 0 then
+      begin
+        Dec(c[i + 1]);
+        c[i] := c[i] + 10;
+      end;
+      s := chr(c[i] + Ord('0')) + s;
+    end;
+    while (length(s) > 0) and (s[1] = '0') do
+      Delete(s, 1, 1);
+    exit(s);
+  end;
+
+begin
+  Read(n);
+  f[0] := '1';
+  f[1] := '1';
+  f[2] := '3';
+  for i := 3 to n do
+    f[i] := del(mul(f[i - 1], 3), f[i - 2]);
+  Write(del(del(mul(f[n], 3), mul(f[n - 1], 2)), '2'));
+end.

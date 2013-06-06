@@ -1,0 +1,56 @@
+#include <iostream>
+#include <cstdio>
+#include <algorithm>
+#define rep(i, n) for(int i = 0; i < n; i++)
+#define debug(x) cout << #x << " = " << x << endl;
+using namespace std;
+struct line
+{
+    int s, t, p;
+} l[90000];
+int n, m, w, ln = 0, fa[301];
+bool cmp(line a, line b)
+{
+    return a.p < b.p;
+}
+int father(int i)
+{
+    return fa[i] == i ? i : fa[i] = father(fa[i]);
+}
+int main()
+{
+    scanf("%d", &n);
+    rep(i, n)
+    {
+        scanf("%d", &w);
+        l[ln].s = i; 
+        l[ln].t = n;
+        l[ln].p = w; 
+        ln++;
+    }
+    rep(i, n)
+        rep(j, n)
+            {
+                scanf("%d", &m);
+                if(i < j)
+                {
+                    l[ln].s = i; 
+                    l[ln].t = j;
+                    l[ln].p = m; 
+                    ln++;
+                }
+            }
+    sort(l, l + ln, cmp);
+    n++;
+    int tot = 0, j = 0;
+    rep(i, n)
+        fa[i] = i;
+    rep(i, n - 1)
+    {
+        while(father(l[j].s) == father(l[j].t))
+            j++;
+        fa[father(l[j].s)] = father(l[j].t);
+        tot += l[j].p;
+    }
+    printf("%d", tot);
+}

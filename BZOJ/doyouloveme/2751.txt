@@ -1,0 +1,63 @@
+/*
+* Copyright (C) 2012 All rights reserved.
+* File name:  2751.cpp
+* Author:     Parabola_ds
+* Creat time: 2012.07.21
+*/
+#include <algorithm>
+#include <iostream>
+#include <cstdlib>
+#include <cstring>
+#include <climits>
+#include <vector>
+#include <cstdio>
+#include <queue>
+#include <cmath>
+#include <set>
+#include <map>
+#define MOD 1000000007ll
+#define MAXK 100010
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+struct data{
+	long long x, y;
+	inline bool operator < (const data &d) const{
+		if (x != d.x)
+			return x < d.x;
+		return y < d.y;
+	}
+} a[MAXK];
+
+long long power(long long a, long long b){
+	if(!b) return 1;
+	long long tmp = power(a, b / 2);
+	tmp = tmp * tmp % MOD;
+	if(b & 1) tmp = tmp * a % MOD;
+	return tmp;
+}
+
+long long n, m, k, tot, del, q, tmp, l = 1;
+
+int main(){
+	scanf("%lld%lld%lld", &n, &m, &k);
+	q = (1 + n) * n / 2 % MOD;
+	tot = power(q, m);
+	for(int i = 1; i <= k; ++i)
+		scanf("%d%d", &a[i].x, &a[i].y);
+	sort(a + 1, a + 1 + k);
+	for(int i = 1, j = 1; i <= k; i = j){
+		tmp = 0;
+		for(; j <= k && a[j].x == a[i].x; ++j)
+			if(j == i || a[j].y != a[j - 1].y)
+				tmp = (tmp + a[j].y) % MOD;
+		l = l * power(q, a[i].x - a[i - 1].x - 1) % MOD;
+		del = (del + l * power(q, m - a[i].x) % MOD * tmp) % MOD;
+		l = l * (q - tmp + MOD) % MOD;
+	}
+	tot += MOD - del;
+	tot %= MOD;
+	printf("%lld\n", tot);
+	return 0;
+}
+

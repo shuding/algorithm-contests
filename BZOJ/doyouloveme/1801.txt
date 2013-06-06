@@ -1,0 +1,31 @@
+#include <iostream>
+#include <cstdio>
+#define mod 9999973
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+int n, m;
+long long f[2][105][105];
+
+int main(){
+	scanf("%d%d", &n, &m);
+	if(n < m) swap(n, m);
+	f[0][0][0] = 1;
+	rep(i, n)
+		for(int j = 0; j <= m; ++j)
+			for(int k = 0; k <= m - j; ++k){
+				int s = i & 1;
+				f[s][j][k] = f[!s][j][k];
+				if(j > 0) f[s][j][k] += f[!s][j - 1][k] * (m - k - j + 1);
+				if(j > 1) f[s][j][k] += f[!s][j - 2][k] * (m - k - j + 2) * (m - k - j + 1) / 2;
+				if(k > 0) f[s][j][k] += f[!s][j + 1][k - 1] * (j + 1);
+				if(k > 1) f[s][j][k] += f[!s][j + 2][k - 2] * (j + 2) * (j + 1) / 2;
+				if(k > 0) f[s][j][k] += f[!s][j][k - 1] * j * (m - k - j + 1);
+				f[s][j][k] %= mod;
+			}
+	long long tot = 0;
+	for(int i = 0; i <= m; ++i)
+		for(int j = 0; j <= m; ++j)
+			tot = (tot + f[n & 1][i][j]) % mod;
+	cout << tot % mod << endl;
+}

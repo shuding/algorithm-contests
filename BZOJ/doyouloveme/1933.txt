@@ -1,0 +1,47 @@
+#include <algorithm>
+#include <iostream>
+#include <cstdio>
+#define rep(i, n, m) for(int i = n; i <= m; i++)
+using namespace std;
+const int inf = 1000000000;
+struct book{
+    int t, h;
+    bool operator < (const book &b) const{return h > b.h;}
+} b[100];
+ 
+int n, s[100], f[2][2300][2300];
+ 
+int main(){
+    scanf("%d", &n);
+    rep(i, 1, n)
+        scanf("%d%d", &b[i].h, &b[i].t);
+    sort(b + 1, b + 1 + n);
+    rep(i, 1, n)
+        s[i] = s[i - 1] + b[i].t;
+    rep(i, 0, s[n])
+        rep(j, 0, s[n])
+            f[0][i][j] = f[1][i][j] = inf;
+    f[0][0][0] = 0;
+    rep(k, 1, n)
+        rep(i, 0, s[k])
+            rep(j, 0, s[k] - i){
+                //if(i + j == s[k])
+                if(i + j == s[k - 1])
+                    f[k & 1][i][j] = f[!(k & 1)][i][j] + b[k].h;
+                else
+                    f[k & 1][i][j] = f[!(k & 1)][i][j];
+                if(i >= b[k].t)
+                    f[k & 1][i][j] = min(f[k & 1][i][j], f[!(k & 1)][i - b[k].t][j] + (i == b[k].t ? b[k].h : 0));
+                if(j >= b[k].t)
+                    f[k & 1][i][j] = min(f[k & 1][i][j], f[!(k & 1)][i][j - b[k].t] + (j == b[k].t ? b[k].h : 0));
+                //printf("%d %d %d %d\n", k, i, j, f[k & 1][i][j]);
+            }
+    int ans = inf;
+    rep(i, 1, s[n])
+        rep(j, 1, s[n] - i - 1)
+            if(f[n & 1][i][j] > 0 && f[n & 1][i][j] < inf)
+                ans = min(ans, max(max(i, j), s[n] - i - j) * f[n & 1][i][j]);
+    printf("%d\n", ans);
+    return 0;
+}
+

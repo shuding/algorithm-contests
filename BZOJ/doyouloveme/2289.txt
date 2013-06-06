@@ -1,0 +1,75 @@
+#include <iostream>
+#include <algorithm>
+#include <cstdio>
+#include <cstdlib>
+#include <cmath>
+#define rep(i, n) for(int i = 0; i < n; i++)
+#define max(a, b) a > b ? a : b;
+#define min(a, b) a > b ? b : a;
+struct C
+{
+    int x, y, r;
+} c[100000];
+const int inf = ~0U >> 1;
+int n;
+double X, L = inf, R = -inf;
+int across(double X)
+{
+    bool l = 0, r = 0;
+    double u = inf, d = -inf, dis;
+    rep(i, n)
+    {
+        if(X >= c[i].x + c[i].r)
+            l = 1;
+        if(X <= c[i].x - c[i].r)
+            r = 1;
+        if(X < c[i].x + c[i].r && X > c[i].x - c[i].r)
+        {
+            dis = sqrt(c[i].r * c[i].r - (X - c[i].x) * (X - c[i].x));
+            u = min(u, c[i].y + dis);
+            d = max(d, c[i].y - dis);
+        }
+    }
+    if(l && r)
+        return 0;
+    if(u > d && !l && !r)
+        return 1;
+    if(l)
+        R = X;
+    else
+        if(r)
+            L = X;
+        else
+            return 0;
+    return -1;
+}
+int main()
+{
+    scanf("%d", &n);
+    rep(i, n)
+    {
+        scanf("%d%d%d", &c[i].x, &c[i].y, &c[i].r);
+        L = min(L, c[i].x - c[i].r);
+        R = max(R, c[i].x + c[i].r);
+    }
+    int ans;
+    while(L <= R)
+    {
+        X = (L + R) / 2;
+        ans = across(X);
+        if(ans == 1)
+        {
+            printf("YES");
+            return 0;
+        }
+        else
+        if(ans == 0)
+        {
+            printf("NO");
+            return 0;
+        }
+    }
+    printf("NO");
+    return 0;
+}
+

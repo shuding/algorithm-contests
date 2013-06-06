@@ -1,0 +1,42 @@
+#include <iostream>
+#include <cstring>
+#include <cstdio>
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+char S[10] = " WING";
+int h[255], n[5], l[5][20], r[5][20];
+bool f[300][300][5], v[300][300][5];
+char st[300];
+
+bool check(int L, int R, int a){
+	bool &x = f[L][R][a];
+	if(v[L][R][a]) return x;
+	v[L][R][a] = 1;
+	if(L == R) return x = (st[L - 1] == S[a]);
+	for(int k = L; k < R; ++k)
+		rep(i, n[a])
+			if(check(L, k, l[a][i]) && check(k + 1, R, r[a][i]))
+				return x = 1;
+	return x = 0;
+}
+
+int main(){
+	h['W'] = 1; h['I'] = 2; h['N'] = 3; h['G'] = 4;
+	rep(i, 4) cin >> n[i];
+	char a, b;
+	rep(i, 4)
+		rep(j, n[i]){
+			cin >> a >> b;
+			l[i][j] = h[a];
+			r[i][j] = h[b];
+		}
+	cin >> st;
+	int len = strlen(st);
+	bool c = 0;
+	rep(i, 4)
+		if(check(1, len, i))
+			cout << S[i], c = 1;
+	if(!c) puts("The name is wrong!");
+	return 0;
+}

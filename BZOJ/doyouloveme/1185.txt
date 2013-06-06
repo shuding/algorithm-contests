@@ -1,0 +1,150 @@
+#include <algorithm>
+#include <iostream>
+#include <cstdlib>
+#include <cstdio>
+#include <cmath>
+#include <ctime>
+#define MAXN	50000 + 10
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+const double PI	 = 3.1415926535897932384626433832795;
+const double eps = 1e-6;
+const double inf = 1e15;
+
+int n, tot, T[MAXN];
+double ans = inf, ans_a = 0;
+
+struct point{
+	double x, y, r, a;
+	void to_complex(){
+		r = sqrt(x * x + y * y);
+		if(x != 0)
+			a = atan(y / x);
+		else
+			if(y > 0)
+				a = 0.5 * PI;
+			else
+				if(y < 0)
+					a = 1.5 * PI;
+				else
+					a = 0;
+		if(x < 0)
+			a += PI;
+		if(x > 0 && y < 0)
+			a += 2 * PI;
+	}
+	point(){}
+	point(double x, double y): x(x), y(y){}
+	bool operator < (const point p) const{
+		return x < p.x || (x == p.x && y < p.y);
+	}
+} p[MAXN], ans_p[4], ANS_P[4];
+
+double rand_arc(double r){
+	double tmp = double(rand() - 1) / RAND_MAX;
+	if(rand() & 1)
+		tmp = -tmp;
+	return r * tmp;
+}
+
+int dir(point a, point b, point c){
+	double s = a.x * b.y + a.y * c.x + b.x * c.y - b.y * c.x - c.y * a.x - a.y * b.x;
+	return s < 0 ? -1 : s > 0;
+}
+
+void init(){
+	sort(p + 1, p + 1 + n);
+	int tail = 1, top = 0;
+	rep(i, n){
+		while(top - tail >= 1){
+			int t = T[top--];
+			if(dir(p[T[top]], p[t], p[i]) == 1){
+				T[++top] = t;
+				break;
+			}
+		}
+		T[++top] = i;
+	}
+	tail = top;
+	for(int i = n - 1; i; --i){
+		while(top - tail >= 1){
+			int t = T[top--];
+			if(dir(p[T[top]], p[t], p[i]) == 1){
+				T[++top] = t;
+				break;
+			}
+		}
+		T[++top] = i;
+	}
+	tot = top - 1;
+}
+
+void get_ans(double a){
+	double l = inf, r = -inf, u = -inf, d = inf, x, y;
+	rep(i, tot){
+		p[T[i]].a += a;
+		x = p[T[i]].r * cos(p[T[i]].a);
+		y = p[T[i]].r * sin(p[T[i]].a);
+		l = min(l, x);
+		r = max(r, x);
+		d = min(d, y);
+		u = max(u, y);
+	}
+	if((r - l) * (u - d) < ans){
+		ans = (r - l) * (u - d);
+		ans_a += a;
+		ans_p[0] = point(l, u);
+		ans_p[1] = point(l, d);
+		ans_p[2] = point(r, u);
+		ans_p[3] = point(r, d);
+	}
+	else
+		rep(i, tot)
+			p[T[i]].a -= a;
+}
+
+int main(){
+	scanf("%d", &n);
+	rep(i, n){
+		scanf("%lf%lf", &p[i].x, &p[i].y);
+		p[i].to_complex();
+	}
+	double r = PI;
+	init();
+	get_ans(0);
+	while(r >= 1e-5){
+		rep(i, 500){
+			double t = rand_arc(r);
+			get_ans(t);
+		}
+		r /= 2.0;
+	}
+	printf("%.5lf\n", ans);
+	for(int i = 0; i < 4; ++i){
+		ans_p[i].to_complex();
+		ans_p[i].a -= ans_a;
+		ans_p[i].x = ans_p[i].r * cos(ans_p[i].a);
+		ans_p[i].y = ans_p[i].r * sin(ans_p[i].a);
+		if(fabs(ans_p[i].x) <= eps) ans_p[i].x = 0;
+		if(fabs(ans_p[i].y) <= eps) ans_p[i].y = 0;
+	}
+	int st = 0;
+	for(int i = 0; i < 4; ++i)
+		if(ans_p[i].y < ans_p[st].y || (ans_p[i].y == ans_p[st].y && ans_p[i].x < ans_p[st].x))
+			st = i;
+	swap(ans_p[st], ans_p[0]);
+	st = 1;
+	for(int i = 1; i < 4; ++i)
+		if(ans_p[i].x > ans_p[st].x || (ans_p[i].x == ans_p[st].x && ans_p[i].y < ans_p[st].y))
+			st = i;
+	swap(ans_p[st], ans_p[1]);
+	st = 2;
+	for(int i = 2; i < 4; ++i)
+		if(ans_p[i].x > ans_p[st].x)
+			st = i;
+	swap(ans_p[st], ans_p[2]);
+	for(int i = 0; i < 4; ++i)
+		printf("%.5lf %.5lf\n", ans_p[i].x, ans_p[i].y);
+	return 0;
+}

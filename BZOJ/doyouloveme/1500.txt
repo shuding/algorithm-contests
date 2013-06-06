@@ -1,0 +1,216 @@
+#include <algorithm>
+#include <iostream>
+#include <cstring>
+#include <cstdio>
+#define MAXN 600000
+using namespace std;
+
+const int inf = int(5e8);
+
+struct node{
+	node *c[2];
+	int value, sum, msum, bsum[2], size;
+	bool rev, same;
+	inline node *rz();
+	inline void makeSame(int);
+	inline void pushDown();
+	node();
+} Null, *null = &Null, st1[MAXN];
+
+node *st2[MAXN];
+int top1, top2;
+
+node::node(){
+	size = 1;
+	c[0] = c[1] = null;
+}
+
+inline node *newNode(){
+	node *p = top2 ? st2[top2--] : &st1[++top1];
+	p->size = 1;
+	p->c[0] = p->c[1] = null;
+	p->same = p->rev = 0;
+	return p;
+}
+
+inline void delNode(node *n){
+	if(n == null) return;
+	st2[++top2] = n;
+	delNode(n->c[0]);
+	delNode(n->c[1]);
+}
+
+inline node *node::rz(){
+	size = c[0]->size + c[1]->size + 1;
+	sum = c[0]->sum + c[1]->sum + value;
+	msum = max(c[0]->msum, c[1]->msum);
+	msum = max(msum, max(c[0]->bsum[!c[0]->rev], 0) + max(c[1]->bsum[c[1]->rev], 0) + value);
+	bsum[0] = max(c[0]->bsum[c[0]->rev], c[0]->sum + max(c[1]->bsum[c[1]->rev], 0) + value);
+	bsum[1] = max(c[1]->bsum[!c[1]->rev], c[1]->sum + max(c[0]->bsum[!c[0]->rev], 0) + value);
+	return this;
+}
+
+inline void node::makeSame(int x){
+	value = x; same = 1; rev= 0;
+	sum = x * size;
+	msum = bsum[0] = bsum[1] = max(x, sum);
+}
+
+inline void node::pushDown(){
+	if(same){
+		rev = same = 0;
+		if(c[0] != null) c[0]->makeSame(value);
+		if(c[1] != null) c[1]->makeSame(value);
+	}
+	else if(rev){
+		rev = 0;
+		swap(c[0], c[1]);
+		if(c[0] != null) c[0]->rev ^= 1;
+		if(c[1] != null) c[1]->rev ^= 1;
+	}
+	rz();
+}
+
+struct splayTree{
+	node *root;
+	splayTree(){
+		null->size = 0;
+		root = newNode();
+		root->size = 2;
+		node *tmp = newNode();
+		null->value = null->msum = null->bsum[0] = null->bsum[1] = -inf;
+		root->value = root->msum = root->bsum[0] = root->bsum[1] = -inf;
+		tmp->value = tmp->msum = tmp->bsum[0] = tmp->bsum[1] = -inf;
+		root->c[1] = tmp;
+	}
+	void finish(bool d){
+		node *tmp = null->c[d], *p = root->c[!d];
+		while(tmp != null){
+			tmp = null->c[d]->c[d];
+			null->c[d]->c[d] = p;
+			p = null->c[d]->rz();
+			null->c[d] = tmp;
+		}
+		root->c[!d] = p;
+		root->rz();
+	}
+	void zig(bool d){
+		node *p = root->c[d];
+		root->c[d] = null->c[d];
+		null->c[d] = root;
+		root = p;
+	}
+	void zigzig(bool d){
+		node *p = root->c[d]->c[d];
+		root->c[d]->c[d] = null->c[d];
+		null->c[d] = root->c[d];
+		root->c[d] = root->c[d]->c[!d];
+		root->rz();
+		null->c[d]->c[!d] = root;
+		root = p;
+	}
+	void splay(int k){
+		for(; ; ){
+			root->pushDown();
+			int tmp = root->c[0]->size;
+			bool d = k > tmp, p;
+			if(k == tmp || root->c[d] == null) break;
+			root->c[d]->pushDown();
+			if(d) k -= tmp + 1;
+			tmp = root->c[d]->c[0]->size;
+			p = k > tmp;
+			if(k == tmp || root->c[d]->c[p] == null){
+				zig(d);
+				break;
+			}
+			if(p) k -= tmp + 1;
+			if(d == p)
+				zigzig(d);
+			else
+				zig(d), zig(p);
+		}
+		finish(0); finish(1);
+	}
+	inline void range(int pos, int n){
+		splay(pos - 1);
+		node *_root = root;
+		root = root->c[1];
+		splay(n);
+		_root->c[1] = root;
+		root = _root->rz();
+	}
+	inline void insert(int pos, int n){
+		node *p = null, *tmp;
+		while(n--){
+			tmp = newNode();
+			scanf("%d", &tmp->value);
+			tmp->c[0] = p;
+			p = tmp->rz();
+		}
+		range(pos + 1, 0);
+		root->c[1]->c[0] = p;
+		root->c[1]->rz();
+		root->rz();
+	}
+	inline void erase(int pos, int n){
+		range(pos, n);
+		delNode(root->c[1]->c[0]);
+		root->c[1]->c[0] = null;
+		root->c[1]->rz();
+		root->rz();
+	}
+	inline int getMax(){
+		root->pushDown();
+		return root->msum;
+	}
+	inline int getSum(int pos, int n){
+		range(pos, n);
+		return root->c[1]->c[0]->sum;
+	}
+	inline void makeSame(int pos, int n, int x){
+		range(pos, n);
+		root->c[1]->c[0]->makeSame(x);
+		root->c[1]->rz();
+		root->rz();
+	}
+	inline void reverse(int pos, int n){
+		range(pos, n);
+		root->c[1]->c[0]->rev ^= 1;
+		root->c[1]->c[0]->pushDown();
+		root->c[1]->rz();
+		root->rz();
+	}
+} T;
+
+int main(){
+	int N, M, pos, n, x;
+	char cmd[50];
+	scanf("%d%d", &N, &M);
+	T.insert(0, N);
+	while(M--){
+		scanf(" %s", cmd);
+		if(cmd[0] != 'M' || cmd[2] != 'X')
+			scanf("%d%d", &pos, &n);
+		switch(cmd[0]){
+			case 'I':
+				T.insert(pos, n);
+				break;
+			case 'D':
+				T.erase(pos, n);
+				break;
+			case 'M':
+				if(cmd[2] == 'K')
+					scanf("%d", &x), T.makeSame(pos, n, x);
+				else
+					printf("%d\n", T.getMax());
+				break;
+			case 'R':
+				T.reverse(pos, n);
+				break;
+			case 'G':
+				printf("%d\n", T.getSum(pos, n));
+				break;
+		}
+	}
+	return 0;
+}

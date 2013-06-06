@@ -1,0 +1,13 @@
+#include <iostream>
+using namespace std;
+ 
+long long p, q;
+ 
+int main(){
+    cin >> p >> q;
+    if(p != q)
+		cout << (p - 1) * (q - 1) / 4 << endl;
+	else
+		cout << (p * q - 1) / 4 << endl;
+}
+

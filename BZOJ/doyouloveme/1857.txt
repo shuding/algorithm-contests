@@ -1,0 +1,51 @@
+#include <algorithm>
+#include <iostream>
+#include <cstdlib>
+#include <cstdio>
+#include <cmath>
+using namespace std;
+
+struct point{
+	double x, y;
+	point(){}
+	point(double _x, double _y):
+		x(_x), y(_y){}
+}a, b, c, d;
+
+double P, Q, R, r, e, f, ans, _ans;
+
+double dis(point a, point b){
+	return sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
+}
+
+double rand_point(double c, double r){
+	double ran = (rand() & 1 ? 1 : -1) * r * (double)rand() / RAND_MAX;
+	while(c + ran < 0 || c + ran > 1)
+		ran = (rand() & 1 ? 1 : -1) * r * (double)rand() / RAND_MAX;
+	return c + ran;
+}
+
+int main(){
+	scanf("%lf%lf%lf%lf%lf%lf%lf%lf", &a.x, &a.y, &b.x, &b.y, &c.x, &c.y, &d.x, &d.y);
+	scanf("%lf%lf%lf", &P, &Q, &R);
+	r = 1.0; ans = dis(a, d) / R;
+	e = f = 0;
+	point E, F;
+	while(r >= 1e-10){
+		for(int i = 0; i <= 800; ++i){
+			double _e = rand_point(e, r);
+			double _f = rand_point(f, r);
+			E = point((a.x - b.x) * _e + b.x, (a.y - b.y) * _e + b.y);
+			F = point((c.x - d.x) * _f + d.x, (c.y - d.y) * _f + d.y);
+			double tmp = dis(a, E) / P + dis(E, F) / R + dis(F, d) / Q;
+			if(tmp < ans){
+				ans = tmp;
+				e = _e; f = _f;
+			}
+		}
+		r /= 2.0;
+	}
+	printf("%.2lf\n", ans);
+	return 0;
+}
+

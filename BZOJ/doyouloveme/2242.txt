@@ -1,0 +1,90 @@
+/*
+* Copyright (C) 2012 All rights reserved.
+* File name:  2242.cpp
+* Author:     Parabola_ds
+* Creat time: 2012.05.23
+*/
+#include <algorithm>
+#include <iostream>
+#include <cstdlib>
+#include <cstring>
+#include <climits>
+#include <vector>
+#include <cstdio>
+#include <cmath>
+#include <set>
+#include <map>
+#define prime 987371
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+int p, h[1000000], num[1000000];
+
+long long power(long long x, long long y){
+	if(!y) return 1;
+	long long tmp = power(x, y / 2);
+	tmp = tmp * tmp % p;
+	if(y & 1) tmp = tmp * x % p;
+	return tmp;
+}
+
+void hashIns(long long n, int i){
+	int tmp = n % prime;
+	while(num[tmp] && num[tmp] != n) ++tmp;
+	if(!h[tmp]) h[tmp] = i, num[tmp] = n;
+}
+
+int hash(long long n){
+	int tmp = n % prime;
+	while(num[tmp] && num[tmp] != n) ++tmp;
+	if(num[tmp] == n) return h[tmp];
+	return -1;
+}
+
+void solve(long long y, long long z){
+	memset(h, 0, sizeof(h));
+	memset(num, 0, sizeof(num));
+	long long tmp, rangePower, ans, ret, range = (long long)sqrt(p);
+	rangePower = power(y, range);
+	h[1] = 0;
+	num[1] = 1;
+	tmp = y % p;
+	if(!rangePower) goto exit;
+	for(int i = 1; i <= range; ++i){
+		hashIns(tmp, i);
+		tmp = tmp * y % p;
+	}
+	tmp = 1;
+	for(int i = 0; i <= range; ++i){
+		ans = power(tmp, p - 2) * z % p;
+		ret = hash(ans);
+		if(ret != -1){
+			printf("%lld\n", i * range + ret);
+			return;
+		}
+		tmp = tmp * rangePower % p;
+	}
+exit:
+	puts("Orz, I cannot find x!");
+}
+
+int main(){
+	int t, k;
+	long long y, z, tmp;
+	scanf("%d%d", &t, &k);
+	rep(i, t){
+		scanf("%lld%lld%lld", &y, &z, &p);
+		switch(k){
+			case 1: printf("%lld\n", power(y, z)); break;
+			case 2: tmp = power(y, p - 2);
+					if(!tmp && z)
+						puts("Orz, I cannot find x!");
+					else
+						printf("%lld\n", tmp * z % p);
+					break;
+			case 3: solve(y, z); break;
+		}
+	}
+	return 0;
+}
+

@@ -1,0 +1,152 @@
+#include <algorithm>
+#include <iostream>
+#include <cstdlib>
+#include <cstring>
+#include <cstdio>
+#include <set>
+#define MAXN 10010
+#define MAXM 10010
+#define MAXC 1000010
+using namespace std;
+
+int n, m, col[MAXN], last[MAXN];
+set<int> postion[MAXC];
+
+class treap{
+	struct node{
+		int size, key, value;
+		node *c[2];
+		node(int v, node *n){
+			size = 1;
+			key = rand() - 1;
+			value = v;
+			c[0] = c[1] = n;
+		}
+		void rz(){
+			size = c[0]->size + c[1]->size + 1;
+		}
+	} *root, *null;
+	void rot(node *&n, bool d){
+		node *r = n->c[d];
+		n->c[d] = r->c[!d];
+		r->c[!d] = n;
+		n->rz();
+		n = r;
+		n->rz();
+	}
+	void ins(node *&n, int v){
+		if(n == null){
+			n = new node(v, null);
+			return;
+		}
+		bool d = v > n->value;
+		ins(n->c[d], v);
+		if(n->c[d]->key < n->key)
+			rot(n, d);
+		else
+			n->rz();
+	}
+	void era(node *&n, int v){
+		if(n == null)
+			return;
+		if(n->value != v)
+			era(n->c[v > n->value], v);
+		else{
+			bool d = n->c[0]->key > n->c[1]->key;
+			if(n->c[d] == null){
+				n = null;
+				return;
+			}
+			rot(n, d);
+			era(n->c[!d], v);
+		}
+		n->rz();
+	}
+	int ran(node *&n, int v){
+		if(n == null)
+			return 0;
+		if(n->value > v)
+			return ran(n->c[0], v);
+		if(n->value == v)
+			return n->c[0]->size + 1;
+		return n->c[0]->size + 1 + ran(n->c[1], v);
+	}
+public:
+	treap(){
+		null = new node(0, 0);
+		null->size = 0;
+		null->key = ~0U >> 1;
+		root = null;
+	}
+	void insert(int n){
+		ins(root, n);
+	}
+	void erase(int n){
+		era(root, n);
+	}
+	int rank(int n){
+		return ran(root, n);
+	}
+} t[MAXN];
+
+struct bitStruct{
+	void insert(int p, int v){
+		for(; p <= n; p += p & -p)
+			t[p].insert(v);
+	}
+	void erase(int p, int v){
+		for(; p <= n; p += p & -p)
+			t[p].erase(v);
+	}
+	int getSum(int p, int v){
+		int sum = 0;
+		for(; p; p -= p & -p)
+			sum += t[p].rank(v);
+		return sum;
+	}
+} bit;
+
+int main(){
+	scanf("%d%d", &n, &m);
+	for(int i = 1; i <= n; ++i){
+		scanf("%d", &col[i]);
+		set<int>::iterator pos = postion[col[i]].insert(i).first;
+		if(pos != postion[col[i]].begin())
+			last[i] = *(--pos);
+		else
+			last[i] = -i;
+		bit.insert(i, last[i]);
+	}
+	while(m--){
+		char cmd = getchar();
+		int x, y;
+		while(cmd != 'Q' && cmd != 'R') cmd = getchar();
+		scanf("%d%d", &x, &y);
+		if(cmd == 'Q')
+			printf("%d\n", bit.getSum(y, x - 1) - bit.getSum(x - 1, x - 1));
+		else{
+			set<int>::iterator pos = postion[col[x]].find(x);
+			if((++pos) != postion[col[x]].end()){
+				bit.erase(*pos, last[*pos]);
+				bit.insert(*pos, last[x]);
+				last[*pos] = last[x];
+			}
+			postion[col[x]].erase(x);
+			col[x] = y;
+			bit.erase(x, last[x]);
+			pos = postion[y].insert(x).first;
+			if(pos != postion[y].begin())
+				last[x] = *(--pos), pos++;
+			else
+				last[x] = -x;
+			if((++pos) != postion[y].end()){
+				bit.erase(*pos, last[*pos]);
+				bit.insert(*pos, x);
+				last[*pos] = x;
+			}
+			bit.insert(x, last[x]);
+		}
+	}
+	return 0;
+}
+

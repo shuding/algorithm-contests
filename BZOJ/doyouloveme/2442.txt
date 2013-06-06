@@ -1,0 +1,27 @@
+#include <algorithm>
+#include <iostream>
+#include <cstdio>
+#include <queue>
+using namespace std;
+ 
+typedef long long int64;
+int n, k;
+int64 tot, a[150000], f[150000];
+deque <pair<int, int64> > q;
+ 
+int main(){
+    scanf("%d%d", &n, &k);
+    for(int i = 1; i <= n; i++)
+        scanf("%lld", &a[i]), tot += a[i];
+    q.push_back(make_pair(0, 0));
+    for(int i = 1; i <= n + 1; i++){
+        while(!q.empty() && q.back().first < i - k - 1)
+            q.pop_back();
+        f[i] = q.back().second + a[i];
+        while(!q.empty() && q.front().second > f[i])
+            q.pop_front();
+        q.push_front(make_pair(i, f[i]));
+    }
+    printf("%lld\n", tot - f[n + 1]);
+}
+

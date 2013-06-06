@@ -1,0 +1,4 @@
+#include<cstdio>
+int n,k;
+int c(int n){return(n-k<2||(n-k)&1)?1:c((n-k)/2)+c((n-k)/2 + k);}
+int main(){scanf("%d%d",&n,&k);printf("%d",c(n));}

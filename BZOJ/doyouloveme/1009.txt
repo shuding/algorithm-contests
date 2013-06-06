@@ -1,0 +1,66 @@
+/***************************************************
+*
+*   Copyright (C) 2012 All rights reserved.
+*   File name:  1009.cpp
+*   Author:     Parabola_ds
+*   Creat time: 2012.04.19
+*
+***************************************************/
+
+#include <algorithm>
+#include <iostream>
+#include <cstring>
+#include <cstdio>
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+int n, m, mod, ANS, a[25], next[25];
+
+struct matrix{
+	int d[25][25];
+	matrix operator * (const matrix &M) const{
+		matrix tmp;
+		memset(tmp.d, 0, sizeof(tmp.d));
+		rep(i, m)
+			rep(j, m)
+				rep(k, m)
+					tmp.d[i][j] = (tmp.d[i][j] + M.d[i][k] * d[k][j] % mod) % mod;
+		return tmp;
+	}
+} orig, ans;
+
+matrix power(const matrix &m, int n){
+	if(n == 1) return m;
+	matrix p = power(m, n / 2);
+	p = p * p;
+	if(n & 1) p = p * m;
+	return p;
+}
+
+int main(){
+	scanf("%d%d%d", &n, &m, &mod);
+	char c;
+	rep(i, m){
+		c = getchar();
+		while(c < '0' || c > '9') c = getchar();
+		a[i] = c - '0';
+	}
+	int t = 0; next[1] = 0;
+	for(int i = 2; i <= m; ++i){
+		while(t && a[i] != a[t + 1]) t = next[t];
+		t += a[i] == a[t + 1];
+		next[i] = t;
+	}
+	for(int i = 0; i < m; ++i)
+		for(int j = 0; j < 10; ++j){
+			int t = i;
+			while(t && a[t + 1] != j) t = next[t];
+			t += a[t + 1] == j;
+			orig.d[t + 1][i + 1]++;
+		}
+	ans = power(orig, n);
+	rep(i, m)
+		ANS = (ANS + ans.d[i][1]) % mod;
+	printf("%d\n", ANS);
+	return 0;
+}

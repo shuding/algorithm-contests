@@ -1,0 +1,87 @@
+/*
+* Copyright (C) 2012 All rights reserved.
+* File name:  1414.cpp
+* Author:     Parabola_ds
+* Creat time: 2012.05.25
+*/
+#include <algorithm>
+#include <iostream>
+#include <cstdlib>
+#include <cstring>
+#include <climits>
+#include <vector>
+#include <cstdio>
+#include <queue>
+#include <cmath>
+#include <set>
+#include <map>
+#define MAXN 2000
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+const int inf = ~0U >> 2;
+
+int n, m, a[MAXN + 10][MAXN + 10], line[MAXN + 10][MAXN + 10], row[MAXN + 10][MAXN + 10];
+int len, s[MAXN + 10], ext[MAXN + 10], tot;
+
+void Manacher(){
+	int maxRange = 0, maxId = 0;
+	memset(ext, 0, sizeof(ext));
+	rep(i, len){
+		if(maxRange > i)
+			ext[i] = min(ext[maxId * 2 - i], maxRange - i);
+		else
+			ext[i] = 1;
+		for(; i + ext[i] <= len && i - ext[i] && s[i + ext[i]] == s[i - ext[i]]; ++ext[i]);
+		if(i + ext[i] > maxRange)
+			maxRange = i + ext[i], maxId = i;
+	}
+}
+
+int main(){
+	scanf("%d%d", &n, &m);
+	rep(i, 2 * n)
+		rep(j, 2 * m)
+			a[i][j] = inf;
+	rep(i, n)
+		rep(j, m)
+			scanf("%d", &a[i * 2][j * 2]);
+	n *= 2, m *= 2;
+	
+	len = m;
+	rep(i, n){
+		rep(j, m)
+			s[j] = a[i][j];
+		Manacher();
+		rep(j, m)
+			line[i][j] = ext[j] - 1;
+	}
+	len = n;
+	rep(j, m){
+		rep(i, n)
+			s[i] = a[i][j];
+		Manacher();
+		rep(i, n)
+			row[i][j] = ext[i] - 1;
+	}
+	
+	rep(i, n)
+		rep(j, m)
+			if(!((i + j) & 1)){
+				int minLen = inf, k;
+				for(k = 0; k <= line[i][j]; ++k){
+					minLen = min(minLen, row[i][j + k]);
+					minLen = min(minLen, row[i][j - k]);
+					minLen = min(minLen, line[i + k][j]);
+					minLen = min(minLen, line[i - k][j]);
+					if(k > minLen) break;
+				}
+				if(i & 1)
+					tot += k / 2;
+				else
+					tot += (k + 1) / 2;
+			}
+	printf("%d\n", tot);
+	
+	return 0;
+}

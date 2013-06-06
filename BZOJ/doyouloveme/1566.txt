@@ -1,0 +1,52 @@
+/*
+* Copyright (C) 2012 All rights reserved.
+* File name:  ball.cpp
+* Author:     Parabola_ds
+* Creat time: 2012.07.09
+*/
+#include <algorithm>
+#include <iostream>
+#include <cstdlib>
+#include <cstring>
+#include <climits>
+#include <vector>
+#include <cstdio>
+#include <queue>
+#include <cmath>
+#include <set>
+#include <map>
+#define MAXL 502
+#define mod 1024523
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+#define add(x, y) (x = (x + y) % mod)
+using namespace std;
+ 
+int n, m, f[MAXL][MAXL][MAXL];
+char u[MAXL], d[MAXL];
+ 
+int main(){
+        scanf("%d%d", &n, &m);
+        getchar();
+        rep(i, n)
+                scanf("%c", &u[i]);
+        getchar();
+        rep(i, m)
+                scanf("%c", &d[i]);
+        f[0][0][0] = 1;
+        for(int u1 = 0; u1 <= n; ++u1)
+                for(int d1 = 0; d1 <= m; ++d1)
+                        for(int u2 = 0; u2 <= n; ++u2){
+                                int d2 = u1 + d1 - u2;
+                                if(u[u1 + 1] == u[u2 + 1])
+                                        add(f[u1 + 1][d1][u2 + 1], f[u1][d1][u2]);
+                                if(u[u1 + 1] == d[d2 + 1])
+                                        add(f[u1 + 1][d1][u2], f[u1][d1][u2]);
+                                if(d[d1 + 1] == u[u2 + 1])
+                                        add(f[u1][d1 + 1][u2 + 1], f[u1][d1][u2]);
+                                if(d[d1 + 1] == d[d2 + 1])
+                                        add(f[u1][d1 + 1][u2], f[u1][d1][u2]);
+                        }
+        printf("%d\n", f[n][m][n]);
+        return 0;
+}
+ 

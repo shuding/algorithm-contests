@@ -1,0 +1,63 @@
+#include <iostream>
+#include <cstdio>
+#define MAXN 50000 + 10
+#define MAXM 1000 + 10
+#define mod 10007
+using namespace std;
+
+int n, m, s[MAXN], f[2][MAXN];
+int p[MAXN], q[MAXN];
+
+bool check_ok(int L)
+{
+	int tot = 0, last = 0;
+	for(int i = 1; i <= n; i++)
+		if(s[i] - s[last] > L)
+		{
+			last = i - 1;
+			tot++;
+		}
+	return tot < m && s[n] - s[last] <= L;
+}
+
+int main()
+{
+	scanf("%d%d", &n, &m);
+	m++;
+	for(int i = 1; i <= n; i++)
+	{
+		scanf("%d", &s[i]);
+		s[i] += s[i - 1];
+	}
+	int L = 0, R = s[n], mid;
+	while(L <= R)
+	{
+		mid = (L + R) / 2;
+		if(check_ok(mid))
+			R = mid - 1;
+		else
+			L = mid + 1;
+	}
+	printf("%d ", L);
+	int k = 0, tot = 0;
+	for(int i = 1; i <= n; i++)
+	{
+		while(s[k] + L < s[i])
+			k++;
+		p[i] = k > 0 ? k - 1 : 0;
+	}
+
+	for(int i = 1; i <= n; i++)
+		f[1][i] = (f[1][i - 1] + (s[i] <= L)) % mod;
+	tot += f[1][n] - f[1][n - 1];
+	for(int j = 2; j <= m; j++)
+	{
+		f[j & 1][0] = 0;
+		for(int i = 1; i <= n; i++)
+			f[j & 1][i] = (f[j & 1][i - 1] + f[!(j & 1)][i - 1] - f[!(j & 1)][p[i]]) % mod;
+		tot += f[j & 1][n] - f[j & 1][n - 1];
+	}
+
+	tot = (tot + mod) % mod;
+	printf("%d\n", tot);
+}

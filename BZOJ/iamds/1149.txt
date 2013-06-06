@@ -1,0 +1,78 @@
+
+program mobiles;
+
+type s=record
+         u,l,r:longint;
+         ln,rn:longint;
+       end;
+
+var st:array[-1..100000] of s;
+    i,j,k,n,one:longint;
+
+function fill(i:longint):longint;
+begin
+   if st[i].ln=-1 then st[i].ln:=fill(st[i].l);
+   if st[i].rn=-1 then st[i].rn:=fill(st[i].r);
+   exit(st[i].ln+st[i].rn);
+end;
+
+procedure ht;
+begin
+   write(-1);
+   close(output);
+   halt;
+end;
+
+function move(i:longint):longint;
+var j,a,b:longint;
+begin
+   if i=-1 then exit(0);
+   if st[i].ln=1 then if st[i].rn=1 then exit(0);
+   a:=st[i].ln; b:=st[i].rn;
+   while a and 1=0 do a:=a shr 1;
+   while b and 1=0 do b:=b shr 1;
+   if (a<>1) and (b<>1) then ht;
+   if st[i].ln>2*st[i].rn then ht else
+   if st[i].rn>2*st[i].ln then ht;
+   j:=move(st[i].l)+move(st[i].r);
+   if st[i].ln<st[i].rn then exit(1+j)
+                        else exit(j);
+end;
+
+begin
+   read(n);
+   for i:=1 to n do st[i].u:=0;
+   for i:=1 to n do
+     begin
+        read(st[i].l,st[i].r);
+        st[st[i].l].u:=i;
+        st[st[i].r].u:=i;
+        st[i].ln:=-1;
+        st[i].rn:=-1;
+        if st[i].l=-1 then
+          if st[i].r=-1 then begin
+                                st[i].ln:=1;
+                                st[i].rn:=1;
+                             end
+                        else begin
+                                st[i].ln:=1;
+                                st[i].rn:=-1;
+                             end else
+        if st[i].r=-1 then begin
+                              st[i].ln:=-1;
+                              st[i].rn:=1;
+                           end;
+     end;
+   i:=1;
+   while true do
+     begin
+        if st[i].u=0 then
+          begin
+             one:=i;
+             break;
+          end;
+        i:=st[i].u;
+     end;
+   fill(one);
+   write(move(one));
+end.

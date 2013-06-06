@@ -1,0 +1,59 @@
+#include <algorithm>
+#include <iostream>
+#include <cstdio>
+#include <cmath>
+#define MAXN 1510
+using namespace std;
+  
+struct point{
+    long long x, y;
+    bool operator < (const point p) const{
+        return x < p.x || (x == p.x && y < p.y);
+    }
+    bool operator == (const point p) const{
+        return x == p.x && y == p.y;
+    }
+} p[MAXN];
+  
+struct line{
+    point a, b, c;
+    long long r;
+    bool operator < (const line l) const{
+        return c < l.c || (c == l.c && r < l.r);
+    }
+} l[MAXN * MAXN / 2];
+  
+int n;
+long long ans, tot;
+  
+long long dis(point a, point b){
+    return (a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y);
+}
+  
+int main(){
+    scanf("%d", &n);
+    for(int i = 1; i <= n; ++i)
+        scanf("%lld%lld", &p[i].x, &p[i].y);
+    for(int i = 1; i <= n; ++i)
+        for(int j = 1; j < i; ++j){
+            tot++;
+            l[tot].a = p[i];
+            l[tot].b = p[j];
+            l[tot].c.x = p[i].x + p[j].x;
+            l[tot].c.y = p[i].y + p[j].y;
+            l[tot].r = dis(p[i], p[j]);
+        }
+    sort(l + 1, l + 1 + tot);
+    for(int i = 1, j = 1; i <= tot; i = j){
+        while(j <= tot && l[i].c == l[j].c && l[i].r == l[j].r)
+            j++;
+        for(int k = i; k < j; ++k)
+            for(int p = k + 1; p < j; ++p){
+                long double d = sqrt(dis(l[p].a, l[k].a)) * sqrt(dis(l[p].a, l[k].b));
+                ans = max(ans, (long long)round(d));
+            }
+    }
+    printf("%lld\n", ans);
+    return 0;
+}
+

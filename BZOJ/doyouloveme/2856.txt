@@ -1,0 +1,86 @@
+/*
+* Copyright (C) 2012 All rights reserved.
+* File name:  2856.cpp
+* Author:     Parabola_ds
+* Creat time: 2012.07.12
+*/
+#include <algorithm>
+#include <iostream>
+#include <cstdlib>
+#include <cstring>
+#include <climits>
+#include <vector>
+#include <cstdio>
+#include <queue>
+#include <cmath>
+#include <set>
+#include <map>
+#define MAXN 100010
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+int col[MAXN], n, k, tmp;
+char cmd;
+
+struct treeArr{
+	int sum[MAXN];
+	int getSum(int k){
+		int ret = 0;
+		for(; k; k -= k & -k)
+			ret += sum[k];
+		return ret;
+	}
+	void Add(int k, int x){
+		for(; k <= n; k += k & -k)
+			sum[k] += x;
+	}
+} s[27];
+
+int getPos(int t, int k){
+	int l = 1, r = n, m, tmp;
+	while(l <= r){
+		m = (l + r) >> 1;
+		tmp = s[t].getSum(m);
+		if(tmp > k)
+			r = m - 1;
+		else if(tmp < k)
+			l = m + 1;
+		else{
+			if(tmp == s[t].getSum(m - 1))
+				r = m - 1;
+			else
+				return m;
+		}
+	}
+}
+
+int main(){
+	scanf("%d", &n);
+	rep(i, n){
+		scanf(" %c", &cmd);
+		if(cmd == 'p'){
+			scanf(" %c", &cmd);
+			s[26].Add(i, 1);
+			s[cmd - 'a'].Add(i, 1);
+			col[i] = cmd - 'a';
+		}
+		else if(cmd == 'r'){
+			scanf("%d", &k);
+			tmp = getPos(26, k);
+			s[26].Add(tmp, -1);
+			s[col[tmp]].Add(tmp, -1);
+		}
+		else if(cmd == 'q'){
+			scanf("%d %c", &k, &cmd);
+			tmp = getPos(cmd - 'a', k);
+			printf("%d\n", s[26].getSum(tmp));
+		}
+		else if(cmd == 'w'){
+			scanf("%d", &k);
+			tmp = getPos(26, k);
+			printf("%c\n", char('a' + col[tmp]));
+		}
+	}
+	return 0;
+}
+

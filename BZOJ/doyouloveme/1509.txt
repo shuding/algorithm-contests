@@ -1,0 +1,84 @@
+/*
+* Copyright (C) 2012 All rights reserved.
+* File name:  hookey.cpp
+* Author:     Parabola_ds
+* Creat time: 2012.06.09
+*/
+#include <algorithm>
+#include <iostream>
+#include <cstdlib>
+#include <cstring>
+#include <climits>
+#include <vector>
+#include <cstdio>
+#include <queue>
+#include <cmath>
+#include <set>
+#include <map>
+#define MAXN 200000
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+const int inf = ~0U >> 1;
+
+struct edge{
+	int t, next;
+	long long l;
+	edge(){}
+	edge(int t, int n, long long l):
+		t(t), next(n), l(l){}
+} e[MAXN * 2 + 10];
+
+int n, x, y, z, etop, st[MAXN + 10];
+long long ans, hMax[MAXN + 10][3];
+
+void build(int v, int f){
+	hMax[v][0] = 0;
+	hMax[v][1] = hMax[v][2] = -inf;
+	for(int i = st[v]; i; i = e[i].next)
+		if(e[i].t != f){
+			build(e[i].t, v);
+			if(hMax[e[i].t][0] + e[i].l > hMax[v][0]){
+				hMax[v][2] = hMax[v][1];
+				hMax[v][1] = hMax[v][0];
+				hMax[v][0] = hMax[e[i].t][0] + e[i].l;
+			}
+			else if(hMax[e[i].t][0] + e[i].l > hMax[v][1]){
+				hMax[v][2] = hMax[v][1];
+				hMax[v][1] = hMax[e[i].t][0] + e[i].l;
+			}
+			else if(hMax[e[i].t][0] + e[i].l > hMax[v][2])
+				hMax[v][2] = hMax[e[i].t][0] + e[i].l;
+		}
+}
+
+long long value(long long a, long long b, long long c){
+	if(!(a <= max(b, c) && a >= min(b, c))) return value(b, c, a);
+	return a + a + b + c;
+}
+
+void calc(int v, int f, long long l){
+	ans = max(ans, value(max(l, hMax[v][2]), hMax[v][0], hMax[v][1]));
+	for(int i = st[v]; i; i = e[i].next)
+		if(e[i].t != f){
+			if(e[i].l + hMax[e[i].t][0] == hMax[v][0])
+				calc(e[i].t, v, max(l, hMax[v][1]) + e[i].l);
+			else
+				calc(e[i].t, v, max(l, hMax[v][0]) + e[i].l);
+		}
+}
+
+int main(){
+	scanf("%d%d", &n, &n); n++;
+	rep(i, n - 1){
+		scanf("%d%d%d", &x, &y, &z);
+		e[++etop] = edge(y, st[x], z);
+		st[x] = etop;
+		e[++etop] = edge(x, st[y], z);
+		st[y] = etop;
+	}
+	build(1, 0);
+	calc(1, 0, 0);
+	printf("%lld\n", ans);
+	return 0;
+}

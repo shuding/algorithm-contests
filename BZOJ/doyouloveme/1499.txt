@@ -1,0 +1,123 @@
+/*
+* Copyright (C) 2012 All rights reserved.
+* File name:  adv1900.cpp
+* Author:     Parabola_ds
+* Creat time: 2012.06.15
+*/
+#include <algorithm>
+#include <iostream>
+#include <cstdlib>
+#include <cstring>
+#include <climits>
+#include <vector>
+#include <cstdio>
+#include <queue>
+#include <cmath>
+#include <set>
+#include <map>
+#define LIMIT 200
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+int n, m, x, y, k, s[LIMIT + 10], t[LIMIT + 10], d[LIMIT + 10];
+int que[LIMIT + 10], pos[LIMIT + 10], l, r;
+int f[LIMIT + 10][LIMIT + 10][LIMIT + 10];
+char g[LIMIT + 10][LIMIT + 10];
+
+void dp(){
+	for(int p = k; p; --p)
+		switch(d[p]){
+			case 1:
+				rep(j, m){
+					l = 1; r = 0;
+					rep(i, n){
+						if(g[i][j] == 'x'){
+							l = 1, r = 0;
+							que[1] = -LIMIT;
+						}
+						else{
+							while(r >= l && que[r] <= f[i][j][p + 1] - i) --r;
+							que[++r] = f[i][j][p + 1] - i;
+							pos[r] = i;
+							while(r >= l && i - pos[l] > t[p] - s[p] + 1) ++l;
+						}
+						f[i][j][p] = que[l] + i;
+					}
+				}
+				break;
+			case 2:
+				rep(j, m){
+					l = 1; r = 0;
+					for(int i = n; i; --i){
+						if(g[i][j] == 'x'){
+							l = 1, r = 0;
+							que[1] = -LIMIT;
+						}
+						else{
+							while(r >= l && que[r] <= f[i][j][p + 1] + i) --r;
+							que[++r] = f[i][j][p + 1] + i;
+							pos[r] = i;
+							while(r >= l && pos[l] - i > t[p] - s[p] + 1) ++l;
+						}
+						f[i][j][p] = que[l] - i;
+					}
+				}
+				break;
+			case 3:
+				rep(i, n){
+					l = 1; r = 0;
+					rep(j, m){
+						if(g[i][j] == 'x'){
+							l = 1, r = 0;
+							que[1] = -LIMIT;
+						}
+						else{
+							while(r >= l && que[r] <= f[i][j][p + 1] - j) --r;
+							que[++r] = f[i][j][p + 1] - j;
+							pos[r] = j;
+							while(r >= l && j - pos[l] > t[p] - s[p] + 1) ++l;
+						}
+						f[i][j][p] = que[l] + j;
+					}
+				}
+				break;
+			case 4:
+				rep(i, n){
+					l = 1; r = 0;
+					for(int j = m; j; --j){
+						if(g[i][j] == 'x'){
+							l = 1, r = 0;
+							que[1] = -LIMIT;
+						}
+						else{
+							while(r >= l && que[r] <= f[i][j][p + 1] + j) --r;
+							que[++r] = f[i][j][p + 1] + j;
+							pos[r] = j;
+							while(r >= l && pos[l] - j > t[p] - s[p] + 1) ++l;
+						}
+						f[i][j][p] = que[l] - j;
+					}
+				}
+				break;
+		}
+}
+
+int main(){
+	scanf("%d%d%d%d%d", &n, &m, &x, &y, &k);
+	rep(i, n){
+		getchar();
+		rep(j, m)
+			g[i][j] = getchar();
+	}
+	int tot = 0;
+	rep(i, k){
+		tot++;
+		scanf("%d%d%d", &s[tot], &t[tot], &d[tot]);
+		if(d[tot] == d[tot - 1])
+			t[tot - 1] = t[tot], tot--;
+	}
+	k = tot;
+	dp();
+	printf("%d\n", f[x][y][1]);
+	return 0;
+}

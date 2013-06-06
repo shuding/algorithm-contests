@@ -1,0 +1,54 @@
+#include <algorithm>
+#include <iostream>
+#include <cstring>
+#include <cstdio>
+#define MAX 152
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+int p, q, r, d, ans;
+bool s[MAX][MAX][MAX];
+int Down[MAX][MAX][MAX], Left[MAX][MAX][MAX], Leng[MAX][MAX][MAX];
+
+bool a(int x, int y, int z){
+	if(d == 1) return s[x][y][z];
+	if(d == 2) return s[y][z][x];
+	return s[z][x][y];
+}
+
+void solve(int p, int q, int r){
+	memset(Down, 0, sizeof Down);
+	memset(Left, 0, sizeof Left);
+	memset(Leng, 0, sizeof Leng);
+	rep(z, r)
+		rep(x, p)
+			rep(y, q)
+				if(a(x, y, z)){
+					Down[x][y][z] = Down[x][y - 1][z] + 1;
+					Left[x][y][z] = Left[x - 1][y][z] + 1;
+					Leng[x][y][z] = min(Leng[x - 1][y - 1][z] + 1, min(Down[x][y][z], Left[x][y][z]));
+					if(Leng[x][y][z] * z > ans)
+						for(int _z = z, m = Leng[x][y][z]; _z && m; --_z){
+							m = min(m, Leng[x][y][_z]);
+							ans = max(ans, m * (z - _z + 1));
+						}
+				}
+}
+
+int main(){
+	scanf("%d%d%d", &p, &q, &r);
+	rep(y, q)
+		rep(x, p)
+			rep(z, r){
+				char c = getchar();
+				while(c != 'P' && c != 'N') c = getchar();
+				s[x][y][z] = c == 'N';
+			}
+	ans = 0;
+	d = 1; solve(p, q, r);
+	d = 2; solve(r, p, q);
+	d = 3; solve(q, r, p);
+	printf("%d\n", ans * 4);
+	return 0;
+}
+

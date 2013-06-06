@@ -1,0 +1,128 @@
+/*
+* Copyright (C) 2012 All rights reserved.
+* File name:  2626.cpp
+* Author:     Parabola_ds
+* Creat time: 2012.07.12
+*/
+#include <algorithm>
+#include <iostream>
+#include <cstdlib>
+#include <cstring>
+#include <climits>
+#include <vector>
+#include <cstdio>
+#include <queue>
+#include <cmath>
+#include <set>
+#include <map>
+#define MAXN 100010
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+struct point{
+	int x, y, id;
+} p[MAXN];
+
+inline bool cmpx(const point &a, const point &b){
+	return a.x < b.x || (a.x == b.x && a.y < b.y);
+}
+
+inline bool cmpy(const point &a, const point &b){
+	return a.y < b.y || (a.y == b.y && a.x < b.x);
+}
+
+struct node{
+	int c[2], l, r, u, d, t;
+} nodes[MAXN * 2];
+
+int n, tot = 1, x, y, k, q;
+
+void build(int n, int l, int r){
+	if(n & 1)
+		sort(p + l, p + r + 1, cmpx);
+	else
+		sort(p + l, p + r + 1, cmpy);
+	nodes[n].t = (l + r) >> 1;
+	nodes[n].l = nodes[n].r = p[nodes[n].t].x;
+	nodes[n].u = nodes[n].d = p[nodes[n].t].y;
+	if(l == r)
+		return;
+
+	if(l < nodes[n].t){
+		build(nodes[n].c[0] = ++tot, l, nodes[n].t - 1);
+		nodes[n].l = min(nodes[n].l, nodes[nodes[n].c[0]].l);
+		nodes[n].r = max(nodes[n].r, nodes[nodes[n].c[0]].r);
+		nodes[n].d = min(nodes[n].d, nodes[nodes[n].c[0]].d);
+		nodes[n].u = max(nodes[n].u, nodes[nodes[n].c[0]].u);
+	}
+	if(r > nodes[n].t){
+		build(nodes[n].c[1] = ++tot, nodes[n].t + 1, r);
+		nodes[n].l = min(nodes[n].l, nodes[nodes[n].c[1]].l);
+		nodes[n].r = max(nodes[n].r, nodes[nodes[n].c[1]].r);
+		nodes[n].d = min(nodes[n].d, nodes[nodes[n].c[1]].d);
+		nodes[n].u = max(nodes[n].u, nodes[nodes[n].c[1]].u);
+	}
+}
+
+int ret[50], sum;
+long long dis[50];
+const long long inf = (long long)1e20;
+
+long long mDis(int n, int x, int y){
+	if(!n) return 0;
+	long long d = 0;
+	d += max((long long)(x - nodes[n].r) * (x - nodes[n].r), (long long)(x - nodes[n].l) * (x - nodes[n].l));
+	d += max((long long)(y - nodes[n].u) * (y - nodes[n].u), (long long)(y - nodes[n].d) * (y - nodes[n].d));
+	return d;
+}
+
+long long eDis(int x1, int y1, int x2, int y2){
+	return (long long)(x1 - x2) * (x1 - x2) + (long long)(y1 - y2) * (y1 - y2);
+}
+
+void update(int x, int y, int t){
+	long long d = eDis(x, y, p[t].x, p[t].y);
+	int pos = 0;
+	for(; (dis[pos] > d || (dis[pos] == d && ret[pos] < p[t].id)) && pos <= sum; pos++);
+	sum++;
+	for(int i = sum; i > pos; --i)
+		dis[i] = dis[i - 1], ret[i] = ret[i - 1];
+	dis[pos] = d;
+	ret[pos] = t;
+	sum = min(sum, k);
+}
+
+void query(int n, int x, int y){
+	if(!n) return;
+	long long d1 = mDis(nodes[n].c[0], x, y), d2 = mDis(nodes[n].c[1], x, y);
+	update(x, y, nodes[n].t);
+	if(d1 < d2){
+		query(nodes[n].c[1], x, y);
+		if(d1 >= dis[sum] || sum < k)
+			query(nodes[n].c[0], x, y);
+	}
+	else{
+		query(nodes[n].c[0], x, y);
+		if(d2 >= dis[sum] || sum < k)
+			query(nodes[n].c[1], x, y);
+	}
+}
+
+int main(){
+	scanf("%d", &n);
+	rep(i, n){
+		scanf("%d%d", &p[i].x, &p[i].y);
+		p[i].id = i;
+	}
+	build(1, 1, n);
+	scanf("%d", &q);
+	dis[0] = inf;
+	rep(i, q){
+		scanf("%d%d%d", &x, &y, &k);
+		sum = 0;
+		query(1, x, y);
+		printf("%d\n", p[ret[k]].id);
+	}
+	return 0;
+}
+

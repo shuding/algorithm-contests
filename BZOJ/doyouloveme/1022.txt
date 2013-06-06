@@ -1,0 +1,24 @@
+#include <iostream>
+#include <cstring>
+#include <cstdio>
+using namespace std;
+int main(){
+	int T, t, n, num, sum, win;
+	scanf("%d", &T);
+	while(T--){
+		scanf("%d", &n);
+		sum = 0;
+		t = 0;
+		win = 0;
+		for(int i = 1; i <= n; i++){
+			scanf("%d", &num);
+			sum ^= num;
+			if(num > 1)
+				win = 1;
+			if(num == 1)
+				t++;
+		}
+		printf(win ? (sum ? "John\n" : "Brother\n") : (t & 1 ^ 1 ? "John\n" : "Brother\n"));
+	}
+	return 0;
+}

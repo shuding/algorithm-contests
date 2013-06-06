@@ -1,0 +1,33 @@
+
+#include <algorithm>
+#include <iostream>
+#include <cstdio>
+#define MAXN 16
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+int n, k, s[MAXN], p[MAXN];
+double f[102][1 << MAXN], ans = 0;
+
+int main(){
+	scanf("%d%d", &k, &n);
+	rep(i, n){
+		int t;
+		scanf("%d%d", &s[i], &t);
+		while(t){
+			p[i] |= 1 << (t - 1);
+			scanf("%d", &t);
+		}
+	}
+	for(int i = k; i; --i)
+		for(int j = 0; j < 1 << n; ++j){
+			rep(q, n)
+				if((j & p[q]) == p[q])
+					f[i][j] += max(f[i + 1][j], f[i + 1][j | (1 << (q - 1))] + s[q]);
+				else
+					f[i][j] += f[i + 1][j];
+			f[i][j] /= n;
+		}
+	printf("%.6lf\n", f[1][0]);
+	return 0;
+}

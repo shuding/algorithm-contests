@@ -1,0 +1,32 @@
+#include <iostream>
+#include <cstdio>
+#include <vector>
+#define MAXN 1000
+using namespace std;
+
+int n, s, d, c;
+bool g[MAXN + 10][MAXN + 10], vst[MAXN + 10], ans[MAXN + 10];
+vector<int> f[MAXN + 10], t[MAXN + 10];
+
+void dfs(int v, bool d){
+	if(vst[v]) return;
+	vst[v] = 1;
+	ans[v] = d;
+	for(vector<int>::iterator it = f[v].begin(); it != f[v].end(); ++it)
+		dfs(*it, d ^ g[*it][v]);
+	for(vector<int>::iterator it = t[v].begin(); it != t[v].end(); ++it)
+		dfs(*it, d ^ g[*it][v]);
+}
+
+int main(){
+	scanf("%d", &n);
+	for(int i = 1; i < n; ++i){
+		scanf("%d%d%d", &s, &d, &c);
+		f[s].push_back(d);
+		t[d].push_back(s);
+		g[s][d] = g[d][s] = c;
+	}
+	dfs(1, 0);
+	printf("%d\n", ans[n]);
+	return 0;
+}

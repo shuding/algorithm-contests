@@ -1,0 +1,44 @@
+#include <cstdio>
+#include <algorithm>
+#include <cstdlib>
+#define MAXN 1000010
+using namespace std;
+long long n, c[MAXN], x[MAXN], que[MAXN];
+long long spx[MAXN], sp[MAXN], f[MAXN];
+
+bool turn(int i, int j, int k)
+{
+    return sp[i] * (f[j] + spx[j]) + (f[i] + spx[i]) * sp[k] + sp[j] * (f[k] + spx[k]) - sp[i] * (f[k] + spx[k]) - sp[k] * (f[j] + spx[j]) - sp[j] * (f[i] + spx[i]) > 0;
+}
+
+int main()
+{
+    scanf("%lld", &n);
+    for(int i = 1; i <= n; i++)
+    {
+	long long p;
+	scanf("%lld%lld%lld", &x[i], &p, &c[i]);
+	sp[i] = sp[i - 1] + p;
+	spx[i] = spx[i - 1] + p * x[i];
+    }
+    int st = 0, top = 0;
+    que[0] = 0;
+    for(int i = 1; i <= n; i++)
+    {
+	while(st < top)
+	{
+	    long long v1 = f[que[st]] - x[i] * sp[que[st]] + spx[que[st]];
+	    long long v2 = f[que[st + 1]] - x[i] * sp[que[st + 1]] + spx[que[st + 1]];
+	    if(v1 >= v2)
+		st++;
+	    else
+		break;
+	}
+	f[i] = f[que[st]] + x[i] * (sp[i] - sp[que[st]]) + spx[que[st]] - spx[i] + c[i];
+	while(st < top && !turn(que[top - 1], que[top], i))
+	    top--;
+	top++;
+	que[top] = i;
+    }
+    printf("%lld\n", f[n]);
+}

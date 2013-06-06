@@ -1,0 +1,42 @@
+#include <iostream>
+#include <cstdio>
+#define MAXN 102
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+const int inf = ~0U >> 2;
+int n, m, g[MAXN][MAXN];
+long long f[MAXN][MAXN];
+
+int main(){
+	scanf("%d%d", &n, &m);
+	int a, b, c;
+	rep(i, n)
+		rep(j, n)
+			g[i][j] = inf;
+	rep(i, n)
+		g[i][i] = 0, f[i][i] = 1;
+	rep(i, m){
+		scanf("%d%d%d", &a, &b, &c);
+		g[a][b] = g[b][a] = c;
+		f[a][b] = f[b][a] = 1;
+	}
+	rep(k, n)
+		rep(i, n) if(i != k)
+			rep(j, n) if(i != j && j != k)
+				if(g[i][k] + g[k][j] < g[i][j]){
+					g[i][j] = g[i][k] + g[k][j];
+					f[i][j] = f[i][k] * f[k][j];
+				}
+				else if(g[i][k] + g[k][j] == g[i][j])
+					f[i][j] += f[i][k] * f[k][j];
+	rep(i, n){
+		double tot = 0.0;
+		rep(j, n) if(j != i)
+			rep(k, n) if(k != i)
+				if(g[j][i] + g[i][k] == g[j][k])
+					tot += double(f[j][i] * f[i][k]) / f[j][k];
+		printf("%.3lf\n", tot);
+	}
+	return 0;
+}

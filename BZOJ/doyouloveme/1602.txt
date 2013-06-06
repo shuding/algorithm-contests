@@ -1,0 +1,53 @@
+/*
+* Copyright (C) 2012 All rights reserved.
+* File name:  1602.cpp
+* Author:     Parabola_ds
+* Creat time: 2012.05.31
+*/
+#include <algorithm>
+#include <iostream>
+#include <cstdlib>
+#include <cstring>
+#include <climits>
+#include <vector>
+#include <cstdio>
+#include <queue>
+#include <cmath>
+#include <set>
+#include <map>
+#define MAXN 1000
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+vector<pair<int, int> > e[MAXN + 10], query[MAXN + 10];
+int n, q, a, b, l, ans[MAXN + 10], dis[MAXN + 10];
+
+void dfs(int v, int f, int F, int d){
+	for(vector<pair<int, int> >::iterator it = e[v].begin(); it != e[v].end(); ++it)
+		if(it->first != f)
+			dfs(it->first, v, F, d + it->second);
+	dis[v] = d;
+}
+
+void finish(int v){
+	for(vector<pair<int, int> >::iterator it = query[v].begin(); it != query[v].end(); ++it)
+		ans[it->second] = dis[it->first];
+}
+
+int main(){
+	scanf("%d%d", &n, &q);
+	rep(i, n - 1){
+		scanf("%d%d%d", &a, &b, &l);
+		e[a].push_back(make_pair(b, l));
+		e[b].push_back(make_pair(a, l));
+	}
+	rep(i, q){
+		scanf("%d%d", &a, &b);
+		query[a].push_back(make_pair(b, i));
+	}
+	rep(i, n)
+		dfs(i, 0, i, 0), finish(i);
+	rep(i, q)
+		printf("%d\n", ans[i]);
+	return 0;
+}

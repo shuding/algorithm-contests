@@ -1,0 +1,135 @@
+/*
+* Copyright (C) 2012 All rights reserved.
+* File name:  rainfall.cpp
+* Author:     Parabola_ds
+* Creat time: 2012.06.09
+*/
+#include <algorithm>
+#include <iostream>
+#include <cstdlib>
+#include <cstring>
+#include <climits>
+#include <vector>
+#include <cstdio>
+#include <queue>
+#include <cmath>
+#include <set>
+#include <map>
+#define MAXN 10
+#define MAXS 300
+#define eps 1e-4
+#define min(x, y) (x < y ? x : y)
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+struct segment{
+	double x1, y1, x2, y2;
+	bool type;
+} s[MAXS * 2 + 10];
+
+struct board{
+	int x, l, v;
+} b[MAXN + 5];
+
+int n, w, t, v, sn, tn;
+double sum, keyTime[MAXS * MAXS];
+
+void addSegment(int k){
+	double x = 0, y = b[k].x, v = b[k].v;
+	if(b[k].l == w) v = 0;
+	while(x < t){
+		sn++;
+		s[sn].x1 = x;
+		s[sn].y1 = y;
+		s[sn].type = 1;
+		if(v > 0)
+			x = min(x + (w - b[k].l - y) / v, t);
+		else if(v < 0)
+			x = min(x - (y / v), t);
+		else
+			x = t;
+		s[sn].x2 = x;
+		y = s[sn].y2 = y + (x - s[sn].x1) * v;
+		v = -v;
+		if(s[sn].x1 == s[sn].x2) sn--;
+	}
+	x = 0, y = b[k].x + b[k].l, v = b[k].v;
+	if(b[k].l == w) v = 0;
+	while(x < t){
+		sn++;
+		s[sn].x1 = x;
+		s[sn].y1 = y;
+		s[sn].type = 0;
+		if(v > 0)
+			x = min(x + (w - y) / v, t);
+		else if(v < 0)
+			x = min(x - (y - b[k].l) / v, t);
+		else
+			x = t;
+		s[sn].x2 = x;
+		y = s[sn].y2 = y + (x - s[sn].x1) * v;
+		v = -v;
+		if(s[sn].x1 == s[sn].x2) sn--;
+	}
+}
+
+void cross(const segment a, const segment b){
+	double k1 = (a.y2 - a.y1) / (a.x2 - a.x1),
+		   k2 = (b.y2 - b.y1) / (b.x2 - b.x1);
+	double b1 = a.y1 - k1 * a.x1,
+		   b2 = b.y1 - k2 * b.x1;
+	if(fabs(k1 - k2) < eps) return;
+	double x = (b2 - b1) / (k1 - k2);
+	if(x + eps < max(a.x1, b.x1) || x > min(a.x2, b.x2) + eps) return;
+	keyTime[++tn] = x;
+}
+
+void initTime(){
+	sort(keyTime + 1, keyTime + tn + 1);
+	int top = 0;
+	rep(i, tn)
+		if(keyTime[i] != keyTime[i + 1])
+			keyTime[++top] = keyTime[i];
+	tn = top;
+}
+
+pair<double, bool> que[MAXS + 10];
+
+double calc(double x){
+	int tot = 0, tmp = 0;
+	rep(i, sn) if(s[i].x1 <= x + eps && s[i].x2 + eps >= x){
+		double k = (s[i].y2 - s[i].y1) / (s[i].x2 - s[i].x1);
+		double b = s[i].y1 - k * s[i].x1;
+		que[++tot] = make_pair(k * x + b, s[i].type);
+	}
+	double sum = 0;
+	sort(que + 1, que + 1 + tot);
+	rep(i, tot){
+		if(tmp) sum += que[i].first - que[i - 1].first;
+		if(que[i].second) tmp++;
+		else tmp--;
+	}
+	return sum;
+}
+
+int main(){
+	scanf("%d%d%d%d", &n, &w, &t, &v);
+	rep(i, n){
+		scanf("%d%d%d", &b[i].x, &b[i].l, &b[i].v);
+		addSegment(i);
+	}
+	rep(i, sn)
+		rep(j, i - 1)
+			cross(s[i], s[j]);
+	keyTime[++tn] = 0;
+	keyTime[++tn] = t;
+	initTime();
+	double len = calc(keyTime[1]), tmp;
+	rep(i, tn - 1){
+		tmp = calc(keyTime[i + 1]);
+		sum += (tmp + len) * (keyTime[i + 1] - keyTime[i]);
+		len = tmp;
+	}
+	printf("%.2lf\n", fabs((w * t - sum / 2.0) * v));
+	return 0;
+}

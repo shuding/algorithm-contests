@@ -1,0 +1,64 @@
+/*
+* Copyright (C) 2012 All rights reserved.
+* File name:  Editor.cpp
+* Author:     Parabola_ds
+* Creat time: 2012.05.30
+*/
+#include <algorithm>
+#include <iostream>
+#include <cstdlib>
+#include <cstring>
+#include <climits>
+#include <vector>
+#include <cstdio>
+#include <queue>
+#include <cmath>
+#include <ext/rope>
+#include <set>
+#include <map>
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+using namespace __gnu_cxx;
+
+crope str;
+char s[2200000], cmd[20];
+
+int main(){
+	int cmdNum, k, pos = 0;
+	scanf("%d", &cmdNum);
+	while(cmdNum--){
+		scanf("%s", cmd);
+		switch(cmd[0]){
+			case 'M':
+				scanf("%d", &pos);
+				break;
+			case 'I':
+				scanf("%d", &k);
+				rep(i, k){
+					scanf("%c", &s[i - 1]);
+					while(s[i - 1] == '\n')
+						scanf("%c", &s[i - 1]);
+				}
+				s[k] = 0;
+				str.insert(pos, s);
+				break;
+			case 'D':
+				scanf("%d", &k);
+				str.erase(pos, k);
+				break;
+			case 'G':
+				scanf("%d", &k);
+				str.copy(pos, k, s);
+				s[k] = 0;
+				puts(s);
+				break;
+			case 'P':
+				pos--;
+				break;
+			case 'N':
+				pos++;
+				break;
+		}
+	}
+	return 0;
+}

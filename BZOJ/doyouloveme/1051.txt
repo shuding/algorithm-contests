@@ -1,0 +1,74 @@
+#include <algorithm>
+#include <iostream>
+#include <cstdio>
+#include <stack>
+#include <cmath>
+#define MAXN 20000
+#define MAXM 60000
+#define rep(i, n) for(int i = 1; i <= n; i++)
+using namespace std;
+
+struct edge{
+	int s, t, next;
+} e[MAXM];
+
+int n, m, etop(0), index(0), t(0);
+int st[MAXN], dfn[MAXN], low[MAXN], b[MAXN], num[MAXN], out_d[MAXN];
+bool in_s[MAXN];
+stack<int> s;
+
+void add(int s, int t){
+	etop++;
+	e[etop].s = s;
+	e[etop].t = t;
+	e[etop].next = st[s];
+	st[s] = etop;
+}
+
+void tarjan(int v){
+	dfn[v] = low[v] = ++index;
+	s.push(v);
+	in_s[v] = 1;
+	for(int i = st[v]; i; i = e[i].next)
+		if(!dfn[e[i].t]){
+			tarjan(e[i].t);
+			low[v] = min(low[v], low[e[i].t]);
+		}
+		else if(in_s[e[i].t])
+			low[v] = min(low[v], dfn[e[i].t]);
+	if(dfn[v] == low[v]){
+		int u;
+		t++;
+		do{
+			u = s.top();
+			b[u] = t;
+			num[t]++;
+			in_s[u] = 0;
+			s.pop();
+		}while(u != v);
+	}
+}
+
+int main(){
+	scanf("%d%d", &n, &m);
+	rep(i, m){
+		int s, t;
+		scanf("%d%d", &s, &t);
+		add(s, t);
+	}
+	rep(i, n)
+		if(!dfn[i])
+			tarjan(i);
+	rep(i, m)
+		if(b[e[i].s] != b[e[i].t])
+			out_d[b[e[i].s]]++;
+	int zero = 0, ans;
+	rep(i, t)
+		if(out_d[i] == 0)
+			zero++, ans = i;
+	if(zero == 1)
+		printf("%d\n", num[ans]);
+	else
+		printf("0\n");
+	return 0;
+}

@@ -1,0 +1,145 @@
+#include <iostream>
+#include <cstdio>
+#define MAXN 30010
+using namespace std;
+
+const int inf = ~0U >> 1;
+int n, eTop, a, b;
+
+struct node{
+	int c[2], f, v, maxv, sumv;
+	node(){
+		c[0] = c[1] = f = 0;
+	}
+	void update();
+} nodes[MAXN];
+
+void node::update(){
+	maxv = sumv = v;
+	if(c[0]){
+		if(nodes[c[0]].maxv > maxv) maxv = nodes[c[0]].maxv;
+		sumv += nodes[c[0]].sumv;
+	}
+	if(c[1]){
+		if(nodes[c[1]].maxv > maxv) maxv = nodes[c[1]].maxv;
+		sumv += nodes[c[1]].sumv;
+	}
+}
+
+struct edge{
+	int t, next;
+} e[MAXN * 2];
+int st[MAXN];
+
+void addEdge(int a, int b){
+	eTop++;
+	e[eTop].t = b;
+	e[eTop].next = st[a];
+	st[a] = eTop;
+}
+
+void bfsInit(){
+	static int queue[MAXN];
+	int top = 0;
+	queue[0] = 1;
+	for(int i = 0; i <= top; ++i){
+		int t = queue[i];
+		for(int j = st[t]; j; j = e[j].next)
+			if(e[j].t != 1 && !nodes[e[j].t].f){
+				nodes[e[j].t].f = t;
+				queue[++top] = e[j].t;
+			}
+	}
+}
+
+void rotate(int n, bool d){
+	int p = nodes[n].f, q = nodes[p].f;
+	nodes[nodes[p].c[d] = nodes[n].c[!d]].f = p;
+	nodes[nodes[p].f = n].c[!d] = p;
+	nodes[n].f = q;
+	if(q && (nodes[q].c[0] == p || nodes[q].c[1] == p))
+		nodes[q].c[nodes[q].c[1] == p] = n;
+	nodes[p].update();
+}
+
+void splay(int n){
+	int p, q;
+	bool d;
+	while(nodes[n].f && (nodes[nodes[n].f].c[0] == n || nodes[nodes[n].f].c[1] == n)){
+		p = nodes[n].f; q = nodes[p].f;
+		if(q && (nodes[q].c[0] == p || nodes[q].c[1] == p)){
+			d = nodes[p].c[1] == n;
+			if((nodes[p].c[1] == n) == (nodes[q].c[1] == p))
+				rotate(p, d), rotate(n, d);
+			else
+				rotate(n, d), rotate(n, !d);
+		}
+		else
+			rotate(n, nodes[p].c[1] == n);
+	}
+	nodes[n].update();
+}
+
+int access(int n){
+	int v = 0;
+	for(; n; n = nodes[n].f){
+		splay(n);
+		nodes[n].c[1] = v;
+		nodes[v = n].update();
+	}
+	return v;
+}
+
+void change(int a, int b){
+	splay(a);
+	nodes[a].v = b;
+	nodes[a].update();
+}
+
+int querySum(int a, int b){
+	access(a);
+	int lca = access(b), ret = nodes[lca].v;
+	if(b != lca)
+		ret += nodes[nodes[lca].c[1]].sumv;
+	if(a != lca){
+		splay(a);
+		ret += nodes[a].sumv;
+	}
+	return ret;
+}
+
+int queryMax(int a, int b){
+	access(a);
+	int lca = access(b), ret = nodes[lca].v;
+	if(b != lca)
+		ret = max(ret, nodes[nodes[lca].c[1]].maxv);
+	if(a != lca){
+		splay(a);
+		ret = max(ret, nodes[a].maxv);
+	}
+	return ret;
+}
+
+int main(){
+	scanf("%d", &n);
+	for(int i = 1; i < n; ++i){
+		scanf("%d%d", &a, &b);
+		addEdge(a, b);
+		addEdge(b, a);
+	}
+	for(int i = 1; i <= n; ++i)
+		scanf("%d", &nodes[i].v), nodes[i].update();
+	bfsInit();
+	int q, a, b; scanf("%d", &q);
+	char cmd[10];
+	while(q--){
+		scanf("%s%d%d", cmd, &a, &b);
+		if(cmd[0] == 'C')
+			change(a, b);
+		else if(cmd[1] == 'S')
+			printf("%d\n", querySum(a, b));
+		else
+			printf("%d\n", queryMax(a, b));
+	}
+	return 0;
+}

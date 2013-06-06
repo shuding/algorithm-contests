@@ -1,0 +1,49 @@
+/*
+* Copyright (C) 2012 All rights reserved.
+* File name:  hut.cpp
+* Author:     Parabola_ds
+* Creat time: 2012.06.10
+*/
+#include <algorithm>
+#include <iostream>
+#include <cstdlib>
+#include <cstring>
+#include <climits>
+#include <vector>
+#include <cstdio>
+#include <queue>
+#include <cmath>
+#include <set>
+#include <map>
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+const double inf = 1e10;
+
+double k1, k2, f[101][101][101];
+int n, m, x;
+
+double area(double k, int n, int len){
+	return ((len % n) * (len / n + 1) * (len / n + 1) + (n - len % n) * (len / n) * (len / n)) * k;
+}
+
+int main(){
+	scanf("%lf%lf%d%d", &k1, &k2, &m, &n);
+	rep(i, 101)
+		rep(j, m + 1)
+			rep(k, n + 1)
+				f[i - 1][j - 1][k - 1] = inf;
+	f[0][0][0] = 0;
+	rep(i, 100)
+		rep(j, m)
+			rep(k, n){
+				x = 1;
+				rep(p, i){
+					while(x < k && f[i - p][j - 1][k - x] + area(k2, x, p) >= f[i - p][j - 1][k - x - 1] + area(k2, x + 1, p))
+						x++;
+					f[i][j][k] = min(f[i][j][k], f[i - p][j - 1][k - x] + area(k1, 1, p) + area(k2, x, p));
+				}
+			}
+	printf("%.1lf\n", f[100][m][n]);
+	return 0;
+}

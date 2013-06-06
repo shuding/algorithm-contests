@@ -1,0 +1,108 @@
+#include <algorithm>
+#include <iostream>
+#include <cstdio>
+#define MAXN 200010
+using namespace std;
+
+struct edge{
+	int t, l, next;
+} e[MAXN * 2];
+
+int n, k, a, b, c, ans = ~0U >> 1;
+int st[MAXN], eTop;
+bool del[MAXN];
+
+void addEdge(int a, int b, int c){
+	eTop++;
+	e[eTop].t = b;
+	e[eTop].l = c;
+	e[eTop].next = st[a];
+	st[a] = eTop;
+}
+
+struct path{
+	int f, num, len;
+	bool operator < (const path &p) const{
+		return len < p.len;
+	}
+} p[MAXN];
+
+int divVertex, minBlock, pathNum, sn[MAXN];
+
+void getSonNum(int v, int f){
+	sn[v] = 1;
+	for(int i = st[v]; i; i = e[i].next)
+		if(!del[e[i].t] && e[i].t != f){
+			getSonNum(e[i].t, v);
+			sn[v] += sn[e[i].t];
+		}
+}
+
+void getDivVertex(int v, int f, int F){
+	int m = sn[F] - sn[v];
+	for(int i = st[v]; i; i = e[i].next)
+		if(!del[e[i].t] && e[i].t != f){
+			getDivVertex(e[i].t, v, F);
+			m = max(m, sn[e[i].t]);
+		}
+	if(m < minBlock)
+		minBlock = m, divVertex = v;
+}
+
+void getPath(int v, int f, int F, int n, int l){
+	++pathNum;
+	p[pathNum].f = F;
+	p[pathNum].len = l;
+	p[pathNum].num = n;
+	for(int i = st[v]; i; i = e[i].next)
+		if(!del[e[i].t] && e[i].t != f)
+			getPath(e[i].t, v, F, n + 1, l + e[i].l);
+}
+
+void solve(int v){
+	minBlock = n;
+	getSonNum(v, 0);
+	getDivVertex(v, 0, v);
+	int d = divVertex;
+	pathNum = 0;
+	for(int i = st[d]; i; i = e[i].next)
+		if(!del[e[i].t])
+			getPath(e[i].t, d, e[i].t, 1, e[i].l);
+	pathNum++;
+	p[pathNum].f = d;
+	p[pathNum].len = 0;
+	p[pathNum].num = 0;
+	sort(p + 1, p + 1 + pathNum);
+	int l = pathNum, r = pathNum;
+	while(l > 1 && p[l - 1].len == p[r].len)
+		--l;
+	for(int i = 1; i <= pathNum; ++i){
+		while(l > 1 && p[i].len + p[l].len > k){
+			r = --l;
+			while(l > 1 && p[l - 1].len == p[r].len)
+				--l;
+		}
+		if(p[i].len + p[l].len == k)
+			for(int j = l; j <= r; ++j)
+				if(p[i].f != p[j].f)
+					ans = min(ans, p[i].num + p[j].num);
+	}
+	del[d] = 1;
+	for(int i = st[d]; i; i = e[i].next)
+		if(!del[e[i].t])
+			solve(e[i].t);
+}
+
+int main(){
+	scanf("%d%d", &n, &k);
+	for(int i = 1; i < n; ++i){
+		scanf("%d%d%d", &a, &b, &c);
+		++a; ++b;
+		addEdge(a, b, c);
+		addEdge(b, a, c);
+	}
+	solve(1);
+	printf("%d\n", ans < n ? ans : -1);
+	return 0;
+}
+

@@ -1,0 +1,37 @@
+#include <iostream>
+#include <cstdio>
+#define MAXN 1001
+#define bit(x) (1 << x - 1)
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+int n, d, k, state[MAXN], ans;
+
+void dfs(int p, int t, int st){
+	if(t == k){
+		int tot = 0;
+		rep(i, n)
+			if((state[i] & st) == state[i])
+				tot++;
+		ans = max(ans, tot);
+		return;
+	}
+	if(d - p + 1 + t < k || p > d) return;
+	dfs(p + 1, t, st);
+	dfs(p + 1, t + 1, st + bit(p));
+}
+
+int main(){
+	scanf("%d%d%d", &n, &d, &k);
+	rep(i, n){
+		int a, b;
+		scanf("%d", &a);
+		rep(j, a){
+			scanf("%d", &b);
+			state[i] |= bit(b);
+		}
+	}
+	dfs(1, 0, 0);
+	printf("%d\n", ans);
+	return 0;
+}

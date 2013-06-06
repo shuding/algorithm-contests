@@ -1,0 +1,146 @@
+/*
+*	Copyright (C) Ds ds303077135@gmail.com
+*	File Name     : BZOJ_1091_Cut.cpp
+*	Creation Time : 2013/01/09 16:05:06
+*	Environment   : OS X 10.8
+*/
+#include <algorithm>
+#include <iostream>
+#include <cstdio>
+#include <cmath>
+#define MAXP 10
+#define between(x, a, b) (fabs(x - a) <= 1e-6 || fabs(x - b) <= 1e-6 || (a > b ? (a >= x && x >= b) : (b >= x && x >= a)))
+using namespace std;
+
+struct poly{
+	int p;
+	double x[MAXP], y[MAXP];
+} now, nxt;
+
+int cnt, n, m, p, P[4], x[MAXP], y[MAXP];
+bool ctd[MAXP];
+double ans = 1e10, X[4], Y[4];
+
+double cut(int k){
+	nxt.p = 0;
+	cnt = 0;
+	if(x[k] == x[k % p + 1]){
+		for(int i = 1; i <= now.p; ++i)
+			if(between(x[k], now.x[i], now.x[i % now.p + 1])){
+				X[cnt] = x[k];
+				Y[cnt] = (x[k] - now.x[i]) * (now.y[i % now.p + 1] - now.y[i]) / (now.x[i % now.p + 1] - now.x[i]) + now.y[i];
+				P[cnt++] = i;
+			}
+		if(!between(y[k], Y[0], y[k % p + 1]))
+			swap(X[0], X[1]), swap(Y[0], Y[1]), swap(P[0], P[1]);
+		while(cnt > 2){ 
+			for(int I = 0; I < cnt; ++I) 
+				for(int J = I + 1; J < cnt; ++J) 
+					if(fabs(X[I] - X[J]) < 1e-3 && fabs(Y[I] - Y[J]) < 1e-3){ 
+						swap(X[J], X[cnt - 1]); 
+						swap(Y[J], Y[cnt - 1]); 
+						swap(P[J], P[cnt - 1]); 
+						cnt--; 
+				    } 
+		}
+	}
+	else{
+		double k_ = double(y[k] - y[k % p + 1]) / (x[k] - x[k % p + 1]);
+		double b = y[k] - x[k] * k_;
+		for(int i = 1; i <= now.p; ++i){
+			if(fabs(now.x[i % now.p + 1] - now.x[i]) <= 1e-6){
+				if(between(now.x[i] * k_ + b, now.y[i], now.y[i % now.p + 1])){
+					X[cnt] = now.x[i];
+					Y[cnt] = now.x[i] * k_ + b;
+					P[cnt++] = i;
+				}
+			}
+			else{
+				double K = (now.y[i % now.p + 1] - now.y[i]) / (now.x[i % now.p + 1] - now.x[i]);
+				double B = now.y[i] - now.x[i] * K;
+				if(fabs(k_ - K) >= 1e-6){
+					double tmp = (B - b) / (k_ - K);
+					if(between(tmp, now.x[i], now.x[i % now.p + 1])){
+						X[cnt] = tmp;
+						Y[cnt] = k_ * tmp + b;
+						P[cnt++] = i;
+					}
+				}
+			}
+		}
+		while(cnt > 2){
+			for(int I = 0; I < cnt; ++I)
+				for(int J = I + 1; J < cnt; ++J)
+					if(fabs(X[I] - X[J]) < 1e-3 && fabs(Y[I] - Y[J]) < 1e-3){
+						swap(X[J], X[cnt - 1]);
+						swap(Y[J], Y[cnt - 1]);
+						swap(P[J], P[cnt - 1]);
+						cnt--;
+					}
+		}
+		if(!between(x[k], X[0], x[k % p + 1]))
+			swap(X[0], X[1]), swap(Y[0], Y[1]), swap(P[0], P[1]);
+	}
+	if(P[0] < P[1]){
+		for(int i = 1; i <= P[0]; ++i){
+			nxt.x[++nxt.p] = now.x[i];
+			nxt.y[nxt.p] = now.y[i];
+		}
+		nxt.x[++nxt.p] = X[0];
+		nxt.y[nxt.p] = Y[0];
+		nxt.x[++nxt.p] = X[1];
+		nxt.y[nxt.p] = Y[1];
+		for(int i = P[1] + 1; i <= now.p; ++i){
+			nxt.x[++nxt.p] = now.x[i];
+			nxt.y[nxt.p] = now.y[i];
+		}
+	}
+	else{
+		for(int i = P[1] + 1; i <= P[0]; ++i){
+			nxt.x[++nxt.p] = now.x[i];
+			nxt.y[nxt.p] = now.y[i];
+		}
+		nxt.x[++nxt.p] = X[0];
+		nxt.y[nxt.p] = Y[0];
+		nxt.x[++nxt.p] = X[1];
+		nxt.y[nxt.p] = Y[1];
+	}
+	now.p = nxt.p;
+	for(int i = 1; i <= nxt.p; ++i)
+		now.x[i] = nxt.x[i], now.y[i] = nxt.y[i];
+	return sqrt((X[0] - X[1]) * (X[0] - X[1]) + (Y[0] - Y[1]) * (Y[0] - Y[1]));
+}
+
+void dfs(int n, double len){
+	if(len >= ans) return;
+	if(n > p){
+		ans = len;
+		return;
+	}
+	poly tmp;
+	tmp.p = now.p;
+	for(int i = 1; i <= now.p; ++i)
+		tmp.x[i] = now.x[i], tmp.y[i] = now.y[i];
+	for(int i = 1; i <= p; ++i)
+		if(!ctd[i]){
+			ctd[i] = 1;
+			dfs(n + 1, len + cut(i));
+			ctd[i] = 0;
+			now.p = tmp.p;
+			for(int i = 1; i <= tmp.p; ++i)
+				now.x[i] = tmp.x[i], now.y[i] = tmp.y[i];
+		}
+}
+
+int main(){
+	scanf("%d%d%d", &n, &m, &p);
+	for(int i = 1; i <= p; ++i)
+		scanf("%d%d", &x[i], &y[i]);
+	now.p = 4;
+	now.x[1] = now.x[2] = now.y[1] = now.y[4] = 0;
+	now.x[3] = now.x[4] = n;
+	now.y[2] = now.y[3] = m;
+	dfs(1, 0);
+	printf("%.3lf\n", ans);
+	return 0;
+}

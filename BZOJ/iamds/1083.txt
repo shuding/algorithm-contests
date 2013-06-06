@@ -1,0 +1,84 @@
+
+program city;
+
+type
+  line = record
+    x, y, s: longint;
+  end;
+
+var
+  n, m, i, j, max: longint;
+  l: array[1..90000] of line;
+  f: array[1..300] of longint;
+
+  function father(i: longint): longint;
+  var
+    fa: longint;
+  begin
+    if i = f[i] then
+      exit(i);
+    fa := father(f[i]);
+    f[i] := fa;
+    exit(fa);
+  end;
+
+  procedure union(i, j: longint);
+  var
+    f1, f2: longint;
+  begin
+    f1 := father(i);
+    f2 := father(j);
+    f[f1] := f2;
+  end;
+
+  procedure qsort(i, j: longint);
+  var
+    p, q: longint;
+    key: line;
+  begin
+    p := i;
+    q := j;
+    key := l[p];
+    while p <> q do
+    begin
+      while (p <> q) and (key.s <= l[q].s) do
+        Dec(q);
+      if p <> q then
+      begin
+        l[p] := l[q];
+        Inc(p);
+      end;
+      while (p <> q) and (key.s >= l[p].s) do
+        Inc(p);
+      if p <> q then
+      begin
+        l[q] := l[p];
+        Dec(q);
+      end;
+    end;
+    l[p] := key;
+    if p - i > 1 then
+      qsort(i, p - 1);
+    if j - q > 1 then
+      qsort(q + 1, j);
+  end;
+
+begin
+  Read(n, m);
+  for i := 1 to m do
+    Read(l[i].x, l[i].y, l[i].s);
+  qsort(1, m);
+  j := 1;
+  max := -1;
+  for i := 1 to n do
+    f[i] := i;
+  for i := 1 to n - 1 do
+  begin
+    while father(l[j].x) = father(l[j].y) do
+      Inc(j);
+    union(l[j].x, l[j].y);
+    if l[j].s > max then
+      max := l[j].s;
+  end;
+  Write(n - 1, ' ', max);
+end.

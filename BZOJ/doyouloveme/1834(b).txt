@@ -1,0 +1,137 @@
+#include <algorithm>
+#include <iostream>
+#include <cstring>
+#include <cstdio>
+#include <queue>
+#define MAXN 1010
+#define MAXM 20010
+#define rep(i, n) for(int i = 1; i <= n; i++)
+using namespace std;
+
+const int inf = 1000000000;
+
+struct edge{
+	int t, w, f, next;
+	edge(){}
+	edge(int _t, int _w, int _f, int _n):
+		t(_t), w(_w), f(_f), next(_n){}
+} e[MAXM];
+
+int n, m, k, s, t, c, w, S, T;
+int etop, st[MAXN], h[MAXN], hn[MAXN], pre[MAXN], dis[MAXN];
+bool v[MAXN];
+deque<int> q;
+
+void add(int s, int t, int w, int f){
+	e[++etop] = edge(t, w, f, st[s]);
+	st[s] = etop;
+}
+
+int sap(int v, int lim){
+	if(v == T || !lim)
+		return lim;
+	int left = lim, tmp = T - 1;
+	for(int i = st[v]; i; i = e[i].next){
+		if(e[i].f && h[v] == h[e[i].t] + 1){
+			int f = sap(e[i].t, min(left, e[i].f));
+			left -= f;
+			e[i].f -= f;
+			e[i + (i & 1 ? 1 : -1)].f += f;
+			if(h[S] == T)
+				return lim - left;
+		}
+		if(e[i].f)
+			tmp = min(tmp, h[e[i].t]);
+	}
+	if(lim == left){
+		hn[h[v]]--;
+		if(!hn[h[v]])
+			h[S] = T;
+		else{
+			h[v] = tmp + 1;
+			hn[h[v]]++;
+		}
+	}
+	return lim - left;
+}
+
+int max_flow(){
+	int f = 0;
+	hn[0] = n;
+	while(h[S] != T)
+		f += sap(S, inf);
+	return f;
+}
+
+bool spfa(){
+	memset(v, 0, sizeof(v));
+	rep(i, T)
+		dis[i] = inf;
+	q.clear();
+	dis[S] = 0;
+	v[S] = 1;
+	q.push_back(S);
+	while(!q.empty()){
+		int Q = q.back();
+		for(int i = st[Q]; i; i = e[i].next)
+			if(e[i].f && dis[Q] + e[i].w < dis[e[i].t]){
+				dis[e[i].t] = dis[Q] + e[i].w;
+				pre[e[i].t] = i;
+				if(!v[e[i].t])
+					q.push_front(e[i].t);
+				v[e[i].t] = 1;
+			}
+		v[Q] = 0;
+		q.pop_back();
+	}
+	return dis[T] != inf;
+}
+
+int min_cost_max_flow(){
+	int cost = 0;
+	while(spfa()){
+		int f = inf;
+		for(int p = pre[T]; p; p = pre[e[p + (p & 1 ? 1 : -1)].t])
+			f = min(f, e[p].f);
+		for(int p = pre[T]; p; p = pre[e[p + (p & 1 ? 1 : -1)].t]){
+			e[p].f -= f;
+			e[p + (p & 1 ? 1 : -1)].f += f;
+		}
+		cost += dis[T] * f;
+	}
+	return cost;
+}
+
+inline void read(int &n){
+	char c = getchar(); n = 0;
+	while(c < '0' || c > '9')
+		c = getchar();
+	while(c >= '0' && c <= '9'){
+		n = n * 10 + c - '0';
+		c = getchar();
+	}
+}
+
+int main(){
+	scanf("%d%d%d", &n, &m, &k);
+	rep(i, m){
+		read(s); read(t); read(c); read(w);
+		add(s, t, w, c);
+		add(t, s, 0, 0);
+	}
+	S = 1; T = n;
+	printf("%d ", max_flow());
+	rep(j, m){
+		int i = j * 2 - 1;
+		add(e[i + (i & 1 ? 1 : -1)].t, e[i].t, e[i].w, inf);
+		add(e[i].t, e[i + (i & 1 ? 1 : -1)].t, -e[i].w, 0);
+		e[i].w = 0;
+	}
+	S = n + 1; T = S + 1;
+	add(S, 1, 0, k);
+	add(1, S, 0, 0);
+	add(n, T, 0, k);
+	add(T, n, 0, 0);
+	printf("%d\n", min_cost_max_flow());
+	return 0;
+}

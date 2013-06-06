@@ -1,0 +1,68 @@
+#include <algorithm>
+#include <iostream>
+#include <cstdio>
+#include <vector>
+#define MAXN 100010
+#define MAXM 300010
+using namespace std;
+
+vector<int> e[MAXN];
+int n, m, ind, dfn[MAXN], low[MAXN], bel[MAXN], tot;
+int top, stack[MAXN], d[MAXN];
+bool inStack[MAXN];
+
+void tarjan(int v){
+	dfn[v] = low[v] = ++ind;
+	inStack[stack[++top] = v] = 1;
+	for(vector<int>::iterator it = e[v].begin(); it != e[v].end(); ++it)
+		if(!dfn[*it]){
+			tarjan(*it);
+			low[v] = min(low[v], low[*it]);
+		}
+		else if(inStack[*it])
+			low[v] = min(low[v], dfn[*it]);
+	if(low[v] == dfn[v]){
+		int tmp;
+		++tot;
+		do{
+			tmp = stack[top--];
+			inStack[tmp] = 0;
+			bel[tmp] = tot;
+		} while(tmp != v);
+	}
+}
+
+bool tmp[MAXN], tmp2[MAXN];
+int d2[MAXN];
+
+int main(){
+	scanf("%d%d", &n, &m);
+	int x, y;
+	while(m--){
+		scanf("%d%d", &x, &y);
+		e[x].push_back(y);
+	}
+	for(int i = 1; i <= n; ++i)
+		if(!dfn[i])
+			tarjan(i);
+	int num = 0;
+	bool trick = 0;
+	for(int i = 1; i <= n; ++i) tmp[i] = tmp2[i] = 1;
+	for(int i = 1; i <= n; ++i)
+		for(vector<int>::iterator it = e[i].begin(); it != e[i].end(); ++it){
+			d2[*it]++;
+			tmp[i] = 0;
+			if(bel[i] != bel[*it])
+				d[bel[*it]]++;
+		}
+	for(int i = 1; i <= n; ++i)
+		trick |= !d2[i] && tmp[i];
+	for(int i = 1; i <= n; ++i)
+		for(vector<int>::iterator it = e[i].begin(); it != e[i].end(); ++it)
+			tmp2[i] &= d2[*it] > 1;
+	for(int i = 1; i <= tot; ++i)
+		num += !d[i], trick |= !d2[i] && tmp2[i];
+	printf("%.6lf\n", 1 - double(num - trick) / n);
+	return 0;
+}
+

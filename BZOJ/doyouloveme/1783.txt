@@ -1,0 +1,33 @@
+#include <algorithm>
+#include <iostream>
+#include <cstdio>
+#define MAXN 700005
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+int n;
+long long s[MAXN];
+
+inline void read(long long &n){
+	char c = getchar(); n = 0;
+	while(c < '0' || c > '9') c = getchar();
+	while(c >= '0' && c <= '9'){
+		n = n * 10 + c - '0';
+		c = getchar();
+	}
+}
+
+int main(){
+	scanf("%d", &n);
+	rep(i, n) read(s[i]);
+	int p1, p2;
+	p1 = p2 = n + 1;
+	for(int i = n; i; --i){
+		s[i] += s[p2];
+		if(s[i] >= s[p1]){
+			p2 = p1;
+			p1 = i;
+		}
+	}
+	printf("%lld %lld\n", s[p1], s[p2]);
+}

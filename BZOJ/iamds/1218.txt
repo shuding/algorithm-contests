@@ -1,0 +1,26 @@
+
+program bzoj1218;
+
+var i,j,k,x,y,n,r,s,max:longint;
+    sum:array[-1..5001,-1..5001] of longint;
+
+begin
+  read(n,r);
+  for i:=1 to n do
+  begin
+    read(x,y,s);
+    sum[x,y]:=s;
+  end;
+  for i:=0 to 5000 do
+    for j:=0 to 5000 do
+      sum[i,j]:=sum[i,j]+sum[i-1,j]+sum[i,j-1]-sum[i-1,j-1];
+  max:=0;
+  for i:=0 to r-2 do
+    for j:=0 to r-2 do
+      if sum[i,j]>max then max:=sum[i,j];
+  for i:=r-1 to 5000 do
+    for j:=r-1 to 5000 do
+      if sum[i,j]-sum[i-r,j]-sum[i,j-r]+sum[i-r,j-r]>max then
+        max:=sum[i,j]-sum[i-r,j]-sum[i,j-r]+sum[i-r,j-r];
+  write(max);
+end.

@@ -1,0 +1,42 @@
+#include <iostream>
+#include <cstdio>
+#define rep(i, n) 	for(int i = 1; i <= n; i++)
+using namespace std;
+int n, NUM[1001][1001], tot = 0;
+bool l[1001][1001][4], is_tri;
+int main()
+{
+	scanf("%d", &n);
+	rep(i, n)
+		rep(j, i)
+			rep(k, 3)
+			{
+				scanf("%d", &l[i][j][k]);
+				if(k == 3)
+					NUM[i][j] = NUM[i][j - 1] + l[i][j][k];
+			}
+	rep(i, n)
+		rep(j, i)
+			for(int k = i; k <= n; k++)
+			{
+				if(!l[k][j][1] || !l[k][k - i + j][2])
+					break;
+				is_tri = NUM[k][k - i + j] - NUM[k][j - 1] == k - i + 1;
+				if(is_tri)
+					tot++;
+			}
+	for(int i = n; i >= 1; i--)
+		for(int j = i - 1; j >= 1; j--)
+			for(int k = i; k >= 1; k--)
+			{
+				if(k <= j || j - i + k <= 0)
+					break;
+				if(!l[k][j - i + k][2] || !l[k][j + 1][1])
+					break;
+				is_tri = NUM[k - 1][j] - NUM[k - 1][j - i + k - 1] == i - k + 1;
+				if(is_tri)
+					tot++;
+			}
+	printf("%d", tot);
+	return 0;
+}

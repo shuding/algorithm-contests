@@ -1,0 +1,61 @@
+#include <algorithm>
+#include <iostream>
+#include <cstdio>
+#include <queue>
+#define MAXN 50001
+#define MAXM 200001
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+const int inf = ~0U >> 1;
+
+struct edge{
+	int t, w, next;
+	edge(){}
+	edge(int t, int w, int n): t(t), w(w), next(n){}
+} e[MAXM];
+
+int n, m, b, dis[MAXN], st[MAXN], etop;
+bool v[MAXN];
+
+void add(int s, int t, int w){
+	e[++etop] = edge(t, w, st[s]);
+	st[s] = etop;
+}
+
+deque<int> q;
+
+void spfa(){
+	rep(i, n) dis[i] = inf;
+	dis[1] = 0; v[1] = 1;
+	q.push_back(1);
+	while(!q.empty()){
+		int Q = q.back();
+		for(int i = st[Q]; i; i = e[i].next)
+			if(dis[e[i].t] > dis[Q] + e[i].w){
+				dis[e[i].t] = dis[Q] + e[i].w;
+				if(!v[e[i].t])
+					q.push_front(e[i].t);
+				v[e[i].t] = 1;
+			}
+		v[Q] = 0;
+		q.pop_back();
+	}
+}
+
+int main(){
+	scanf("%d%d%d", &n, &m, &b);
+	rep(i, m){
+		int s, t, w;
+		scanf("%d%d%d", &s, &t ,&w);
+		add(s, t, w); add(t, s, w);
+	}
+	spfa();
+	while(b--){
+		int A, B;
+		scanf("%d%d", &A, &B);
+		printf("%d\n", dis[A] + dis[B]);
+	}
+	return 0;
+}
+

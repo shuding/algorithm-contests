@@ -1,0 +1,22 @@
+#include <iostream>
+#include <cstdio>
+#define LL long long
+#define debug(x) cout << #x << " = " << x << endl;
+using namespace std;
+const int MOD = 100003;
+LL m, n, ans;
+LL power(LL a, LL b)
+{
+    if(!b)
+        return 1;
+    LL ans = power(a, b >> 1);
+    ans = ans * ans % MOD;
+    if(b & 1)
+        ans = ans * a % MOD;
+    return ans;
+}
+int main()
+{
+    scanf("%lld %lld", &m, &n);
+    printf("%lld", (power(m, n) + MOD - (m *(power(m - 1, n - 1)) % MOD)) % MOD);
+}

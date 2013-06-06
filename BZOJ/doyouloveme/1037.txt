@@ -1,0 +1,46 @@
+/*
+* Copyright (C) 2012 All rights reserved.
+* File name:  1037.cpp
+* Author:     Parabola_ds
+* Creat time: 2012.05.23
+*/
+#include <algorithm>
+#include <iostream>
+#include <cstdlib>
+#include <cstring>
+#include <climits>
+#include <vector>
+#include <cstdio>
+#include <queue>
+#include <cmath>
+#include <set>
+#include <map>
+#define mod 12345678
+#define MAXN 155
+#define MAXK 25
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+int n, m, k, ans, tmp, f[2][MAXN][MAXK][MAXK];
+
+int main(){
+	scanf("%d%d%d", &n, &m, &k);
+	f[0][0][0][0] = 1;
+	for(int tot = 0; tot <= n + m; ++tot){
+		memset(f[!(tot & 1)], 0, sizeof(f[!(tot & 1)]));
+		for(int j = 0; j <= min(m, tot); ++j)
+			for(int k1 = 0; k1 <= min(tot - j, k); ++k1)
+				for(int k2 = 0; k2 <= min(j, k); ++k2){
+					tmp = (f[tot & 1][j][k1][k2] %= mod);
+					if(tot - j < n)
+						f[!(tot & 1)][j][k1 + 1][max(0, k2 - 1)] += tmp;
+					if(j < m)
+						f[!(tot & 1)][j + 1][max(0, k1 - 1)][k2 + 1] += tmp;
+				}
+	}
+	for(int k1 = 0; k1 <= k; ++k1)
+		for(int k2 = 0; k2 <= k; ++k2)
+			ans = (ans + f[(n + m) & 1][m][k1][k2]) % mod;
+	printf("%d\n", ans);
+	return 0;
+}

@@ -1,0 +1,44 @@
+#include <iostream> 
+#define MAX 201
+#define INF 0x7FFFFFFF
+using namespace std;
+typedef struct
+{
+int x,y;
+}point;
+point P[MAX],Line[MAX*MAX];
+int N,cnt=0;
+void init()
+{
+int i,j;
+cin >> N;
+for (i=1;i<=N;i++)
+cin >> P[i].x >> P[i].y;
+for (i=1;i<=N-1;i++)
+for (j=i+1;j<=N;j++)
+Line[++cnt].x=P[j].x-P[i].x,Line[cnt].y=P[j].y-P[i].y;
+}
+void solve()
+{
+int i,j;
+int Ans=1;
+bool b;
+for (i=2;i<=cnt;i++)
+{
+b=true;
+for (j=1;j<i;j++) if (Line[i].x*Line[j].y==Line[i].y*Line[j].x)
+{
+b=false;
+break;
+}
+if (b)
+Ans++;
+}
+cout << Ans << endl;
+}
+int main()
+{
+init();
+solve();
+return 0;
+}

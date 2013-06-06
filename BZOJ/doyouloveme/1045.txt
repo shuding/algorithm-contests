@@ -1,0 +1,25 @@
+#include <cstdio> 
+#include <algorithm>
+#include <cmath>
+#define rep(i, n) for(int i = 1; i <= n; i++)
+using namespace std;
+int n, a;
+long long avg = 0, tot = 0, s[1000005];
+int main()
+{
+    scanf("%d", &n);
+    rep(i, n)
+    {
+        scanf("%d", &a);
+        avg += a;
+        if(i > 1)
+            s[i] = s[i - 1] + a;
+    }
+    avg /= n;
+    rep(i, n)
+        s[i] -= avg * (i - 1);
+    sort(s + 1, s + n + 1);
+    rep(i, n)
+        tot += abs(s[(n + 1) / 2] - s[i]);
+    printf("%lld\n", tot);
+}

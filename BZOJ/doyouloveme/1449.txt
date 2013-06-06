@@ -1,0 +1,90 @@
+#include <algorithm>
+#include <iostream>
+#include <cstdio>
+#define MAXN 10000
+#define MAXE 10000
+#define MAXM 100000
+using namespace std;
+
+struct edge{
+	int s, t, f, c, opp, next;
+	edge(){}
+	edge(int s, int t, int f, int c, int o, int n):
+		s(s), t(t), f(f), c(c), opp(o), next(n){}
+} e[MAXM * 2];
+
+int n, m, S, T, ans;
+int win[MAXN], tot[MAXN], c[MAXN], d[MAXN], a[1010], b[1010];
+int st[MAXE], eTop;
+
+void addEdge(int s, int t, int f, int c){
+	eTop++;
+	e[eTop] = edge(s, t, f, c, eTop + 1, st[s]);
+	st[s] = eTop;
+	eTop++;
+	e[eTop] = edge(t, s, 0, -c, eTop - 1, st[t]);
+	st[t] = eTop;
+}
+
+const int inf = ~0U >> 2;
+int dis[MAXE], que[MAXE * 10], pre[MAXE];
+bool inq[MAXE];
+
+bool spfa(){
+	int top = 1;
+	que[1] = S;
+	for(int i = 1; i <= T; ++i)
+		inq[i] = 0, dis[i] = inf;
+	dis[S] = 0; inq[S] = 1;
+	for(int i = 1; i <= top; ++i){
+		for(int j = st[que[i]]; j; j = e[j].next)
+			if(e[j].f && dis[e[j].t] > dis[que[i]] + e[j].c){
+				dis[e[j].t] = dis[que[i]] + e[j].c;
+				pre[e[j].t] = j;
+				if(!inq[e[j].t])
+					que[++top] = e[j].t;
+				inq[e[j].t] = 1;
+			}
+		inq[que[i]] = 0;
+	}
+	return dis[T] != inf;
+}
+
+int mcmf(){
+	int v, cost = 0, f;
+	while(spfa()){
+		f = inf;
+		v = T;
+		while(v != S){
+			f = min(f, e[pre[v]].f);
+			v = e[pre[v]].s;
+		}
+		cost += dis[T] * f;
+		v = T;
+		while(v != S){
+			e[pre[v]].f -= f;
+			e[e[pre[v]].opp].f += f;
+			v = e[pre[v]].s;
+		}
+	}
+	return cost;
+}
+
+int main(){
+	scanf("%d%d", &n, &m);
+	for(int i = 1; i <= n; ++i)
+		scanf("%d%d%d%d", &win[i], &tot[i], &c[i], &d[i]), tot[i] += win[i];
+	for(int i = 1; i <= m; ++i)
+		scanf("%d%d", &a[i], &b[i]), tot[a[i]]++, tot[b[i]]++;
+	S = n + m + 1;
+	T = S + 1;
+	for(int i = 1; i <= m; ++i)
+		addEdge(S, i, 1, 0), addEdge(i, m + a[i], 1, 0), addEdge(i, m + b[i], 1, 0);
+	for(int i = 1; i <= n; ++i){
+		ans += c[i] * win[i] * win[i] + d[i] * (tot[i] - win[i]) * (tot[i] - win[i]);
+		for(int j = win[i] + 1; j <= tot[i]; ++j)
+			addEdge(m + i, T, 1, -2 * d[i] * tot[i] + (c[i] + d[i]) * (2 * j - 1));
+	}
+	printf("%d\n", ans + mcmf());
+	return 0;
+}

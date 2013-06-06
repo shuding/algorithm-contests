@@ -1,0 +1,145 @@
+#include <algorithm>
+#include <iostream>
+#include <cstdlib>
+#include <cstdio>
+#include <cmath>
+#define mod 1000000
+using namespace std;
+
+const int inf = ~0U >> 1;
+
+class treap{
+	struct node{
+		int value, key, size;
+		node(int v, node *n): value(v){
+			c[0] = c[1] = n;
+			key = rand() - 1;
+			size = 1;
+		}
+		void rz(){
+			size = c[0]->size + c[1]->size + 1;
+		}
+		node *c[2];
+	} *root, *null;
+	void rot(node *&t, bool d){
+		node *c = t->c[d];
+		t->c[d] = c->c[!d];
+		c->c[!d] = t;
+		t->rz(); c->rz();
+		t = c;
+	}
+	void Insert(node *&t, int x){
+		if(t == null){
+			t = new node(x, null);
+			return;
+		}
+		if(x == t->value)
+			return;
+		bool d = x > t->value;
+		Insert(t->c[d], x);
+		if(t->c[d]->key < t->key)
+			rot(t, d);
+		else
+			t->rz();
+	}
+	void Delete(node *&t, int x){
+		if(t == null)
+			return;
+		if(t->value == x){
+			bool d = t->c[0]->key > t->c[1]->key;
+			if(t->c[d] == null){
+				delete t;
+				t = null;
+				return;
+			}
+			rot(t, d);
+			Delete(t->c[!d], x);
+		}
+		else{
+			bool d = x > t->value;
+			Delete(t->c[d], x);
+		}
+		t->rz();
+	}
+	int Seek_l(node *&t, int x){
+		if(t == null)
+			return -inf;
+		if(t->value == x)
+			return x;
+		if(t->value < x)
+			return max(t->value, Seek_l(t->c[1], x));
+		else
+			return Seek_l(t->c[0], x);
+	}
+	int Seek_r(node *&t, int x){
+		if(t == null)
+			return inf;
+		if(t->value == x)
+			return x;
+		if(t->value > x)
+			return min(t->value, Seek_r(t->c[0], x));
+		else
+			return Seek_r(t->c[1], x);
+	}
+	public:
+	treap(){
+		null = new node(0, 0);
+		null->size = 0;
+		null->key = inf;
+		root = null;
+	}
+	void ins(int x){
+		Insert(root, x);
+	}
+	void del(int x){
+		Delete(root, x);
+	}
+	int seek(int x){
+		int l = Seek_l(root, x), r = Seek_r(root, x);
+		if(l == -inf){
+			del(r);
+			return abs(r - x);
+		}
+		if(r == inf){
+			del(l);
+			return abs(l - x);
+		}
+		if(abs(l - x) <= abs(r - x)){
+			del(l);
+			return abs(l - x);
+		}
+		else{
+			del(r);
+			return abs(r - x);
+		}
+	}
+	int siz(){
+		return root->size;
+	}
+} T;
+
+int main(){
+	int TestNum, x, c, p = -1, ans(0);
+	scanf("%d", &TestNum);
+	while(TestNum--){
+		scanf("%d%d", &c, &x);
+		if(c){
+			if(T.siz() == 0 || p == 1){
+				T.ins(x);
+				p = 1;
+			}
+			else
+				ans = (ans + T.seek(x)) % mod;
+		}
+		else{
+			if(T.siz() == 0 || p == 0){
+				T.ins(x);
+				p = 0;
+			}
+			else
+				ans = (ans + T.seek(x)) % mod;
+		}
+	}
+	printf("%d\n", ans);
+	return 0;
+}

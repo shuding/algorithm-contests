@@ -1,0 +1,60 @@
+#include <algorithm>
+#include <iostream>
+#include <cstring>
+#include <cstdio>
+#define MAXN 1000001
+using namespace std;
+
+struct edge{
+	int t, next;
+	edge(){}
+	edge(int t, int n): t(t), next(n){}
+} e[MAXN * 2];
+
+int etop, st[10001], l[MAXN], v[MAXN];
+
+void add(int s, int t){
+	e[++etop] = edge(t, st[s]);
+	st[s] = etop;
+}
+
+int n, s, t, T;
+
+bool find(int k){
+	for(int i = st[k]; i; i = e[i].next)
+		if(v[e[i].t] < T){
+			v[e[i].t] = T;
+			if(!l[e[i].t] || find(l[e[i].t])){
+				l[e[i].t] = k;
+				return 1;
+			}
+		}
+	return 0;
+}
+
+inline void read(int &n){
+	char c = getchar();
+	n = 0;
+	while(c < '0' || c > '9')
+		c = getchar();
+	while(c >= '0' && c <= '9'){
+		n = n * 10 + c - '0';
+		c = getchar();
+	}
+}
+
+int main(){
+	scanf("%d", &n);
+	for(int i = 1; i <= n; ++i){
+		read(s); read(t);
+		add(s, i);
+		add(t, i);
+	}
+	for(T = 1; T <= 10001; ++T){
+		if(!find(T)){
+			cout << T - 1 << endl;
+			return 0;
+		}
+	}
+}
+

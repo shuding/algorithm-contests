@@ -1,0 +1,73 @@
+
+#include <iostream>
+#include <cstdio>
+#include <deque>
+#define MAXN 50000 + 10
+using namespace std;
+ 
+typedef long long int64;
+const int inf = ~0U >> 1;
+struct range
+{
+    int s, t, num;
+    range(){}
+    range(int _s, int _t, int _num): s(_s), t(_t), num(_num){}
+};
+deque<range> ST;
+int n, l;
+int64 c[MAXN], f[MAXN];
+ 
+int64 cost(int i, int j)
+{
+    return (c[j] - c[i - 1] - l) * (c[j] - c[i - 1] - l);
+}
+ 
+int binary_seek(int l, int r, int i)
+{
+    while(l <= r)
+    {
+        int mid = (l + r) / 2;
+        if(f[ST.back().num] + cost(ST.back().num + 1, mid) >= f[i] + cost(i + 1, mid))
+            r = mid - 1;
+        else
+            l = mid + 1;
+    }
+    return l;
+}
+ 
+void work()
+{
+    ST.push_back(range(1, n, 0));
+    for(int i = 1; i <= n; i++)
+    {
+        f[i] = f[ST.front().num] + cost(ST.front().num + 1, i);
+        if(ST.front().s < ST.front().t)
+            ST.front().s++;
+        else
+            ST.pop_front();
+        while(!ST.empty() && i < ST.back().s && f[ST.back().num] + cost(ST.back().num + 1, ST.back().s) >= f[i] + cost(i + 1, ST.back().s))
+            ST.pop_back();
+        if(ST.empty())
+            ST.push_back(range(i + 1, n, i));
+        else
+        {
+            ST.back().t = binary_seek(ST.back().s, ST.back().t, i) - 1;
+            if(ST.back().t < n)
+                ST.push_back(range(ST.back().t + 1, n, i));
+        }
+    }
+    printf("%lld\n", f[n]);
+}
+ 
+int main()
+{
+    scanf("%d%d", &n, &l);
+    l++;
+    for(int i = 1; i <= n; i++)
+    {
+        scanf("%lld", &c[i]);
+        c[i] += c[i - 1] + 1;
+    }
+    work();
+    return 0;
+}

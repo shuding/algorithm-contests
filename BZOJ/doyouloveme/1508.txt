@@ -1,0 +1,146 @@
+/*
+* Copyright (C) 2012 All rights reserved.
+* File name:  game.cpp
+* Author:     Parabola_ds
+* Creat time: 2012.05.30
+*/
+#include <algorithm>
+#include <iostream>
+#include <cstdlib>
+#include <cstring>
+#include <climits>
+#include <vector>
+#include <cstdio>
+#include <queue>
+#include <cmath>
+#include <set>
+#include <map>
+#define MAXN 1000
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+int m, n, value, number;
+int belong[MAXN + 10], sign[MAXN + 10], num[MAXN + 10], len[MAXN + 10], power[9];
+int add[10][10], dev[10][10], aad[10][10], pos[MAXN + 10];
+bool equ(0);
+char s[MAXN + 10];
+
+void init(){
+	add[0][0] = 1;
+	add[0][1] = 8;
+	add[1][0] = 1;
+	add[1][1] = 7;
+	add[2][0] = 0;
+	add[3][0] = 1;
+	add[3][1] = 9;
+	add[4][0] = 0;
+	add[5][0] = 2;
+	add[5][1] = 9;
+	add[5][2] = 6;
+	add[6][0] = 1;
+	add[6][1] = 8;
+	add[7][0] = 0;
+	add[8][0] = 0;
+	add[9][0] = 1;
+	add[9][1] = 8;
+
+	dev[1][0] = 0;
+	dev[2][0] = 0;
+	dev[3][0] = 0;
+	dev[4][0] = 0;
+	dev[5][0] = 0;
+	dev[6][0] = 1;
+	dev[6][1] = 5;
+	dev[7][0] = 1;
+	dev[7][1] = 1;
+	dev[8][0] = 3;
+	dev[8][1] = 0;
+	dev[8][2] = 6;
+	dev[8][3] = 9;
+	dev[9][0] = 2;
+	dev[9][1] = 3;
+	dev[9][2] = 5;
+	
+	aad[0][0] = 2;
+	aad[0][1] = 6;
+	aad[0][2] = 9;
+	aad[1][0] = 0;
+	aad[2][0] = 1;
+	aad[2][1] = 3;
+	aad[3][0] = 2;
+	aad[3][1] = 2;
+	aad[3][2] = 5;
+	aad[4][0] = 0;
+	aad[5][0] = 1;
+	aad[5][1] = 3;
+	aad[6][0] = 2;
+	aad[6][1] = 9;
+	aad[6][2] = 0;
+	aad[7][0] = 0;
+	aad[8][0] = 0;
+	aad[9][0] = 2;
+	aad[9][1] = 6;
+	aad[9][2] = 0;
+}
+
+int main(){
+	char c;
+	sign[1] = 1;
+	while((c = getchar()) != '#'){
+		s[m] = c;
+		num[++m] = -1;
+		switch(c){
+			case '+':
+				sign[n + 1] = !equ;
+				break;
+			case '-':
+				sign[n + 1] = equ;
+				break;
+			case '=':
+				equ = 1;
+				break;
+			default:
+				num[m] = c - '0';
+				if(m == 1 || num[m - 1] == -1){
+					value += number * (sign[n] ? 1 : -1);
+					number = 0;
+					++n;
+				}
+				belong[m] = n;
+				pos[m] = pos[m - 1] + 1;
+				len[n]++;
+				number = number * 10 + num[m];
+				break;
+		}
+	}
+	value += number * (sign[n] ? 1 : -1);
+	power[0] = 1;
+	rep(i, 8)
+		power[i] = power[i - 1] * 10;
+	init();
+	rep(i, m)
+		if(num[i] != -1){
+			rep(j, aad[num[i]][0]){
+				int delta = (sign[belong[i]] ? 1 : -1) * (aad[num[i]][j] - num[i]) * power[len[belong[i]] - pos[i]];
+				if(value + delta == 0){
+					s[i - 1] = aad[num[i]][j] + '0';
+					printf("%s#\n", s);
+					return 0;
+				}
+			}
+			rep(k1, dev[num[i]][0])
+				rep(j, m) if(j != i && num[j] != -1)
+					rep(k2, add[num[j]][0]){
+						int delta = (sign[belong[i]] ? 1 : -1) * (dev[num[i]][k1] - num[i]) * power[len[belong[i]] - pos[i]]
+							      + (sign[belong[j]] ? 1 : -1) * (add[num[j]][k2] - num[j]) * power[len[belong[j]] - pos[j]];
+						if(value + delta == 0){
+							s[i - 1] = dev[num[i]][k1] + '0';
+							s[j - 1] = add[num[j]][k2] + '0';
+							printf("%s#\n", s);
+							return 0;
+						}
+					}
+		}
+	printf("No\n");
+	return 0;
+}

@@ -1,0 +1,117 @@
+#include <iostream>
+#include <cstdio>
+#include <algorithm>
+#define rep(i, n) for(int i = 0; i < n; i++)
+using namespace std;
+struct data
+{
+    int l, r, mid, Max;
+    bool block;
+} tree[200050];
+int n, m;
+void build(int n, int L, int R)
+{
+    if(L == R)
+    {
+        scanf("%d%d", &tree[n].l, &tree[n].Max);
+        tree[n].mid = tree[n].r = tree[n].l;
+        tree[n].block = false;
+        return;
+    }
+    build(n * 2, L, (L + R) / 2);
+    build(n * 2 + 1, (L + R) / 2 + 1, R);
+    tree[n].l = tree[n * 2].l;
+    tree[n].r = tree[n * 2 + 1].r;
+    tree[n].mid = tree[n * 2].r;
+    tree[n].block = tree[n * 2].r + 1 != tree[n * 2 + 1].l || tree[n * 2].block || tree[n * 2 + 1].block;
+    tree[n].Max = max(tree[n * 2].Max, tree[n * 2 + 1].Max);
+}
+int seek(int n, int L, int R, int k) //0 for false, 1 for true, 2 for maybe
+{
+    if(R < tree[n].l || L > tree[n].r)
+        return 2;
+    if(tree[n].l == L && tree[n].r == R)
+    {
+        if(tree[n].Max >= k)
+            return 0;
+        if(tree[n].block)
+            return 2;    
+        return 1;
+    }
+    if(L <= tree[n].l && R >= tree[n].r)
+    {
+        if(tree[n].Max >= k)
+            return 0;
+        return 2;        
+    }
+    if(R <= tree[n].mid)
+        return seek(n * 2, L, R, k);
+    if(L > tree[n].mid)
+        return seek(n * 2 + 1, L, R, k);
+    int t1, t2;
+    t1 = seek(n * 2, L, tree[n].mid, k);
+    t2 = seek(n * 2 + 1, tree[n].mid + 1, R, k);
+    if(t1 == 0 || t2 == 0)
+        return 0;
+    if(t1 == 2 || t2 == 2)
+        return 2;
+    return 1;
+}
+int find(int k, int n)
+{
+    if(tree[n].l > k || tree[n].r < k)
+        return -1;
+    if(tree[n].l == tree[n].r && tree[n].l == k)
+        return tree[n].Max;
+    if(k <= tree[n].mid)
+        return find(k, n * 2);
+    return find(k, n * 2 + 1);
+}
+int main()
+{
+    scanf("%d", &n);
+    build(1, 1, n);
+    scanf("%d", &m);
+    int L, R, t, k, Y;
+    while(m--)
+    {
+        scanf("%d%d", &L, &R);
+        k = find(R, 1);
+        Y = find(L, 1);
+        if(Y < k && k != -1 && Y != -1)
+            printf("false\n");
+        else
+        {
+            L++;
+            R--;
+            if(k == -1 && Y == -1)
+                printf("maybe\n");
+            else
+                if(L > R)
+                    if(k != -1 && Y != -1)
+                        printf("true\n");
+                    else
+                        printf("maybe\n");
+                else
+                    if(k != -1)
+                    {
+                        t = seek(1, L, R, k);
+                        if(t == 0)
+                            printf("false\n");
+                        else
+                            if(t == 1 && Y != -1)
+                                printf("true\n");
+                            else
+                                printf("maybe\n");
+                    }
+                    else
+                    {
+                        t = seek(1, L, R, Y);
+                        if(t == 0)
+                            printf("false\n");
+                        else
+                            printf("maybe\n");
+                    }
+        }
+    }
+}

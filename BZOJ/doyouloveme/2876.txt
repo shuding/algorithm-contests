@@ -1,0 +1,52 @@
+#include <algorithm>
+#include <iostream>
+#include <cstdio>
+#define MAXN 10010
+using namespace std;
+
+const double eps = 1e-13, inf = 1e8;
+int n;
+long double ans = inf, e, s[MAXN], k[MAXN], _v[MAXN], v[MAXN];
+
+void calc(int i, double lamada){
+	long double tmp = inf, l = _v[i] > 0 ? _v[i] : 0, r = inf, m, equ = 0.5 / k[i] / lamada;
+	if(l * l * (l - _v[i]) > equ + eps){
+		v[i] = inf;
+		return;
+	}
+	while(tmp > equ + eps || tmp < equ - eps){
+		m = (l + r) * 0.5;
+		tmp = m * m * (m - _v[i]);
+		if(tmp > equ)
+			r = m;
+		else
+			l = m;
+	}
+	v[i] = m;
+}
+
+bool check(double lamada){
+	long double sum = 0, calcAns = 0;
+	for(int i = 1; i <= n; ++i)
+		calc(i, lamada), sum += s[i] * k[i] * (v[i] - _v[i]) * (v[i] - _v[i]), calcAns += s[i] / v[i];
+	if(sum <= e)
+		ans = min(ans, calcAns);
+	return sum <= e;
+}
+
+int main(){
+	cin >> n >> e;
+	for(int i = 1; i <= n; ++i)
+		scanf("%Lf%Lf%Lf", &s[i], &k[i], &_v[i]);
+	long double l = 0, r = inf, m;
+	while(r - l > eps){
+		m = (l + r) * 0.5;
+		if(check(m))
+			r = m;
+		else
+			l = m;
+	}
+	printf("%.6Lf\n", ans);
+	return 0;
+}
+

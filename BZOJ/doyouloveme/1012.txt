@@ -1,0 +1,49 @@
+#include <iostream>
+#include <cstdio>
+#define rep(i, n) for(int i = 0; i < n; i++)
+#define LL long long
+#define debug(x) cout << #x << " = " << x << endl;
+using namespace std;
+LL m, d, n, l = 0, t = 0;
+LL ans[200000], fa[200000];
+char p;
+int father(int i)
+{
+    if(fa[i] == i)
+        return i;
+    else
+        return fa[i] = father(fa[i]);
+}
+void add(LL n)
+{
+    int i = l;
+    n = (n + t) % d;
+    ans[l++] = n;
+    while(i > 0 && ans[i - 1] < n)
+    {
+        fa[i - 1] = l - 1;
+        i--;
+    }
+}
+void query(LL n)
+{
+    t = ans[father(l - n)];
+    printf("%d\n", t);
+}
+int main()
+{
+    scanf("%d%d", &m, &d);
+    rep(i, m)
+        fa[i] = i;
+    rep(i, m)
+    {
+        while((p = getchar()) == '\n')
+            ;
+        scanf("%d", &n);
+        if(p == 'A')
+            add(n);
+        else
+            query(n);
+    }
+    return 0;
+}

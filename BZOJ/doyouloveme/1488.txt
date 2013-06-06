@@ -1,0 +1,55 @@
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+#include <cstdio>
+#define mod 997
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+int n, ans, g[100][100], f[100], h[5001], A[100];
+
+int gcd(int a, int b){
+	return !b ? a : gcd(b, a % b);
+}
+
+int power(int a, int b){
+	if(b == 1) return a;
+	int p = power(a, b >> 1);
+	p = p * p % mod;
+	if(b & 1) p = p * a % mod;
+	return p;
+}
+
+void dfs(int deep, int n, int last, int t, int k, int l){
+	if(!n)
+		ans = (ans + t * h[k]) % mod;
+	else{
+		int _t = t, _k = k;
+		for(int i = last; i <= n; ++i){
+			A[deep] = i;
+			t = _t; k = _k;
+			t = t * h[i >> 1] % mod * f[i] % mod;
+			rep(j, deep - 1)
+				k = k + g[A[j]][i];
+			if(i == A[deep - 1]) l++; else l = 1;
+			t = t * f[l] % mod;
+			dfs(deep + 1, n - i, i, t, k, l);
+		}
+	}
+}
+
+int main(){
+	scanf("%d", &n);
+	rep(i, n)
+		rep(j, n)
+			g[i][j] = gcd(i, j);
+	h[0] =  1;
+	rep(i, n)
+		f[i] = power(i, mod - 2);
+	rep(i, 5000)
+		h[i] = h[i - 1] * 2 % mod;
+	A[0] = 0;
+	dfs(1, n, 1, 1, 0, 0);
+	printf("%d\n", ans);
+	return 0;
+}

@@ -1,0 +1,53 @@
+#include <algorithm>
+#include <iostream>
+#include <cstdio>
+#include <cmath>
+#define MAXN 1010
+#define MAXM 1000010
+using namespace std;
+
+struct edge{
+	int a, b;
+	double d;
+	inline bool operator < (const edge &e) const{
+		return d < e.d;
+	}
+} e[MAXM];
+
+int n, m, f[MAXN];
+double x[MAXN], y[MAXN], ans;
+
+inline int father(int v){
+	return f[v] == v ? v : f[v] = father(f[v]);
+}
+
+double dis(int a, int b){
+	return (x[a] - x[b]) * (x[a] - x[b]) + (y[a] - y[b]) * (y[a] - y[b]);
+}
+
+int main(){
+	scanf("%d%d", &n, &m);
+	for(int i = 1; i <= n; ++i)
+		scanf("%lf%lf", &x[i], &y[i]), f[i] = i;
+	int a, b;
+	for(int i = 1; i <= m; ++i){
+		scanf("%d%d", &a, &b);
+		f[father(a)] = father(b);
+	}
+	m = 0;
+	for(int i = 1; i <= n; ++i)
+		for(int j = 1; j < i; ++j){
+			m++;
+			e[m].a = i;
+			e[m].b = j;
+			e[m].d = sqrt(dis(i, j));
+		}
+	sort(e + 1, e + 1 + m);
+	for(int i = 1; i <= m; ++i)
+		if(father(e[i].a) != father(e[i].b)){
+			f[father(e[i].a)] = father(e[i].b);
+			ans += e[i].d;
+		}
+	printf("%.2lf\n", ans);
+	return 0;
+}

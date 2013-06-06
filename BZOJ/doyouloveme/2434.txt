@@ -1,0 +1,134 @@
+/*
+* Copyright (C) 2012 All rights reserved.
+* File name:  type.cpp
+* Author:     Parabola_ds
+* Creat time: 2012.07.13
+*/
+#include <algorithm>
+#include <iostream>
+#include <cstdlib>
+#include <cstring>
+#include <climits>
+#include <vector>
+#include <cstdio>
+#include <queue>
+#include <cmath>
+#include <set>
+#include <map>
+#define MAXN 100010
+#define MAXM 100010
+#define MAXL 100010
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+struct query{
+	int x, y, id;
+	inline bool operator < (const query &q) const{
+		return y < q.y;
+	}
+} q[MAXM];
+
+struct trieNode{
+	int c[26], f, fail;
+} node[MAXL];
+
+int n, m, ind, nodeNum = 1, tPos[MAXN], lPos[MAXN], rPos[MAXN], son[MAXN], bro[MAXN];
+char s[MAXL];
+
+void buildTrie(){
+	int len = strlen(s), num = 0, pos = 1;
+	for(int i = 0; i < len; ++i)
+		switch(s[i]){
+			case 'P':
+				tPos[++num] = pos;
+				break;
+			case 'B':
+				if(pos != 1)
+					pos = node[pos].f;
+				break;
+			default:
+				if(!node[pos].c[s[i] - 'a']){
+					node[pos].c[s[i] - 'a'] = ++nodeNum;
+					node[nodeNum].f = pos;
+				}
+				pos = node[pos].c[s[i] - 'a'];
+		}
+}
+
+void buildACA(){
+	static int que[MAXN];
+	int qTop = 1, tmp; que[1] = 1;
+	rep(i, qTop)
+		for(int j = 0; j < 26; ++j)
+			if(node[que[i]].c[j]){
+				que[++qTop] = node[que[i]].c[j];
+				tmp = node[que[i]].fail;
+				while(tmp && !node[tmp].c[j]) tmp = node[tmp].fail;
+				node[node[que[i]].c[j]].fail = !tmp ? 1 : node[tmp].c[j];
+				bro[node[que[i]].c[j]] = son[node[node[que[i]].c[j]].fail];
+				son[node[node[que[i]].c[j]].fail] = node[que[i]].c[j];
+			}
+}
+
+int tSum[MAXN * 2];
+
+struct treeShapeArray{
+	int getSum(int x){
+		int tot = 0;
+		for(; x; x -= x & -x)
+			tot += tSum[x];
+		return tot;
+	}
+	void modify(int k, int x){
+		for(; k <= nodeNum * 2; k += k & -k)
+			tSum[k] += x;
+	}
+} TSA;
+
+void dfsFailTree(int v){
+	lPos[v] = ++ind;
+	for(int i = son[v]; i; i = bro[i])
+		dfsFailTree(i);
+	rPos[v] = ++ind;
+}
+
+void calcAns(){
+	static int ans[MAXM];
+	int qTop = 1, pos = 1, len = strlen(s), num = 0;
+	for(int i = 0; i < len; ++i)
+		switch(s[i]){
+			case 'P':
+				num++;
+				while(num == q[qTop].y){
+					ans[q[qTop].id] = TSA.getSum(rPos[tPos[q[qTop].x]]) - TSA.getSum(lPos[tPos[q[qTop].x]] - 1);
+					qTop++;
+				}
+				break;
+			case 'B':
+				TSA.modify(lPos[pos], -1);
+				pos = node[pos].f;
+				break;
+			default:
+				pos = node[pos].c[s[i] - 'a'];
+				TSA.modify(lPos[pos], 1);
+		}
+	rep(i, m)
+		printf("%d\n", ans[i]);
+}
+
+int main(){
+	scanf("%s%d", s, &m);
+	rep(i, m){
+		scanf("%d%d", &q[i].x, &q[i].y);
+		q[i].id = i;
+	}
+	sort(q + 1, q + 1 + m);
+
+	buildTrie();
+	buildACA();
+	dfsFailTree(1);
+
+	calcAns();
+	return 0;
+}
+

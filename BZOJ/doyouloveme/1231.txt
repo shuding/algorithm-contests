@@ -1,0 +1,80 @@
+#include <algorithm>
+#include <iostream>
+#include <cstdio>
+#define rep(i, n) for(int i = 1; i <= n; i++)
+using namespace std;
+typedef long long int64;
+
+struct data
+{
+	int num, sum;
+} d[131072];
+bool operator < (const data &a, const data &b)
+{
+	return a.sum < b.sum;
+}
+
+int n, D, s[17], t, st[17];
+int64 f[2][17][131072];
+
+void init(int _dit, int tot, int N)
+{
+	if(_dit == n)
+	{
+		t++;
+		d[t].num = tot;
+		d[t].sum = N;
+		return;
+	}
+	init(_dit + 1, tot * 2, N);
+	init(_dit + 1, tot * 2 + 1, N + 1);
+}
+
+bool have(int a, int b)
+{
+	return (d[a].num >> (b - 1)) & 1;
+}
+
+int merge(int a, int b)
+{
+	return d[a].num | (1 << (b - 1));
+}
+
+int abs(int x)
+{
+	return x > 0 ? x : -x;
+}
+
+int main()
+{
+	scanf("%d%d", &n, &D);
+	rep(i, n)
+		scanf("%d", &s[i]);
+	init(0, 0, 0);
+	sort(d + 1, d + 1 + t);
+	rep(i, t)
+		if(d[i].sum != d[i - 1].sum)
+			st[d[i].sum] = i;
+	st[0] = 1;
+	rep(i, n)
+		rep(j, n)
+			for(int k = st[i - 1]; k < st[i]; k++)
+				if(!have(k, j))
+				{
+					int SUM = merge(k, j);
+					f[0][j][SUM] = f[1][j][SUM] = i == 1;
+					rep(p, n)
+						if(have(k, p))
+						{
+							if(abs(s[p] - s[j]) <= D)
+								f[0][j][SUM] += f[0][p][d[k].num];
+							else
+								f[1][j][SUM] += f[1][p][d[k].num];
+						}
+				}
+	int64 tot = 0;
+	rep(i, n)
+		tot += f[1][i][d[t].num];
+	printf("%lld\n", tot);
+	return 0;
+}

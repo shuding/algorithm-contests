@@ -1,0 +1,116 @@
+#include <iostream>
+#include <cstdio>
+#include <cstdlib>
+#include <cmath>
+#include <algorithm>
+#include <stack>
+#define MAXN 2000 + 10
+using namespace std;
+
+const double inf = 1e10;
+int n, l[MAXN * 2];
+
+struct point
+{
+    double x, y;
+} p[MAXN];
+
+bool operator < (const point &a, const point &b)
+{
+    return a.x < b.x || (a.x == b.x && a.y < b.y);
+}
+
+double dis(int a, int b)
+{
+    return sqrt((p[a].x - p[b].x) * (p[a].x - p[b].x) + (p[a].y - p[b].y) * (p[a].y - p[b].y));
+}
+
+double _area(int a, int b, int c)
+{
+    a = l[a];
+    b = l[b];
+    c = l[c];
+    return abs(p[a].x * p[b].y + p[a].y * p[c].x + p[b].x * p[c].y - p[b].y * p[c].x - p[a].x * p[c].y - p[b].x * p[a].y) / 2;
+}
+
+double area(int a, int b, int c)
+{
+    return (p[a].x * p[b].y + p[a].y * p[c].x + p[b].x * p[c].y - p[b].y * p[c].x - p[a].x * p[c].y - p[b].x * p[a].y);
+}
+
+double get_s(int a, int b)
+{
+    if(abs(a - b) <= 1)
+	return 0;
+    int mid, l = a, r = b;
+    while(l <= r)
+    {
+	mid = (l + r) / 2;
+	if(_area(a, b, mid) < _area(a, b, mid + 1))
+	    l = mid + 1;
+	else
+	    if(_area(a, b, mid) < _area(a, b, mid - 1))
+		r = mid - 1;
+	    else
+		break;
+    }
+    return _area(a, b, mid);
+}
+
+int main()
+{
+    scanf("%d", &n);
+    for(int i = 1; i <= n; i++)
+	scanf("%lf%lf", &p[i].x, &p[i].y);
+    sort(p + 1, p + n + 1);
+    stack<int> s;
+    for(int i = 1; i <= n; i++)
+    {
+	while(s.size() >= 2)
+	{
+	    int _p = s.top();
+	    s.pop();
+	    if(area(s.top(), _p, i) < 0)
+	    {
+		s.push(_p);
+		break;
+	    }
+	}
+	s.push(i);
+    }
+    int last = s.size() - 1;
+    while(s.size() > 0)
+    {
+	l[s.size()] = s.top();
+	s.pop();
+    }
+    for(int i = n; i >= 1; i--)
+    {
+	while(s.size() >= 2)
+	{
+	    int _p = s.top();
+	    s.pop();
+	    if(area(s.top(), _p, i) < 0)
+	    {
+		s.push(_p);
+		break;
+	    }
+	}
+	s.push(i);
+    }
+    int _last = s.size();
+    while(s.size() > 0)
+    {
+	l[s.size() + last] = s.top();
+	s.pop();
+    }
+    last = last + _last - 1;
+    for(int i = 1; i <= last; i++)
+	l[last + i] = l[i];
+    double ans = 0;
+    for(int i = 1; i <= last; i++)
+	for(int j = i + 2; j <= last; j++)
+	    ans = max(ans, get_s(i, j) + get_s(j, i + last));
+    printf("%.3lf\n", ans);
+    return 0;
+}

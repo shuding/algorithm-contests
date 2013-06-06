@@ -1,0 +1,81 @@
+{
+Problem         USACO_2008_Feb Line
+Algorithm       Sort
+Author          DS
+Date            2011/11/8 15:44
+Complexity      O(n^2logn^2)
+}
+program bzoj1610;
+
+const
+  inf = 1000000000;
+
+var
+  n, i, j, t, tot: longint;
+  x, y: array[1..200] of longint;
+  a: array[1..40000] of extended;
+
+  function get(i, j: longint): extended;
+  begin
+    if x[i] = x[j] then
+      exit(inf);
+    exit((y[i] - y[j]) / (x[i] - x[j]));
+  end;
+
+  procedure qsort(i, j: longint);
+  var
+    p, q: longint;
+    key: extended;
+  begin
+    p := i;
+    q := j;
+    key := a[(p + q) div 2];
+    a[(p + q) div 2] := a[p];
+    a[p] := key;
+    while p < q do
+    begin
+      while (p < q) and (key <= a[q]) do
+        Dec(q);
+      if p <> q then
+      begin
+        a[p] := a[q];
+        Inc(p);
+      end;
+      while (p < q) and (key >= a[p]) do
+        Inc(p);
+      if p <> q then
+      begin
+        a[q] := a[p];
+        Dec(q);
+      end;
+    end;
+    a[p] := key;
+    if p - i > 1 then
+      qsort(i, p - 1);
+    if j - q > 1 then
+      qsort(q + 1, j);
+  end;
+
+begin
+  Read(n);
+  for i := 1 to n do
+    Read(x[i], y[i]);
+  for i := 1 to n do
+    for j := i + 1 to n do
+    begin
+      Inc(tot);
+      a[tot] := get(i, j);
+    end;
+  qsort(1, tot);
+  t := 0;
+  i := 1;
+  while i <= tot do
+  begin
+    j := i;
+    while (a[j] = a[i]) and (j <= tot) do
+      Inc(j);
+    Inc(t);
+    i := j;
+  end;
+  Write(t);
+end.

@@ -1,0 +1,102 @@
+/*
+* Copyright (C) 2012 All rights reserved.
+* File name:  employee.cpp
+* Author:     Parabola_ds
+* Creat time: 2012.07.07
+*/
+#include <algorithm>
+#include <iostream>
+#include <cstdlib>
+#include <cstring>
+#include <climits>
+#include <vector>
+#include <cstdio>
+#include <queue>
+#include <cmath>
+#include <set>
+#include <map>
+#define MAXN 2010
+#define MAXM 20010
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+const int inf = ~0U >> 1;
+
+struct edge{
+	int t, next, f, c;
+} e[MAXM * 10];
+
+int n, m, s, t, x, z, c;
+int st[MAXN], etop, S, T;
+
+void addEdge(int s, int t, int f, int c){
+	etop++;
+	e[etop].t = t;
+	e[etop].next = st[s];
+	e[etop].f = f;
+	e[etop].c = c;
+	st[s] = etop;
+}
+
+int que[MAXN * 10], pre[MAXN], dis[MAXN], inq[MAXN];
+
+bool spfa(){
+	int q = 0;
+	rep(i, T) dis[i] = inf, inq[i] = 0, pre[i] = 0;
+	dis[S] = 0; inq[S] = 1; que[0] = S;
+	for(int i = 0; i <= q; ++i){
+		for(int j = st[que[i]]; j; j = e[j].next)
+			if(e[j].f && dis[e[j].t] > dis[que[i]] + e[j].c){
+				dis[e[j].t] = dis[que[i]] + e[j].c;
+				pre[e[j].t] = j;
+				if(!inq[e[j].t]) que[++q] = e[j].t;
+				inq[e[j].t] = 1;
+			}
+		inq[que[i]] = 0;
+	}
+	return dis[T] != inf;
+}
+
+int mcmf(){
+	int f, v, sum = 0;
+	while(spfa()){
+		f = inf;
+		for(v = T; v != S; v = e[pre[v] + (pre[v] & 1 ? 1 : -1)].t)
+			f = min(f, e[pre[v]].f);
+		for(v = T; v != S; v = e[pre[v] + (pre[v] & 1 ? 1 : -1)].t){
+			e[pre[v]].f -= f;
+			e[pre[v] + (pre[v] & 1 ? 1 : -1)].f += f;
+		}
+		sum += dis[T] * f;
+	}
+	return sum;
+}
+
+int main(){
+	scanf("%d%d", &n, &m);
+	S = n + 2; T = S + 1;
+	rep(i, n + 1){
+		if(i <= n)
+			scanf("%d", &z);
+		else
+			z = 0;
+		if(z >= x)
+			addEdge(i, T, z - x, 0),
+			addEdge(T, i, 0, 0);
+		else
+			addEdge(S, i, x - z, 0),
+			addEdge(i, S, 0, 0);
+		x = z;
+	}
+	rep(i, m){
+		scanf("%d%d%d", &s, &t, &c);
+		addEdge(t + 1, s, inf, c);
+		addEdge(s, t + 1, 0, -c);
+	}
+	rep(i, n){
+		addEdge(i, i + 1, inf, 0);
+		addEdge(i + 1, i, 0, 0);
+	}
+	printf("%d\n", mcmf());
+	return 0;
+}

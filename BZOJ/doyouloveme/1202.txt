@@ -1,0 +1,72 @@
+#include <iostream>
+#include <cstdio>
+#define rep(i, n) for(int i = 1; i <= n; i++)
+#define debug(x) cout << #x << " = " << x << endl;
+using namespace std;
+const int inf = ~0U >> 1;
+int w, n, m, s, t, v, sum[105][105];
+bool ANS;
+int main()
+{
+	scanf("%d", &w);
+	while(w--)
+	{
+		scanf("%d%d", &n, &m);
+		rep(i, n)
+			rep(j, n)
+				sum[i][j] = inf;
+		ANS = true;
+		rep(i, m)
+		{
+			scanf("%d%d%d", &s, &t, &v);
+			if(sum[s][t] != inf && sum[s][t] != v)
+				ANS = false;
+			sum[s][t] = v;
+			rep(j, n)
+			{			
+				if(!ANS)
+					break;
+				if(j < s)
+				{
+					if(sum[j][s - 1] != inf)
+						if(sum[j][t] != inf && sum[j][t] != v + sum[j][s - 1])
+							ANS = false;
+						else
+							sum[j][t] = v + sum[j][s - 1];
+					if(sum[j][t] != inf)
+						if(sum[j][s - 1] != inf && sum[j][s - 1] != sum[j][t] - v)
+							ANS = false;
+						else
+							sum[j][s - 1] = sum[j][t] - v;
+				}
+				if(j >= s && j < t)
+				{
+					if(sum[s][j] != inf)
+						if(sum[j + 1][t] != inf && sum[j + 1][t] != v - sum[s][j])
+							ANS = false;
+						else
+							sum[j + 1][t] = v - sum[s][j];
+					if(sum[j + 1][t] != inf)
+						if(sum[s][j] != inf && sum[s][j] != v - sum[j + 1][t])
+							ANS = false;
+						else
+							sum[s][j] = v - sum[j + 1][t];
+				}
+				if(j > t)
+				{
+					if(sum[s][j] != inf)
+						if(sum[t + 1][j] != inf && sum[t + 1][j] != sum[s][j] - v)
+							ANS = false;
+						else
+							sum[t + 1][j] = sum[s][j] - v;
+					if(sum[t + 1][j] != inf)
+						if(sum[s][j] != inf && sum[s][j] != sum[t + 1][j] + v)
+							ANS = false;
+						else
+							sum[s][j] = sum[t + 1][j] + v;
+				}
+			}
+		}
+		printf(ANS ? "true\n" : "false\n");
+	}
+}

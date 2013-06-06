@@ -1,0 +1,22 @@
+#include <algorithm>
+#include <iostream>
+#include <cstdio>
+using namespace std;
+
+int n;
+long long tot, a[10100], l;
+
+int main(){
+	scanf("%d", &n);
+	for(int i = 1; i <= n; ++i)
+		scanf("%lld", &a[i]);
+	sort(a + 1, a + 1 + n);
+	for(int i = 1; i <= n; ++i)
+		l += a[i] - a[1];
+	for(int i = 1; i <= n; ++i){
+		tot += l;
+		l = l + (2 * i - n) * (a[i + 1] - a[i]);
+	}
+	cout << tot << endl;
+	return 0;
+}

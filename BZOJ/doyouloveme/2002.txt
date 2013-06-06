@@ -1,0 +1,57 @@
+/***************************************************
+*
+*   Copyright (C) 2012 All rights reserved.
+*   File name:  2002.cpp
+*   Author:     Parabola_ds
+*   Creat time: 2012.04.18
+*
+***************************************************/
+
+#include <algorithm>
+#include <iostream>
+#include <cstdio>
+#include <cmath>
+#define MAXN 200000
+using namespace std;
+
+int step[MAXN], next[MAXN], pos[MAXN], k[MAXN];
+
+int main(){
+	int n, m, x, y, len, cmd, tot;
+	scanf("%d", &n);
+	len = int(sqrt(n));
+	for(int i = 0; i < n; ++i){
+		scanf("%d", &k[i]);
+		pos[i] = i / len;
+		next[i] = i + k[i]; step[i] = 1;
+	}
+	for(int i = n - 1; i >= 0; --i)
+		if(pos[i] == pos[next[i]]){
+			step[i] += step[next[i]];
+			next[i] = next[next[i]];
+		}
+	scanf("%d", &m);
+	while(m--){
+		scanf("%d", &cmd);
+		if(cmd == 1){
+			scanf("%d", &x);
+			tot = 0;
+			while(x < n)
+				tot += step[x], x = next[x];
+			printf("%d\n", tot);
+		}
+		else{
+			scanf("%d%d", &x, &y);
+			k[x] = y;
+			for(int i = x; i >= 0 && pos[i] == pos[x]; --i){
+				next[i] = i + k[i]; step[i] = 1;
+				if(pos[i] == pos[next[i]]){
+					step[i] += step[next[i]];
+					next[i] = next[next[i]];
+				}
+			}
+		}
+	}
+	return 0;
+}
+

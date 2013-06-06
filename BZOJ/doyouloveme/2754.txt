@@ -1,0 +1,112 @@
+//
+//  main.cpp
+//  BZOJ_2754
+//
+//  Created by ds on 12-8-22.
+//  Copyright (c) 2012年 ds. All rights reserved.
+//
+
+#include <iostream>
+#include <cstdio>
+#include <vector>
+#include <map>
+#define MAXN 20010
+#define MAXM 50010
+#define MAXL 100010
+using namespace std;
+
+const int inf = ~0U >> 1;
+struct node{
+	int fail, tailNum;
+	vector<int> tail;
+	map<int, int> c;
+	node(){
+		fail = tailNum = 0;
+	}
+} nodes[MAXL];
+
+int n, m, l, tot, top;
+int nameString[MAXL + MAXN], name[MAXN][2], str[MAXL];
+
+void insert(int l, int v){
+	int n = 0;
+	for(int i = 1; i <= l; ++i){
+		int &tmp = nodes[n].c[str[i]];
+		if(tmp)
+			n = tmp;
+		else
+			tmp = n = ++tot;
+	}
+	nodes[n].tail.push_back(v);
+	nodes[n].tailNum++;
+}
+
+void buildACA(){
+	static int que[MAXL + MAXN];
+	int top = 1;
+	que[1] = 0;
+	for(int i = 1; i <= top; ++i)
+		for(map<int, int>::iterator j = nodes[que[i]].c.begin();
+			j != nodes[que[i]].c.end(); ++j){
+			int tmp = nodes[que[i]].fail;
+			if(que[i]){
+				while(tmp && !nodes[tmp].c[j->first])
+					tmp = nodes[tmp].fail;
+				tmp = nodes[tmp].c[j->first];
+			}
+			nodes[j->second].fail = tmp;
+			que[++top] = j->second;
+		}
+}
+
+int cnt[MAXM], ans[MAXN], vst[MAXL + MAXN];
+
+void query(int v){
+	int n = 0, m;
+	for(int i = name[v][0]; i < name[v][1]; ++i){
+		while(n && !nodes[n].c[nameString[i]])
+			n = nodes[n].fail;
+		if(nodes[n].c[nameString[i]])
+			n = nodes[n].c[nameString[i]];
+		m = n;
+		do{
+			if(nodes[m].tailNum && vst[m] != v){
+				for(int j = 0; j < nodes[m].tailNum; ++j)
+					ans[v]++, cnt[nodes[m].tail[j]]++;
+				vst[m] = v;
+			}
+			m = nodes[m].fail;
+		}while(m);
+	}
+}
+
+int main(){
+	scanf("%d%d", &n, &m);
+	for(int i = 1; i <= n; ++i){
+		name[i][0] = top;
+		scanf("%d", &l);
+		for(int j = 1; j <= l; ++j)
+			scanf("%d", &nameString[top++]);
+		nameString[top++] = inf;
+		scanf("%d", &l);
+		for(int j = 1; j <= l; ++j)
+			scanf("%d", &nameString[top++]);
+		name[i][1] = top;
+	}
+	for(int i = 1; i <= m; ++i){
+		scanf("%d", &l);
+		for(int j = 1; j <= l; ++j)
+			scanf("%d", &str[j]);
+		insert(l, i);
+	}
+	buildACA();
+	for(int i = 1; i <= n; ++i)
+		query(i);
+	for(int i = 1; i <= m; ++i)
+		printf("%d\n", cnt[i]);
+	for(int i = 1; i < n; ++i)
+		printf("%d ", ans[i]);
+	printf("%d\n", ans[n]);
+	return 0;
+}
+

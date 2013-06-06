@@ -1,0 +1,39 @@
+#include <algorithm> 
+#include <iostream> 
+#include <cstdio> 
+using namespace std; 
+  
+int a, b, X, Y, tot; 
+bool v[10][10]; 
+  
+void dfs(int x, int y){ 
+    if((x == 0 || x == a || y == 0 || y == b) && (x != X || y != Y)){ 
+        tot++; 
+        return; 
+    } 
+    if(x < 0 || x > a || y < 0 || y > b || v[x][y] || (x == X && y == Y)) 
+        return; 
+    v[x][y] = 1; 
+    dfs(x - 1, y); 
+    dfs(x + 1, y); 
+    dfs(x, y - 1); 
+    dfs(x, y + 1); 
+    v[x][y] = 0; 
+} 
+  
+int main(){ 
+    scanf("%d%d", &a, &b); 
+    for(int i = 1; i < a; ++i){ 
+        X = i; Y = 0; 
+        dfs(i, 1); 
+        X = i; Y = b; 
+        dfs(i, b - 1); 
+    } 
+    for(int i = 1; i < b; ++i){ 
+        X = 0; Y = i; 
+        dfs(1, i); 
+        X = a; Y = i; 
+        dfs(a - 1, i); 
+    } 
+    cout << tot / 2 << endl; 
+}

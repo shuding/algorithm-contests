@@ -1,0 +1,71 @@
+/***************************************************
+*
+*   Copyright (C) 2012 All rights reserved.
+*   File name:  2004.cpp
+*   Author:     Parabola_ds
+*   Creat time: 2012.04.18
+*
+***************************************************/
+
+#include <iostream>
+#include <cstring>
+#include <cstdio>
+#define mod 30031
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+struct matrix{
+	int n, m, d[150][150];
+	matrix operator *(const matrix &a) const{
+		matrix c; 
+		memset(c.d, 0, sizeof(c.d));
+		c.n = n; c.m = a.m;
+		rep(i, n)
+			rep(j, a.m)
+				rep(k, m)
+					c.d[i][j] = (c.d[i][j] + d[i][k] * a.d[k][j] % mod) % mod;
+		return c;
+	}
+} g, ans;
+
+int n, k, m, y, x, tot, zt[150], p[1200];
+
+void check(int z){
+	int zk[12], s(0), zz(z);
+	rep(i, m)
+		zk[m - i + 1] = z & 1, z >>= 1;
+	rep(i, m){
+		s += zk[i];
+		if(s > k) return;
+	}
+	if(s < k) return;
+	zt[++tot] = zz;
+	p[zz] = tot;
+}
+
+void make(int t){
+	int z = (zt[t] << 1) & x;
+	rep(i, m)
+		if(!((z >> (i - 1)) & 1) && (z + (1 << (i - 1))) >= y)
+			g.d[t][p[z + (1 << (i - 1))]]++;
+}
+
+int main(){
+	scanf("%d%d%d", &n, &k, &m);
+	y = 1 << (m - 1); x = (1 << m) - 1;
+	rep(i, y)
+		check(y + i - 1);
+	g.n = g.m = tot;
+	rep(i, tot)
+		make(i);
+	int b = p[((1 << k) - 1) << (m - k)];
+	n -= k; ans.n = 1; ans.m = tot; ans.d[1][b] = 1;
+	while(1){
+		if(n & 1) ans = ans * g;
+		n >>= 1; if(!n) break;
+		g =g * g;
+	}
+	printf("%d\n", ans.d[1][b]);
+	return 0;
+}
+

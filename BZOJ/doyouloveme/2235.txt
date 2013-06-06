@@ -1,0 +1,89 @@
+// 最大权闭合图。。经典题
+#include <algorithm>
+#include <iostream>
+#include <cstring>
+#include <cstdio>
+#include <cmath>
+#define MAXN 510
+#define rep(i, n) for(int i = 1; i <= n; i++)
+using namespace std;
+
+const int inf = 1000000000;
+
+int TestNum, n, x[MAXN], y[MAXN], r[MAXN], s[MAXN];
+int S, T, SUM, g[MAXN][MAXN], h[MAXN], hn[MAXN];
+
+int dis(int a, int b){
+	return (x[a] - x[b]) * (x[a] - x[b]) + (y[a] - y[b]) * (y[a] - y[b]);
+}
+
+void read_data(){
+	memset(g, 0, sizeof(g));
+	scanf("%d", &n);
+	S = n + 1; T = S + 1;
+	SUM = 0;
+	rep(i, n){
+		scanf("%d%d%d%d", &x[i], &y[i], &r[i], &s[i]);
+		if(s[i] >= 0){
+			g[S][i] = s[i];
+			SUM += s[i];
+		}
+		else
+			g[i][T] = -s[i];
+	}
+	rep(i, n)
+		rep(j, n)
+			if(i != j && dis(i, j) <= r[i] * r[i])
+				g[i][j] = inf;
+}
+
+int sap(int v, int lim){
+	if(v == T || !lim)
+		return lim;
+	int left = lim, tmp = T - 1;
+	rep(i, T){
+		if(g[v][i] && h[v] == h[i] + 1){
+			int f = sap(i, min(left, g[v][i]));
+			left -= f;
+			g[v][i] -= f;
+			g[i][v] += f;
+			if(h[S] == T)
+				return lim - left;
+		}
+		if(g[v][i])
+			tmp = min(tmp, h[i]);
+	}
+	if(lim == left){
+		hn[h[v]]--;
+		if(!hn[h[v]])
+			h[S] = T;
+		else{
+			h[v] = tmp + 1;
+			hn[h[v]]++;
+		}
+	}
+	return lim - left;
+}
+
+int MaxFlow(){
+	int F = 0;
+	memset(h, 0, sizeof(h));
+	memset(hn, 0, sizeof(hn));
+	hn[0] = T;
+	while(h[S] != T)
+		F += sap(S, inf);
+	return F;
+}
+
+int Calc(){
+	return SUM - MaxFlow();
+}
+
+int main(){
+	scanf("%d", &TestNum);
+	rep(i, TestNum){
+		read_data();
+		printf("Case #%d:%d\n", i, Calc());
+	}
+}
+

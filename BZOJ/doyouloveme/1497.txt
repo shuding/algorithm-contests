@@ -1,0 +1,93 @@
+#include <algorithm>
+#include <iostream>
+#include <cstring>
+#include <cstdio>
+#include <cmath>
+#define MAXN 80000
+#define MAXE 1000000
+#define rep(i, n) for(int i = 1; i <= n; i++)
+using namespace std;
+
+const int inf = 1000000000;
+
+struct edge{
+	int s, t, f, next, anti;
+	edge(){}
+	edge(int _s, int _t, int _f, int _anti): s(_s), t(_t), f(_f), anti(_anti){}
+} e[MAXE];
+
+int n, m, S, T, sum(0);
+int etop(0), st[MAXN];
+
+void add_e(int s, int t, int f, int _anti){
+	etop++;
+	e[etop] = edge(s, t, f, etop + _anti);
+	e[etop].next = st[s];
+	st[s] = etop;
+}
+
+int h[MAXN], hn[MAXN];
+
+int sap(int v, int lim){
+	if(v == T || !lim)
+		return lim;
+	int left = lim, tmp = T - 1, p = st[v];
+	while(p){
+		if(e[p].f && h[v] == h[e[p].t] + 1){
+			int f = sap(e[p].t, min(left, e[p].f));
+			left -= f;
+			e[p].f -= f;
+			e[e[p].anti].f += f;
+			if(h[S] == T)
+				return lim - left;
+		}
+		if(e[p].f)
+			tmp = min(tmp, h[e[p].t]);
+		p = e[p].next;
+	}
+	if(lim == left){
+		hn[h[v]]--;
+		if(!hn[h[v]])
+			h[S] = T;
+		else{
+			h[v] = tmp + 1;
+			hn[h[v]]++;
+		}
+	}
+	return lim - left;
+}
+
+int MaxFlow(){
+	int f = 0;
+	memset(h, 0, sizeof(h));
+	memset(hn, 0, sizeof(hn));
+	hn[0] = T;
+	while(h[S] != T)
+		f += sap(S, inf);
+	return f;
+}
+
+int main(){
+	scanf("%d%d", &n, &m);
+	S = n + m + 1;
+	T = S + 1;
+	rep(i, n){
+		int value;
+		scanf("%d", &value);
+		add_e(i, T, value, 1);
+		add_e(T, i, 0, -1);
+	}
+	rep(i, m){
+		int a, b, c;
+		scanf("%d%d%d", &a, &b, &c);
+		add_e(i + n, a, inf, 1);
+		add_e(a, i + n, 0, -1);
+		add_e(i + n, b, inf, 1);
+		add_e(b, i + n, 0, -1);
+		add_e(S, i + n, c, 1);
+		add_e(i + n, S, 0, -1);
+		sum += c;
+	}
+	printf("%d\n", sum - MaxFlow());
+	return 0;
+}

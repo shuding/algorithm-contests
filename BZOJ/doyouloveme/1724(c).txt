@@ -1,0 +1,33 @@
+#include<cstdio>
+#include<algorithm>
+#include<utility>
+#include<iostream>
+#include<string>
+#include<cstring>
+#include<vector>
+#include<queue>
+#include<cstdlib>
+#include<stack>
+using namespace std;
+priority_queue<int> Heap;
+int n, l;
+long long tot = 0;
+int main()
+{
+    scanf("%d", &n);
+    while(n--)
+    {
+        scanf("%d", &l);
+        Heap.push(-l);
+    }
+    while(Heap.size() >= 2)
+    {
+        l = Heap.top();
+        Heap.pop();
+        l += Heap.top();
+        Heap.pop();
+        tot += l;
+        Heap.push(l);
+    }
+    printf("%lld", -tot);
+}

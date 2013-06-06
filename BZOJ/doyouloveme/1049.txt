@@ -1,0 +1,78 @@
+/*
+* Copyright (C) 2012 All rights reserved.
+* File name:  1049.cpp
+* Author:     Parabola_ds
+* Creat time: 2012.06.03
+*/
+#include <algorithm>
+#include <iostream>
+#include <cstdlib>
+#include <cstring>
+#include <climits>
+#include <vector>
+#include <cstdio>
+#include <queue>
+#include <cmath>
+#include <set>
+#include <map>
+#define MAXN 35000
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+struct data{
+	int id, f, next;
+	data(){}
+	data(int id, int f):
+		id(id), f(f){
+			next = 0;
+		}
+} q[MAXN + 10];
+
+const long long inf = ~0U >> 1;
+set<data> s;
+int n, maxl, it, st[MAXN + 10];
+long long a[MAXN + 10], f[MAXN + 10], g[MAXN + 10], t[MAXN + 10];
+
+void calc(int x, int y){
+	long long tot = 0;
+	for(int i = x + 1; i < y; ++i)
+		tot += abs(a[i] - a[y]);
+	t[y] = min(t[y], tot + t[x]);
+	for(int i = x + 1; i < y; ++i){
+		tot += abs(a[i] - a[x]) - abs(a[i] - a[y]);
+		t[y] = min(t[y], tot + t[x]);
+	}
+}
+
+int main(){
+	scanf("%d", &n);
+	rep(i, n)
+		scanf("%lld", &a[i]), a[i] -= i;
+	f[0] = -inf;
+	rep(i, n){
+		f[i] = inf;
+		int pos = upper_bound(f, f + i, a[i]) - f;
+		f[pos] = a[i];
+		g[i] = pos;
+		maxl = max(maxl, pos);
+	}
+	q[n + 2] = data(0, 0);
+	g[n + 1] = maxl + 1;
+	st[0] = n + 2;
+	a[0] = -inf;
+	a[n + 1] = inf;
+	rep(i, n + 1){
+		t[i] = inf;
+		it = st[g[i] - 1];
+		while(it){
+			if(a[q[it].id] <= a[i])
+				calc(q[it].id, i);
+			it = q[it].next;
+		}
+		q[i] = data(i, g[i]);
+		q[i].next = st[g[i]];
+		st[g[i]] = i;
+	}
+	printf("%d\n%lld\n", n - maxl, t[n + 1]);
+	return 0;
+}

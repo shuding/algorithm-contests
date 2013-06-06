@@ -1,0 +1,28 @@
+#include <iostream>
+#include <cstdio>
+#include <set>
+using namespace std;
+
+set<int> s;
+int n, x;
+
+int main(){
+	scanf("%d", &n);
+	for(int a = 1; (long long)a * a <= n; ++a)
+		if(n % a == 0){
+			int b = n / a;
+			for(int x = 1; x <= n; x += b)
+				if((x + 1) % a == 0){
+					s.insert(x);
+					break;
+				}
+			for(int x = b - 1; x <= n; x += b)
+				if((x - 1) % a == 0){
+					s.insert(x);
+					break;
+				}
+		}
+	for(set<int>::iterator it = s.begin(); it != s.end(); ++it)
+		printf("%d\n", *it);
+	return 0;
+}

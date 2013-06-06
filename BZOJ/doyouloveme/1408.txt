@@ -1,0 +1,48 @@
+/*
+* Copyright (C) 2012 All rights reserved.
+* File name:  robot.cpp
+* Author:     Parabola_ds
+* Creat time: 2012.05.30
+*/
+#include <algorithm>
+#include <iostream>
+#include <cstdlib>
+#include <cstring>
+#include <climits>
+#include <vector>
+#include <cstdio>
+#include <queue>
+#include <cmath>
+#include <set>
+#include <map>
+#define mod 10000
+#define MAXN 1000
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+int n, p[MAXN + 10], e[MAXN + 10], a, b, c(1), tmp;
+
+int power(int a, int b){
+	if(!b) return 1;
+	int p = power(a, b / 2);
+	p = p * p % mod;
+	if(b & 1) p = p * a % mod;
+	return p;
+}
+
+int main(){
+	scanf("%d", &n);
+	rep(i, n){
+		scanf("%d%d", &p[i], &e[i]);
+		c = (c * power(p[i], e[i])) % mod;
+		tmp = a;
+		a = (a + b * (p[i] - 1)) % mod;
+		if(p[i] != 2)
+			b = (b + (tmp + 1) * (p[i] - 1)) % mod;
+	}
+	c -= a + b + 1;
+	while(c < 0) c += mod;
+	c %= mod;
+	printf("%d\n%d\n%d\n", a, b, c);
+	return 0;
+}

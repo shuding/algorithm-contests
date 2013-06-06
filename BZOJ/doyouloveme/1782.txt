@@ -1,0 +1,55 @@
+#include <algorithm>
+#include <iostream>
+#include <vector>
+#include <cstdio>
+#define MAXN 100050
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+int n, tot(0), p[MAXN], pos[MAXN], tail[MAXN], s[MAXN * 2];
+vector<int> c[MAXN];
+
+void dfs(int v, int u){
+	pos[p[v]] = ++tot;
+	for(vector<int>::iterator it = c[v].begin(); it != c[v].end(); ++it)
+		if(*it != u)
+			dfs(*it, v);
+	tail[p[v]] = ++tot;
+}
+
+void Plus(int k, int x){
+	while(k <= 2 * n){
+		s[k] += x;
+		k += k & -k;
+	}
+}
+
+int Sum(int k){
+	int tot = 0;
+	while(k){
+		tot += s[k];
+		k -= k & -k;
+	}
+	return tot;
+}
+
+int main(){
+	scanf("%d", &n);
+	int a, b, tmp;
+	rep(i, n - 1){
+		scanf("%d%d", &a, &b);
+		c[a].push_back(b);
+		c[b].push_back(a);
+	}
+	rep(i, n){
+		scanf("%d", &tmp);
+		p[tmp] = i;
+	}
+	dfs(1, -1);
+	rep(i, n){
+		printf("%d\n", Sum(pos[i] - 1));
+		Plus(pos[i], 1);
+		Plus(tail[i], -1);
+	}
+	return 0;
+}

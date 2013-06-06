@@ -1,0 +1,110 @@
+#include <iostream>
+#include <cstdio>
+#include <algorithm>
+#include <cstring>
+#include <cstdlib>
+#define rep(i, n) for(int i = 0; i < n; i++)
+#define debug(x) cout << #x << " = " << x << endl;
+using namespace std;
+const int MAXN = 20050, inf = ~0U >> 1;
+long long n, x[MAXN], y[MAXN], maxx = -inf, minx = inf, maxy = -inf, miny = inf;
+bool del[MAXN];
+
+bool can(long long l, int k)
+{
+    long long maxx = -inf, minx = inf, maxy = -inf, miny = inf;
+    rep(i, n)
+        if(!del[i])
+        {
+            maxx = max(maxx, x[i]);
+            minx = min(minx, x[i]);
+            maxy = max(maxy, y[i]);
+            miny = min(miny, y[i]);
+        }
+    bool ans = false, back_up[MAXN];
+    rep(i, n)
+        back_up[i] = del[i];
+    if(k == 1)
+    {
+        rep(i, n)if(!del[i])
+            if(minx + l >= x[i] && miny + l >= y[i])
+                del[i] = true;
+        ans |= can(l, k + 1);
+        rep(i, n)
+            del[i] = back_up[i];
+        rep(i, n)if(!del[i])
+            if(minx + l >= x[i] && maxy - l <= y[i])
+                del[i] = true;
+        ans |= can(l, k + 1);
+        rep(i, n)
+            del[i] = back_up[i];
+        rep(i, n)if(!del[i])
+            if(maxx - l <= x[i] && miny + l >= y[i])
+                del[i] = true;
+        ans |= can(l, k + 1);
+        rep(i, n)
+            del[i] = back_up[i];
+        rep(i, n)if(!del[i])
+            if(maxx - l <= x[i] && maxy - l <= y[i])
+                del[i] = true;
+        ans |= can(l, k + 1);
+        rep(i, n)
+            del[i] = back_up[i];
+    }
+    else
+    if(k == 2)
+    {
+        rep(i, n)if(!del[i])
+            if(minx + l >= x[i] && miny + l >= y[i])
+                del[i] = true;
+        ans |= can(l, k + 1);
+        rep(i, n)
+            del[i] = back_up[i];
+        rep(i, n)if(!del[i])
+            if(minx + l >= x[i] && maxy - l <= y[i])
+                del[i] = true;
+        ans |= can(l, k + 1);
+        rep(i, n)
+            del[i] = back_up[i];
+        rep(i, n)if(!del[i])
+            if(maxx - l <= x[i] && miny + l >= y[i])
+                del[i] = true;
+        ans |= can(l, k + 1);
+        rep(i, n)
+            del[i] = back_up[i];
+        rep(i, n)if(!del[i])
+            if(maxx - l <= x[i] && maxy - l <= y[i])
+                del[i] = true;
+        ans |= can(l, k + 1);
+        rep(i, n)
+            del[i] = back_up[i];
+    }
+    else
+        ans |= max(maxx - minx, maxy - miny) <= l;
+    return ans;
+}
+
+int main()
+{
+    scanf("%lld", &n);
+    rep(i, n)
+    {
+        scanf("%lld%lld", &x[i], &y[i]);
+        maxx = max(maxx, x[i]);
+        minx = min(minx, x[i]);
+        maxy = max(maxy, y[i]);
+        miny = min(miny, y[i]);
+    }
+    long long l = 0, r = max(maxx - minx, maxy - miny), mid;
+    while(l <= r)
+    {
+        mid = (l + r) / 2;
+        memset(del, 0, sizeof(del));
+        if(can(mid, 1))
+            r = mid - 1;
+        else
+            l = mid + 1;
+    }
+    printf("%lld", l);
+    return 0;
+}

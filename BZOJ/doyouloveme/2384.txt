@@ -1,0 +1,90 @@
+#include <iostream>
+#include <cstdio>
+#define MAXN 1000000 + 10
+#define MAXM 1000000 + 10
+using namespace std;
+  
+int n, m;
+int s[MAXN], _s[MAXN], p[MAXN], bigger[MAXN], smaller[MAXN];
+int pos[MAXN], next[MAXN], N[MAXN], L[MAXN];
+ 
+inline void read(int &n)
+{
+    n = 0;
+    char c = getchar();
+    while(c < '0' || c > '9')
+       c = getchar();
+    while(c >= '0' && c <= '9')
+    {
+        n = n * 10 + c - '0';
+        c = getchar();
+    }
+}
+  
+bool match(int i, int j, int s[], int p[])
+{
+    return (bigger[s[i]] ? p[bigger[s[i]] + (j - i)] > p[j] : 1)
+        && (smaller[s[i]] ? p[smaller[s[i]] + (j - i)] < p[j] : 1);
+}
+  
+void init()
+{
+    read(n);
+    read(m);
+    for(int i = 1; i <= n; i++)
+    {
+        read(_s[i]);
+        s[_s[i]] = i;
+        pos[i] = _s[i];
+    }
+    pos[0] = pos[n + 1] = 0;
+    for(int i = 1; i <= m; i++)
+        read(p[i]);
+      
+    for(int i = 1; i <= n; i++)
+        N[i] = i + 1, L[i] = i - 1;
+    for(int i = n; i >= 1; i--)
+    {
+        bigger[s[i]] = pos[N[s[i]]];
+        smaller[s[i]] = pos[L[s[i]]];
+        N[L[s[i]]] = N[s[i]];
+        L[N[s[i]]] = L[s[i]];
+    }
+}
+  
+void calc()
+{
+    int j = 0, ans[MAXN], top(0);
+    next[1] = 0;
+    for(int i = 2; i <= n; i++)
+    {
+        while(j > 0 && !match(j + 1, i, s, s))
+            j = next[j];
+        if(match(j + 1, i, s, s))
+            j++;
+        next[i] = j;
+    }
+    j = 0;
+    for(int i = 1; i <= m; i++)
+    {
+        while(j > 0 && !match(j + 1, i, s, p))
+            j = next[j];
+        if(match(j + 1, i, s, p))
+            j++;
+        if(j == n)
+        {
+            ans[++top] = i - n + 1;
+            j = next[j];
+        }
+    }
+    printf("%d\n", top);
+    for(int i = 1; i <= top; i++)
+        printf("%d ", ans[i]);
+}
+  
+int main()
+{
+    init();
+    calc();
+}
+

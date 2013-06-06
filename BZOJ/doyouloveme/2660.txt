@@ -1,0 +1,38 @@
+#include <algorithm>
+#include <iostream>
+#include <cstdio>
+#include <map>
+using namespace std;
+
+long long n, tot, top, f[500], sum[500], f1(1), f2(1), tmp;
+map<pair<int, long long>, long long> MAP;
+
+void dfs(long long t, int k){
+	if(!t){
+		tot++;
+		return;
+	}
+	if(MAP.count(make_pair(k, t))){
+		tot += MAP[make_pair(k, t)];
+		return;
+	}
+	if(t > sum[k]) return;
+	long long tmp = tot;
+	if(t >= f[k]) dfs(t - f[k], k - 1);
+	dfs(t, k - 1);
+	MAP[make_pair(k, t)] = tot - tmp;
+}
+
+int main(){
+	scanf("%lld", &n);
+	while(f2 <= n){
+		f[++top] = f2;
+		sum[top] = min(n + 1, f[top] + sum[top - 1]);
+		tmp = f1 + f2;
+		f1 = f2; f2 = tmp;
+	}
+	dfs(n, top);
+	cout << tot << endl;
+	return 0;
+}
+

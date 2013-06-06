@@ -1,0 +1,35 @@
+#include <algorithm>
+#include <iostream>
+#include <cstdio>
+#define MAXN 1000000 + 10
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+typedef long long ll;
+
+int sn[MAXN], n, p;
+
+ll tot = 1;
+
+ll power(ll a, int b){
+	if(!b) return 1;
+	ll q = power(a, b / 2);
+	q = q * q % p;
+	if(b & 1) q = q * a % p;
+	return q;
+}
+
+ll rev(int k){
+	return power(k, p - 2);
+}
+
+int main(){
+	scanf("%d%d", &n, &p);
+	for(int i = n; i; --i){
+		sn[i]= (i * 2 <= n ? sn[i * 2] : 0) + (i * 2 < n ? sn[i * 2 + 1] : 0) + 1;
+		tot = (tot * i) % p * rev(sn[i]) % p;
+	}
+	printf("%lld\n", tot);
+	return 0;
+}
+

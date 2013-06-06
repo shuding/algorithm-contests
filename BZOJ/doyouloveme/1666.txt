@@ -1,0 +1,20 @@
+program bzoj1666;
+
+var n,tot:int64;
+
+begin
+  tot:=0;
+  read(n);
+  while n<>1 do
+    if n and 1=1 then
+      begin
+        n:=n*3+1;
+        tot:=tot+1;
+      end
+      else
+      begin
+        n:=n shr 1;
+        tot:=tot+1;
+      end;
+  write(tot);
+end.

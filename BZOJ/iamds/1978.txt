@@ -1,0 +1,33 @@
+
+/**
+*Source     Beijing2010
+*Author     DS
+*Algorithm  DP
+*Complexity O(nSQRT(MAXa))
+*Date       2011/11/28 22:54
+*/
+#include <iostream>
+#include <cstdio>
+#define rep(i,n) for(int i=0;i<n;i++)
+using namespace std;
+int n,l,a,ans=0,f[1000000]={},list[10000];
+int main()
+{
+    cin >> n >> l;
+    rep(i,n)
+    {
+        cin >> a;
+        int c=0,maxn=0;
+        for(int i=1;i*i<=a;i++)
+            if(a%i==0)
+            {
+                if(i>=l)list[c++]=i;
+                if(a/i>=l)list[c++]=a/i;
+            }
+        rep(i,c)maxn=max(maxn,f[list[i]]);
+        ans=max(ans,++maxn);
+        rep(i,c)f[list[i]]=maxn;
+    }
+    cout << ans;
+    return 0;
+}

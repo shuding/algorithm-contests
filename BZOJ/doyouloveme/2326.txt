@@ -1,0 +1,77 @@
+#include <algorithm>
+#include <iostream>
+#include <cstdio>
+#include <cstring>
+#include <cmath>
+#define rep(i, n) for(int i = 1; i <= n; i++)
+using namespace std;
+
+typedef unsigned long long int64;
+int64 n, mod, dig, ans = 0, zero = 1;
+
+struct matrix{
+	int64 m[5][5];
+	void operator *= (const matrix &_m){
+		matrix __m;
+		memset(__m.m, 0, sizeof(__m.m));
+		rep(i, 3)
+			rep(j, 3)
+				rep(k, 3)
+					__m.m[i][j] = ((_m.m[i][k] * m[k][j]) % mod + __m.m[i][j]) % mod;
+		memcpy(m, __m.m, sizeof(m));
+	}
+	void operator = (const matrix &_m){
+		memcpy(m, _m.m, sizeof(m));
+	}
+} M, N, Q;
+
+matrix power(matrix base, int64 n){
+	if(n == 1)
+		return base;
+	matrix tmp = power(base, n / 2);
+	tmp *= tmp;
+	if(n & 1)
+		tmp *= base;
+	return tmp;
+}
+
+int64 pow(int64 n){
+	if(n == 0)
+		return 1;
+	int64 tmp = pow(n / 2);
+	tmp = (tmp * tmp) % mod;
+	if(n & 1)
+		tmp = (tmp * 10) % mod;
+	return tmp;
+}
+
+int main(){
+	scanf("%lld%lld", &n, &mod);
+	dig = floor(log(n) / log(10)) + 1;
+	rep(i, dig){
+		memset(M.m, 0, sizeof(M.m));
+		memset(N.m, 0, sizeof(N.m));
+		memset(Q.m, 0, sizeof(Q.m));
+		M.m[1][1] = 1;
+		M.m[1][2] = zero % mod;
+		zero *= 10;
+		N.m[1][1] = 1;
+		N.m[1][2] = 1;
+		N.m[2][2] = 1;
+		N.m[2][3] = 1;
+		N.m[3][3] = zero % mod;
+		if(i < dig){
+			Q = power(N, zero / 10 * 9);
+			ans = (pow(zero / 10 * 9 * i) * ans) % mod;
+		}
+		else{
+			Q = power(N, n - zero / 10 + 1);
+			ans = (pow((n - zero / 10 + 1) * i) * ans) % mod;
+		}
+		Q *= M;
+		ans = (ans + Q.m[1][3]) % mod;
+	}
+	printf("%lld\n", ans);
+	return 0;
+}
+

@@ -1,0 +1,40 @@
+#include <iostream>
+#include <cstdio>
+#include <cmath>
+#define rep(i, n) for(int i = 1; i <= n; i++)
+#define debug(x) cout << #x << " = " << x << endl; 
+#define LEN 8
+using namespace std;
+int n, g[100005], start;
+double a, f[100005], m[100005];
+void calc1(int x)
+{
+    rep(i, g[x])
+        f[x] += m[i] / (x - i);
+    f[x] *= m[x];
+}
+void calc2(int x)
+{
+    for(int j = g[x - LEN] + 1; j <= g[x]; j++)
+        f[x] += m[j] / (x - j);
+    f[x] += (x - LEN - g[x - LEN] / 2) * f[x - LEN] / (m[x - LEN] * (x - g[x - LEN] / 2));
+    f[x] *= m[x];
+}
+int main()
+{
+    scanf("%d%lf", &n, &a);
+    rep(i, n)
+    {
+        scanf("%lf", &m[i]);
+        g[i] = floor(a * i);
+    }
+    for(int i = 1; i <= n; i++)
+    {
+        if(g[i] <= LEN)
+            calc1(i);
+        else
+            calc2(i);
+        printf("%.6lf\n", f[i]);
+    }
+    return 0;
+}

@@ -1,0 +1,49 @@
+#include <algorithm>
+#include <iostream>
+#include <cstdio>
+#define MAXN 500500
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+const int inf = ~0U >> 2;
+
+int n, top, a[MAXN], st[MAXN], next[MAXN], f[MAXN];
+
+int binary_seek(int a){
+	int l = 0, r = top, mid;
+	while(l <= r){
+		mid = l + r >> 1;
+		if(f[mid] < a)
+			l = mid + 1;
+		else
+			r = mid - 1;
+	}
+	return l;
+}
+
+int main(){
+	scanf("%d", &n);
+	n *= 5;
+	rep(i, n){
+		scanf("%d", &a[0]);
+		next[i] = st[a[0]];
+		st[a[0]] = i;
+	}
+	rep(i, n){
+		scanf("%d", &a[0]);
+		for(int j = st[a[0]]; j; j = next[j])
+			a[++top] = j;
+	}
+	rep(i, top)
+		f[i] = inf;
+	rep(i, top){
+		int k = binary_seek(a[i]);
+		f[k] = a[i];
+	}
+	for(int i = top; i >= 0; --i)
+		if(f[i] != inf){
+			printf("%d\n", i);
+			return 0;
+		}
+	return 0;
+}

@@ -1,0 +1,17 @@
+program bzoj1625;
+
+var
+  n, m, i, j: longint;
+  f: array[0..12880] of longint;
+  d, w: array[1..3402] of longint;
+
+begin
+  Read(n, m);
+  for i := 1 to n do
+    Read(w[i], d[i]);
+  for i := 1 to n do
+    for j := m downto w[i] do
+      if f[j] < f[j - w[i]] + d[i] then
+        f[j] := f[j - w[i]] + d[i];
+  Write(f[m]);
+end.

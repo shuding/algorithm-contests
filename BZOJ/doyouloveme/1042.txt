@@ -1,0 +1,55 @@
+/*
+* Copyright (C) 2012 All rights reserved.
+* File name:  1042.cpp
+* Author:     Parabola_ds
+* Creat time: 2012.05.23
+*/
+#include <algorithm>
+#include <iostream>
+#include <cstdlib>
+#include <cstring>
+#include <climits>
+#include <vector>
+#include <cstdio>
+#include <queue>
+#include <cmath>
+#include <set>
+#include <map>
+#define MAXS 100000
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+int c[5], tot;
+long long f[MAXS + 10], sum;
+
+long long getF(int k){
+	return k >= 0 ? f[k] : 0;
+}
+
+int main(){
+	rep(i, 4) scanf("%d", &c[i]);
+	scanf("%d", &tot);
+	f[0] = 1;
+	rep(j, 4)
+		for(int i = 0; i <= MAXS; ++i)
+			if(i + c[j] <= MAXS)
+				f[i + c[j]] += f[i];
+	while(tot--){
+		int d[5], s;
+		rep(i, 4) scanf("%d", &d[i]);
+		scanf("%d", &s);
+		sum = f[s];
+		rep(i, 4)
+			sum -= getF(s - (d[i] + 1) * c[i]);
+		rep(i, 4)
+			rep(j, i - 1)
+				sum += getF(s - (d[i] + 1) * c[i] - (d[j] + 1) * c[j]);
+		rep(i, 4)
+			rep(j, i - 1)
+				rep(k, j - 1)
+					sum -= getF(s - (d[i] + 1) * c[i] - (d[j] + 1) * c[j] - (d[k] + 1) * c[k]);
+		sum += getF(s - (d[1] + 1) * c[1] - (d[2] + 1) * c[2] - (d[3] + 1) * c[3] - (d[4] + 1) * c[4]);
+		printf("%lld\n", sum);
+	}
+	return 0;
+}

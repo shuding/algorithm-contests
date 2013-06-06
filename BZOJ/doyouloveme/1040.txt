@@ -1,0 +1,65 @@
+/*
+* Copyright (C) 2012 All rights reserved.
+* File name:  1040.cpp
+* Author:     Parabola_ds
+* Creat time: 2012.06.02
+* Tips:
+*	Rope + Trees,
+*	vertexs in the rope are same in degree dirction.
+*/
+#include <algorithm>
+#include <iostream>
+#include <cstdlib>
+#include <cstring>
+#include <climits>
+#include <vector>
+#include <cstdio>
+#include <queue>
+#include <cmath>
+#include <set>
+#include <map>
+#define MAXN 1000000
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+int n, f[MAXN + 10], d[MAXN + 10];
+long long s[MAXN + 10], dp[MAXN + 10][2], rope[MAXN + 10][2];
+queue<int> que;
+
+int main(){
+	scanf("%d", &n);
+	rep(i, n){
+		scanf("%lld%d", &s[i], &f[i]); d[f[i]]++;
+	}
+	rep(i, n) if(!d[i]) que.push(i);
+	while(!que.empty()){
+		int v = que.front(); que.pop();
+		dp[v][1] += s[v];
+		dp[f[v]][0] += max(dp[v][1], dp[v][0]);
+		dp[f[v]][1] += dp[v][0];
+		if(--d[f[v]] == 0) que.push(f[v]);
+	}
+	long long ans = 0, tmp;
+	rep(i, n) if(d[i]){
+		tmp = 0;
+		memset(rope, 0, sizeof(rope));
+		rope[f[i]][0] += dp[i][1] + s[i];
+		for(int v = f[i]; v != i; v = f[v]){
+			rope[f[v]][0] += max(rope[v][0] + dp[v][0], rope[v][1] + dp[v][1] + s[v]);
+			rope[f[v]][1] += rope[v][0] + dp[v][0];
+			d[v] = 0;
+		}
+		tmp = max(tmp, rope[i][1]);
+		memset(rope, 0, sizeof(rope));
+		rope[f[i]][1] += dp[i][0];
+		rope[f[i]][0] += dp[i][0];
+		for(int v = f[i]; v != i; v = f[v]){
+			rope[f[v]][0] += max(rope[v][0] + dp[v][0], rope[v][1] + dp[v][1] + s[v]);
+			rope[f[v]][1] += rope[v][0] + dp[v][0];
+		}
+		tmp = max(tmp, rope[i][0]);
+		ans += tmp;
+	}
+	printf("%lld\n", ans);
+	return 0;
+}

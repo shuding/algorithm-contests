@@ -1,0 +1,54 @@
+#include <algorithm>
+#include <iostream>
+#include <cstdio>
+#define MAXN 1005
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+int inf = ~0U >> 2;
+
+struct ball{
+	int x, y, v;
+	bool operator < (const ball b) const{
+		return x < b.x;
+	}
+} b[MAXN];
+
+int n, x, f[MAXN][MAXN][2], costl[MAXN], costr[MAXN];
+
+int dp(int l, int r, int p){
+	if(l < 1 || r > n)		return inf;
+	if(l == 1 && r == n)	return 0;
+	if(f[l][r][p])			return f[l][r][p];
+	int pos = p ? r : l, tot;
+	tot = min(dp(l - 1, r, 0) + abs(b[pos].x - b[l - 1].x) * (costl[l - 1] + costr[r + 1]),
+			  dp(l, r + 1, 1) + abs(b[pos].x - b[r + 1].x) * (costl[l - 1] + costr[r + 1]));
+	f[l][r][p] = tot;
+	return tot;
+}
+
+int main(){
+	int cost = inf, tot = 0, st;
+	scanf("%d%d", &n, &x);
+	rep(i, n)
+		scanf("%d", &b[i].x);
+	rep(i, n){
+		scanf("%d", &b[i].y);
+		tot += b[i].y;
+	}
+	rep(i, n)
+		scanf("%d", &b[i].v);
+	n++;
+	b[n].x = x;
+	sort(b + 1, b + 1 + n);
+	rep(i, n){
+		costl[i] = b[i].v + costl[i - 1];
+		costr[n - i + 1] = b[n - i + 1].v + costr[n - i + 2];
+		if(b[i].x == x && !b[i].y && !b[i].v)
+			st = i;
+	}
+	b[0].x = x;
+	cost = dp(st, st, 0);
+	printf("%.3lf\n", double(tot - cost) / 1000.0);
+}
+

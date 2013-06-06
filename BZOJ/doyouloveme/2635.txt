@@ -1,0 +1,43 @@
+#include <iostream>
+#include <cstdio>
+using namespace std;
+
+long long x(long long n){
+	int sign = 1;
+	while(n > 1)
+		if(n & 1){
+			if((n / 2 + 1) % 2 == 0)
+				sign = -sign;
+			n = n / 2 + 1;
+		}
+		else{
+			sign = -sign;
+			n = n / 2;
+		}
+	return sign;
+}
+
+long long s(long long n){
+	if(!n) return 0;
+	if(n % 4 != 0) return s(n - 1) + x(n);
+	return s(n / 4) * 2;
+}
+
+int	main(){
+	int testNum, c;
+	long long n;
+	scanf("%d", &testNum);
+	while(testNum--){
+		scanf("%d%lld", &c, &n);
+		if(c == 1)
+			printf("%lld\n", x(n));
+		else if(c == 2){
+			long long tmp = s(n);
+			printf("%c\n", tmp > 0 ? '+' : (tmp < 0 ? '-' : '0'));
+		}
+		else
+			printf("%lld\n", s(n));
+	}
+	return 0;
+}
+

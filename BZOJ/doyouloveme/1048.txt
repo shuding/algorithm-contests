@@ -1,0 +1,42 @@
+#include <iostream>
+#include <cstdio>
+#include <cmath>
+#define inf 1000000000
+#define rep(i, n) for(int i = 1; i <= n; i++)
+using namespace std;
+int a, b, n, s[11][11];
+int f[11][11][11][11][11];
+
+int dfs(int x1, int y1, int x2, int y2, int k)
+{
+	if(k == 1)
+	{
+		int _pow = s[x2][y2] - s[x1 - 1][y2] - s[x2][y1 - 1] + s[x1 - 1][y1 - 1];
+		return _pow * _pow;
+	}
+	if(f[x1][y1][x2][y2][k] > 0)
+		return f[x1][y1][x2][y2][k];
+	int _ans = inf;
+	for(int i = x1; i < x2; i++)
+		rep(_k, k - 1)
+			_ans = min(_ans, dfs(x1, y1, i, y2, _k) + dfs(i + 1, y1, x2, y2, k - _k));
+	for(int i = y1; i < y2; i++)
+		rep(_k, k - 1)
+			_ans = min(_ans, dfs(x1, y1, x2, i, _k) + dfs(x1, i + 1, x2, y2, k - _k));
+	f[x1][y1][x2][y2][k] = _ans;
+	return _ans;
+}
+
+int main()
+{
+	scanf("%d%d%d", &a, &b, &n);
+	rep(i, a)
+		rep(j, b)
+		{
+			scanf("%d", &s[i][j]);
+			s[i][j] += s[i - 1][j] + s[i][j - 1] - s[i - 1][j - 1];
+		}
+	int ans = dfs(1, 1, a, b, n);
+	printf("%.2lf\n", sqrt((ans - s[a][b] * s[a][b] / (double)n) / n));
+	return 0;
+}

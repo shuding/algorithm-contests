@@ -1,0 +1,27 @@
+
+program bzoj1617;
+
+const
+  inf = 1000000000;
+
+var
+  n, i, j: longint;
+  m, s, f: array[0..2500] of longint;
+
+begin
+  Read(n, m[0]);
+  s[0] := 0;
+  for i := 1 to n do
+  begin
+    Read(m[i]);
+    s[i] := m[i] + s[i - 1];
+  end;
+  for i := 1 to n do
+    f[i] := inf;
+  for i := 1 to n do
+    for j := 1 to n do
+      if i >= j then
+        if f[i - j] + s[j] + m[0] * 2 < f[i] then
+          f[i] := f[i - j] + s[j] + m[0] * 2;
+  Write(f[n] - m[0]);
+end.

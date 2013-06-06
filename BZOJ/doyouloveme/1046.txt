@@ -1,0 +1,63 @@
+/*
+* Copyright (C) 2012 All rights reserved.
+* File name:  1046.cpp
+* Author:     Parabola_ds
+* Creat time: 2012.05.28
+*/
+#include <algorithm>
+#include <iostream>
+#include <cstdlib>
+#include <cstring>
+#include <climits>
+#include <vector>
+#include <cstdio>
+#include <queue>
+#include <cmath>
+#include <set>
+#include <map>
+#define MAXN 10000
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+const int inf = ~0U >> 1;
+
+int n, m, l, a[MAXN + 10], f[MAXN + 10], g[MAXN + 10];
+
+void init(){
+	f[0] = -inf;
+	for(int i = n; i; --i){
+		f[n - i + 1] = inf;
+		int pos = lower_bound(f, f + n - i + 1, -a[i]) - f;
+		f[pos] = -a[i];
+		g[i] = pos;
+	}
+}
+
+void print(int i){
+	int l = -inf;
+	rep(j, n)
+		if(g[j] >= i && a[j] > l){
+			printf("%d ", a[j]);
+			i--;
+			l = a[j];
+			if(!i) break;
+		}
+}
+
+int main(){
+	scanf("%d", &n);
+	rep(i, n)
+		scanf("%d", &a[i]);
+	init();
+	scanf("%d", &m);
+	while(m--){
+		scanf("%d", &l);
+		if(l > n || f[l] == inf)
+			printf("Impossible\n");
+		else{
+			print(l);
+			puts("");
+		}
+	}
+	return 0;
+}

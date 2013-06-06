@@ -1,0 +1,40 @@
+/*
+* Copyright (C) 2012 All rights reserved.
+* File name:  1079.cpp
+* Author:     Parabola_ds
+* Creat time: 2012.06.11
+*/
+#include <iostream>
+#include <cstring>
+#include <cstdio>
+#define MAXK 16
+#define mod 1000000007ll
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+int k, c[MAXK + 10], n[6];
+long long f[MAXK][MAXK][MAXK][MAXK][MAXK][6];
+
+long long dp(int n[], int l){
+	long long &tmp = f[n[1]][n[2]][n[3]][n[4]][n[5]][l];
+	if(tmp != -1) return tmp;
+	tmp = 0;
+	rep(i, 5)
+		if(n[i]){
+			n[i]--;
+			n[i - 1]++;
+			tmp = (tmp + (n[i] + (i != l)) * dp(n, i - 1)) % mod;
+			n[i]++;
+			n[i - 1]--;
+		}
+	return tmp;
+}
+
+int main(){
+	scanf("%d", &k);
+	rep(i, k) scanf("%d", &c[i]), n[c[i]]++;
+	memset(f, -1, sizeof(f));
+	f[0][0][0][0][0][0] = 1;
+	printf("%lld\n", dp(n, 0));
+	return 0;
+}

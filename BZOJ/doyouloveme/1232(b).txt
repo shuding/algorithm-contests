@@ -1,0 +1,55 @@
+#include <algorithm>
+#include <iostream>
+#include <cstdio>
+#define MAXN 15000
+#define MAXM 105000
+#define rep(i, n) for(int i = 1; i <= n; i++)
+using namespace std;
+struct edge{
+	int s, t, w;
+	bool operator < (const edge &e) const{
+		return w < e.w;
+	}
+} e[MAXM];
+
+int n, m, c[MAXN], fa[MAXN], tot = ~0U >> 1;
+
+int father(int i){
+	return fa[i] == i ? i : father(fa[i]);
+}
+
+inline void read(int &n){
+	n = 0;
+	char c = getchar();
+	while(c < '0' || c >'9')
+		c = getchar();
+	while(c >= '0' && c <= '9'){
+		n = n * 10 + c - '0';
+		c = getchar();
+	}
+}
+
+int main(){
+	scanf("%d%d", &n, &m);
+	rep(i, n){
+		read(c[i]);
+		fa[i] = i;
+		tot = min(tot, c[i]);
+	}
+	rep(i, m){
+		read(e[i].s);
+		read(e[i].t);
+		read(e[i].w);
+		e[i].w = e[i].w * 2 + c[e[i].s] + c[e[i].t];
+	}
+	sort(e + 1, e + 1 + m);
+	int j = 1;
+	rep(i, n - 1){
+		while(father(e[j].s) == father(e[j].t))
+			j++;
+		fa[father(e[j].s)] = father(e[j].t);
+		tot += e[j].w;
+	}
+	printf("%d\n", tot);
+	return 0;
+}

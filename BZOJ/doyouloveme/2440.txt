@@ -1,0 +1,53 @@
+#include <algorithm>
+#include <iostream>
+#include <cstdio>
+#define LIM 500000
+using namespace std;
+
+int pn, prime[100000], phi[LIM];
+bool inp[LIM];
+
+void init(){
+	for(int i = 2; i < LIM; ++i){
+		if(!inp[i])
+			prime[++pn] = i, phi[i] = 1;
+		for(int j = 1; j <= pn && i * prime[j] <= LIM; ++j){
+			inp[i * prime[j]] = 1;
+			if(i % prime[j] == 0){
+				phi[i * prime[j]] = 0;
+				break;
+			}
+			phi[i * prime[j]] = -phi[i];
+		}
+	}
+}
+
+int rank(int n){
+	int tot = 0;
+	for(int i = 2; i * i <= n; ++i)
+		tot += n / (i * i) * phi[i];
+	return n - tot;
+}
+
+int solve(int n){
+	long long l = 1, r = 2000000000, m;
+	while(l < r){
+		m = l + r >> 1;
+		if(rank(m) < n)
+			l = m + 1;
+		else
+			r = m;
+	}
+	return l;
+}
+
+int main(){
+	int testNum, n;
+	init();
+	scanf("%d", &testNum);
+	while(testNum--){
+		scanf("%d", &n);
+		printf("%d\n", solve(n));
+	}
+}
+

@@ -1,0 +1,53 @@
+{
+Problem         JSOI_2008 sphere
+Algorithm       Gaussian Elimination
+Author          DS
+Date            2011/11/6 16:20
+Complexity      O(n^3)
+}
+program bzoj1013;
+
+var
+  n, i, j, k: longint;
+  a: array[1..11, 1..11] of extended;
+  x: array[1..10] of extended;
+
+  procedure init;
+  begin
+    Read(n);
+    for i := 1 to n + 1 do
+      for j := 1 to n do
+        Read(a[i, j]);
+    for i := 1 to n do
+      for j := 1 to n do
+      begin
+        a[i, n + 1] += sqr(a[i, j]) - sqr(a[i + 1, j]);
+        a[i, j] := 2 * (a[i, j] - a[i + 1, j]);
+      end;
+  end;
+
+  procedure solve;
+  var
+    r: extended;
+  begin
+    for i := 1 to n do
+      for j := i + 1 to n do
+      begin
+        r := -a[j, i] / a[i, i];
+        for k := 1 to n + 1 do
+          a[j, k] := a[j, k] + r * a[i, k];
+      end;
+    for i := n downto 1 do
+    begin
+      for j := n downto i + 1 do
+        a[i, n + 1] := a[i, n + 1] - a[i, j] * x[j];
+      x[i] := a[i, n + 1] / a[i, i];
+    end;
+    for i := 1 to n do
+      Write(x[i]: 0: 3, ' ');
+  end;
+
+begin
+  init;
+  solve;
+end.

@@ -1,0 +1,47 @@
+#include <algorithm>
+#include <iostream>
+#include <cstdio>
+#include <cmath>
+#define MAXN 50001
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+#define repd(i, n) for(int i = n; i >= 1; --i)
+using namespace std;
+
+int n, q, a[MAXN], maxn[MAXN][20], minn[MAXN][20];
+
+void init_rmq(){
+	repd(i, n){
+		maxn[i][0] = minn[i][0] = a[i];
+		rep(j, (int)floor(log(n - i + 2) / log(2))){
+			maxn[i][j] = max(maxn[i][j - 1], maxn[i + (1 << (j - 1))][j - 1]);
+			minn[i][j] = min(minn[i][j - 1], minn[i + (1 << (j - 1))][j - 1]);
+		}
+	}
+}
+
+int query(int l, int r){
+	int len = (int)floor(log(r - l + 1) / log(2));
+	int _max = max(maxn[l][len], maxn[r - (1 << len) + 1][len]);
+	int _min = min(minn[l][len], minn[r - (1 << len) + 1][len]);
+	return _max - _min;
+}
+
+void read(int &n){
+	char c = getchar(); n = 0;
+	while(c < '0' || c >'9') c = getchar();
+	while(c >= '0' && c <= '9'){
+		n = n * 10 + c - '0';
+		c = getchar();
+	}
+}
+
+int main(){
+	read(n); read(q);
+	rep(i, n) read(a[i]);
+	init_rmq();
+	while(q--){
+		int l, r;
+		read(l); read(r);
+		printf("%d\n", query(l, r));
+	}
+}

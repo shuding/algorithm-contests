@@ -1,0 +1,33 @@
+#include <algorithm>
+#include <iostream>
+#include <cstring>
+#include <cstdio>
+#define MAXL 60
+#define rep(i, s, t) for(int i = (s); i <= (t); ++i)
+using namespace std;
+
+char s[MAXL];
+int len, f[MAXL][MAXL];
+
+int dp(int l, int r){
+	if(l == r) return 1;
+	if(l > r) return 0;
+	if(f[l][r]) return f[l][r];
+	int calc = len + 1;
+	if(s[l] == s[r])
+		calc = min(calc, dp(l + 1, r - 1) + 1);
+	rep(i, l, r - 1)
+		calc = min(calc, dp(l, i) + dp(i + 1, r));
+	if(s[l] != s[r])
+		return f[l][r] = calc;
+	rep(i, l + 1, r - 1)
+		if(s[i] == s[l])
+			calc = min(calc, dp(l, i) + dp(i + 1, r - 1));
+	return f[l][r] = calc;
+}
+
+int main(){
+	scanf("%s", s);
+	len = strlen(s) - 1;
+	printf("%d\n", dp(0, len));
+}

@@ -1,0 +1,38 @@
+/*
+* Copyright (C) 2012 All rights reserved.
+* File name:  2620.cpp
+* Author:     Parabola_ds
+* Creat time: 2012.05.30
+*/
+#include <algorithm>
+#include <iostream>
+#include <cstdlib>
+#include <cstring>
+#include <climits>
+#include <vector>
+#include <cstdio>
+#include <queue>
+#include <cmath>
+#include <set>
+#include <map>
+#define MAXN 100000
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+long long n, tot, sa[MAXN + 10], sb[MAXN + 10];
+
+int main(){
+	scanf("%d", &n);
+	rep(i, n)
+		scanf("%d%d", &sa[i], &sb[i]),
+		sa[i] += sa[i - 1],
+		sb[i] += sb[i - 1];
+	rep(i, n)
+		sa[i] -= sb[i];
+	sort(sa + 1, sa + 1 + n);
+	rep(i, n)
+		tot += abs(sa[i] - sa[(n + 1) / 2]);
+	printf("%lld\n", tot);
+	return 0;
+}
+

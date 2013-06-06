@@ -1,0 +1,62 @@
+#include <algorithm>
+#include <iostream>
+#include <cstring>
+#include <cstdio>
+#define MAXN 10010
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+const int inf = MAXN;
+
+struct edge{
+	int t, next;
+	edge(){}
+	edge(int t, int n): t(t), next(n){}
+} e[MAXN * 2];
+
+int n, etop, st[MAXN], f[MAXN][3];
+bool v[MAXN];
+
+void add(int s, int t){
+	e[++etop] = edge(t, st[s]);
+	st[s] = etop;
+}
+
+void solve(int u){
+	if(v[u]) return;
+	v[u] = 1;
+	int t = inf, tmp;
+	for(int i = st[u]; i; i = e[i].next)
+		if(!v[e[i].t]){
+			solve(e[i].t);
+			tmp = min(f[e[i].t][1], f[e[i].t][0]);
+			t = min(t, f[e[i].t][1] - tmp);
+			f[u][0] += tmp;
+			f[u][1] += min(f[e[i].t][0], min(f[e[i].t][1], f[e[i].t][2]));
+			f[u][2] += f[e[i].t][0];
+		}
+	f[u][1]++;
+	f[u][0] += t;
+}
+
+inline void read(int &n){
+	char c = getchar(); n = 0;
+	while(c < '0' || c > '9') c = getchar();
+	while(c >= '0' && c <= '9'){
+		n = n * 10 + c - '0';
+		c = getchar();
+	}
+}
+
+int main(){
+	scanf("%d", &n);
+	int a, b;
+	rep(i, n - 1){
+		read(a); read(b);
+		add(a, b);
+		add(b, a);
+	}
+	solve(1);
+	printf("%d\n", min(f[1][1], f[1][0]));
+	return 0;
+}

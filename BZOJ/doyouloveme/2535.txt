@@ -1,0 +1,92 @@
+/*
+* Copyright (C) 2012 All rights reserved.
+* File name:  plane.cpp
+* Author:     Parabola_ds
+* Creat time: 2012.07.11
+*/
+#include <algorithm>
+#include <iostream>
+#include <cstdlib>
+#include <cstring>
+#include <climits>
+#include <vector>
+#include <cstdio>
+#include <queue>
+#include <cmath>
+#include <set>
+#include <map>
+#define MAXN 2010
+#define MAXM 10010
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+ 
+int n, m, a, b, d[MAXN], k[MAXN], sTmp[MAXN];
+vector<int> e[MAXN];
+ 
+bool cmp(int i, int j){
+    return k[i] < k[j];
+}
+ 
+void tSort(){
+    static int que[MAXN];
+    int top = 0;
+    rep(i, n)
+        if(!d[i])
+            que[++top] = i;
+    rep(i, top){
+        for(vector<int>::iterator it = e[que[i]].begin(); it != e[que[i]].end(); ++it){
+            d[*it]--;
+            k[*it] = min(k[*it], k[que[i]] - 1);
+            if(!d[*it])
+                que[++top] = *it;
+        }
+    }
+    sort(sTmp + 1, sTmp + 1 + n, cmp);
+    rep(i, n - 1)
+        printf("%d ", sTmp[i]);
+    printf("%d\n", sTmp[n]);
+}
+ 
+bool vst[MAXN];
+ 
+int dfs(int v){
+    if(vst[v]) return 0;
+    int ret = 1;
+    vst[v] = 1;
+    for(vector<int>::iterator it = e[v].begin(); it != e[v].end(); ++it)
+        ret += dfs(*it);
+    return ret;
+}
+ 
+int calc(int i){
+    int ans, cnt;
+    memset(vst, 0, sizeof(vst));
+    ans = cnt = dfs(i);
+    rep(j, n)
+        if(!vst[sTmp[j]]){
+            cnt++;
+            if(k[sTmp[j]] <= ans)
+                ans++;
+            else
+                if(k[sTmp[j]] < cnt)
+                    ans = k[sTmp[j]] + 1;
+        }
+    return ans;
+}
+ 
+int main(){
+    scanf("%d%d", &n, &m);
+    rep(i, n)
+        scanf("%d", &k[i]), sTmp[i] = i;
+    rep(i, m){
+        scanf("%d%d", &a, &b);
+        e[b].push_back(a);
+        d[a]++;
+    }
+    tSort();
+    rep(i, n - 1)
+        printf("%d ", calc(i));
+    printf("%d\n", calc(n));
+    return 0;
+}
+

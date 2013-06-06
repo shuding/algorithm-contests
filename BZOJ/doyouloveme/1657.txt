@@ -1,0 +1,31 @@
+#include <iostream>
+#include <algorithm>
+#include <cstdio>
+#define MAXN 50000 + 10
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+#define repd(i, n) for(int i = n; i; --i)
+using namespace std;
+
+int n, h[MAXN], v[MAXN], q[MAXN], s[MAXN], top(0);
+
+int main(){
+	scanf("%d", &n);
+	rep(i, n)
+		scanf("%d%d", &h[i], &v[i]);
+	rep(i, n){
+		while(top && h[i] >= h[q[top]]) --top;
+		q[++top] = i;
+		if(top > 1) s[q[top - 1]] += v[i];
+	}
+	top = 0;
+	repd(i, n){
+		while(top && h[i] >= h[q[top]]) --top;
+		q[++top] = i;
+		if(top > 1) s[q[top - 1]] += v[i];
+	}
+	int ans = 0;
+	rep(i, n)
+		ans = max(ans, s[i]);
+	cout << ans << endl;
+	return 0;
+}

@@ -1,0 +1,93 @@
+/*
+* Copyright (C) 2012 All rights reserved.
+* File name:  2820.cpp
+* Author:     Parabola_ds
+* Creat time: 2012.05.29
+*/
+#include <algorithm>
+#include <iostream>
+#include <cstdlib>
+#include <cstring>
+#include <climits>
+#include <vector>
+#include <cstdio>
+#include <queue>
+#include <cmath>
+#include <set>
+#include <map>
+#define maxn 10000000
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+int pn, MAXN, fn[maxn + 10], prime[maxn], qn[maxn + 10], qm[maxn + 10];
+long long f[maxn + 10], tmp;
+bool isNotPrime[maxn + 10], sq[maxn + 10], cu[maxn + 10];
+
+void init(){
+	for(long long i = 2; i <= MAXN; ++i){
+		if(!isNotPrime[i]){
+			prime[++pn] = i;
+			fn[i] = 1;
+		}
+		for(int j = 1; j <= pn && prime[j] * i <= MAXN; ++j){
+			tmp = prime[j] * i;
+			isNotPrime[tmp] = 1;
+			if(i % prime[j] != 0){
+				fn[tmp] = fn[i] + 1;
+				sq[tmp] = sq[i];
+				cu[tmp] = cu[i];
+			}
+			else{
+				fn[tmp] = fn[i];
+				if(sq[i]) cu[tmp] = 1;
+				sq[tmp] = 1;
+				break;
+			}
+		}
+		if(cu[i])
+			f[i] = 0;
+		else{
+			if(sq[i])
+				f[i] = fn[i] & 1 ? -1 : 1;
+			else
+				f[i] = fn[i] * (fn[i] & 1 ? 1 : -1);
+		}
+		f[i] += f[i - 1];
+	}
+}
+
+inline void solve(long long n, long long m){
+	long long sum = 0;
+	for(int i = 1; i <= n; ++i){
+		int next = min(n / (n / i), m / (m / i)) - i;
+		sum += (f[i + next] - f[i - 1]) * (n / i) * (m / i);
+		i += next;
+	}
+	printf("%lld\n", sum);
+}
+
+inline void read(int &n){
+	char c = getchar(); n = 0;
+	while(c < '0' || c > '9') c = getchar();
+	while(c >= '0' && c <= '9'){
+		n = n * 10 + c - '0';
+		c = getchar();
+	}
+}
+
+int main(){
+	int testNum;
+	scanf("%d", &testNum);
+	rep(i, testNum){
+		read(qn[i]);
+		read(qm[i]);
+		if(qn[i] > qm[i])
+			swap(qn[i], qm[i]);
+		MAXN = max(MAXN, qn[i]);
+	}
+	init();
+	rep(i, testNum)
+		solve(qn[i], qm[i]);
+	return 0;
+}
+

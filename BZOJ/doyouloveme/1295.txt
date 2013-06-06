@@ -1,0 +1,74 @@
+/*
+* Copyright (C) 2012 All rights reserved.
+* File name:  1295.cpp
+* Author:     Parabola_ds
+* Creat time: 2012.05.23
+*/
+#include <algorithm>
+#include <iostream>
+#include <cstdlib>
+#include <cstring>
+#include <climits>
+#include <vector>
+#include <cstdio>
+#include <queue>
+#include <cmath>
+#include <set>
+#include <map>
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+int n, m, t, dis[50][50];
+bool g[50][50];
+deque<pair<int, int> > que;
+
+void bfs(int x, int y){
+	que.clear();
+	que.push_front(make_pair(x, y));
+	rep(i, n)
+		rep(j, m)
+			dis[i][j] = 10000;
+	dis[x][y] = 0;
+	while(!que.empty()){
+		pair<int, int> p = que.back();
+		if(p.first > 1 && dis[p.first - 1][p.second] > dis[p.first][p.second] + !g[p.first - 1][p.second]){
+			dis[p.first - 1][p.second] = dis[p.first][p.second] + !g[p.first - 1][p.second];
+			que.push_front(make_pair(p.first - 1, p.second));
+		}
+		if(p.second > 1 && dis[p.first][p.second - 1] > dis[p.first][p.second] + !g[p.first][p.second - 1]){
+			dis[p.first][p.second - 1] = dis[p.first][p.second] + !g[p.first][p.second - 1];
+			que.push_front(make_pair(p.first, p.second - 1));
+		}
+		if(p.first < n && dis[p.first + 1][p.second] > dis[p.first][p.second] + !g[p.first + 1][p.second]){
+			dis[p.first + 1][p.second] = dis[p.first][p.second] + !g[p.first + 1][p.second];
+			que.push_front(make_pair(p.first + 1, p.second));
+		}
+		if(p.second < m && dis[p.first][p.second + 1] > dis[p.first][p.second] + !g[p.first][p.second + 1]){
+			dis[p.first][p.second + 1] = dis[p.first][p.second] + !g[p.first][p.second + 1];
+			que.push_front(make_pair(p.first, p.second + 1));
+		}
+		que.pop_back();
+	}
+}
+
+int main(){
+	scanf("%d%d%d", &n, &m, &t);
+	char c;
+	rep(i, n){
+		scanf("\n");
+		rep(j, m){
+			scanf("%c" ,&c);
+			g[i][j] = c == '0';
+		}
+	}
+	double ans = 0.0;
+	rep(i, n)
+		rep(j, m) if(g[i][j]){
+			bfs(i, j);
+			rep(I, n)
+				rep(J, m)
+					if(dis[I][J] <= t)
+						ans = max(ans, sqrt((i - I) * (i - I) + (j - J) * (j - J)));
+		}
+	printf("%.6lf\n", ans);
+}

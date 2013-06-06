@@ -1,0 +1,79 @@
+#include <algorithm>
+#include <iostream>
+#include <cstring>
+#include <cstdio>
+#include <cmath>
+#define eps 1e-9
+#define inf 1e+9
+#define MAXN 3001
+#define MAXM 10001
+#define rep(i, n) for(int i = 1; i <= n; i++)
+using namespace std;
+ 
+struct edge{
+    int t, next;
+    double w;
+} e[MAXM];
+ 
+int n, m, s, t;
+int etop, st[MAXN];
+ 
+void add(int s, int t, double w){
+    etop++;
+    e[etop].t = t;
+    e[etop].w = w;
+    e[etop].next = st[s];
+    st[s] = etop;
+}
+ 
+double dis[MAXN], mid, w;
+int d[MAXN];
+bool v[MAXN], rope;
+
+void dfs(int i){
+	v[i] = 1;
+	for(int j = st[i]; j; j = e[j].next){
+		if(rope)
+			return;
+		if(dis[i] + e[j].w - mid < dis[e[j].t]){
+			if(v[e[j].t]){
+				rope = 1;
+				return;
+			}
+			else
+				dis[e[j].t] = dis[i] + e[j].w - mid;
+			dfs(e[j].t);
+		}
+	}
+	v[i] = 0;
+}
+
+bool check(){
+	memset(dis, 0, sizeof(dis));
+	memset(v, 0, sizeof(v));
+	rope = 0;
+	rep(i, n){
+		dfs(i);
+		if(rope)
+			return 1;
+	}
+	return 0;
+}
+ 
+int main(){
+    scanf("%d%d", &n, &m);
+    rep(i, m){
+        scanf("%d%d%lf", &s, &t, &w);
+        add(s, t, w);
+    }
+    double l = -1e7, r = 1e7;
+    while(r - l > eps){
+        mid = (l + r) / 2.0;
+        if(check())
+            r = mid;
+        else
+            l = mid;
+    }
+    printf("%.8lf\n", l);
+    return 0;
+}

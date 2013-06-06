@@ -1,0 +1,52 @@
+#include <algorithm>
+#include <iostream>
+#include <cstdio>
+#include <queue>
+#define MAXN 50050
+using namespace std;
+
+struct data{
+	long long value;
+	int id;
+	data(){}
+	data(long long v, int i):
+		value(v), id(i){}
+	bool operator < (const data &d) const{
+		return value > d.value;
+	}
+};
+
+int n, k, tot;
+long long m, p[MAXN], c[MAXN];
+priority_queue<data> P, C, delta;
+bool v[MAXN];
+
+int main(){
+	scanf("%d%d%lld", &n, &k, &m);
+	for(int i = 1; i <= n; ++i){
+		scanf("%lld%lld", &p[i], &c[i]);
+		P.push(data(p[i], i));
+		C.push(data(c[i], i));
+	}
+	while(k--) delta.push(data(0, 0));
+	while(m && tot < n){
+		while(v[P.top().id]) P.pop();
+		while(v[C.top().id]) C.pop();
+		if(delta.top().value + C.top().value < P.top().value){
+			if(m < delta.top().value + C.top().value) break;
+			m -= delta.top().value + C.top().value;
+			delta.pop();
+			delta.push(data(p[C.top().id] - C.top().value, 0));
+			v[C.top().id] = 1;
+		}
+		else{
+			if(m < P.top().value) break;
+			m -= P.top().value;
+			v[P.top().id] = 1;
+		}
+		tot++;
+	}
+	printf("%d\n", tot);
+	return 0;
+}
+

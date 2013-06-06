@@ -1,0 +1,34 @@
+#include <algorithm>
+#include <iostream>
+#include <vector>
+#include <cstdio>
+#define MAXN 100000
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+int n, S, tot, s[MAXN + 10], fa[MAXN + 10];
+
+int add(int i, int j){
+	if(j > S) return 0;
+	if(j == S) return 1;
+	if(fa[i]) return add(fa[i], j + s[fa[i]]);
+	return 0;
+}
+
+int main(){
+//	freopen("tree.in", "r", stdin);
+//	freopen("tree.out", "w", stdout);
+	scanf("%d%d", &n, &S);
+	rep(i, n)
+		scanf("%d", &s[i]);
+	int x, y;
+	rep(i, n - 1){
+		scanf("%d%d", &x, &y);
+		fa[y] = x;
+	}
+	rep(i, n)
+		tot += add(i, s[i]);
+	printf("%d\n", tot);
+	return 0;
+}
+

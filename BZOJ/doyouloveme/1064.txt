@@ -1,0 +1,91 @@
+/*
+* Copyright (C) 2012 All rights reserved.
+* File name:  party.cpp
+* Author:     Parabola_ds
+* Creat time: 2012.07.06
+*/
+#include <algorithm>
+#include <iostream>
+#include <cstdlib>
+#include <cstring>
+#include <climits>
+#include <vector>
+#include <cstdio>
+#include <queue>
+#include <cmath>
+#include <set>
+#include <map>
+#define MAXN 100010
+#define MAXM 1000010
+#define answer(x, y) printf("%d %d\n", x, y), exit(0)
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+ 
+int n, m, a, b, etop;
+int d[MAXN], st[MAXN], label[MAXN], bel[MAXN];
+bool rope, vst[MAXN];
+ 
+struct edge{
+        int t, next;
+        bool d;
+} e[MAXM];
+ 
+void addEdge(int a, int b, bool t){
+        etop++;
+        e[etop].t = b;
+        e[etop].next = st[a];
+        e[etop].d = t;
+        st[a] = etop;
+}
+ 
+int gcd(int x, int y){
+        return !y ? x : gcd(y, x % y);
+}
+ 
+int rl[MAXN];
+int stop, _index, rn, maxL, tot, maxLabel, minLabel;
+ 
+void dfs(int v, int l){
+        if(vst[v]){
+                if(l != label[v])
+                        rl[++tot] = abs(l - label[v]);
+                return;
+        }
+        vst[v] = 1;
+        label[v] = l;
+        maxLabel = max(maxLabel, l + 1);
+        minLabel = min(minLabel, l + 1);
+        for(int i = st[v]; i; i = e[i].next)
+                dfs(e[i].t, l + (e[i].d ? 1 : -1));
+}
+ 
+int main(){
+        scanf("%d%d", &n, &m);
+        rep(i, m){
+                scanf("%d%d", &a, &b);
+                addEdge(a, b, 1);
+                addEdge(b, a, 0);
+                d[b]++;
+        }
+        rep(i, n) if(!vst[i]){
+                maxLabel = 0;
+                minLabel = n;
+                dfs(i, 0);
+                maxL += maxLabel - minLabel + 1;
+        }
+        if(tot){
+                maxL = 0;
+                rep(i, tot)
+                        maxL = gcd(maxL, rl[i]);
+                if(maxL < 3)
+                        answer(-1, -1);
+                for(int minL = 3; minL <= maxL; ++minL)
+                        if(maxL % minL == 0)
+                                answer(maxL, minL);
+        }
+        if(maxL >= 3)
+                answer(maxL, 3);
+        else
+                answer(-1, -1);
+        return 0;
+}

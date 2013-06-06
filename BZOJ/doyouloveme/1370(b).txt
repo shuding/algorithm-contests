@@ -1,0 +1,48 @@
+#include <cstdio>
+#define rep(i, n) for(int i = 1; i <= n; i++)
+using namespace std;
+ 
+int n, m, x, y, fa[2001];
+bool v[1001] = {};
+ 
+int father(int i){
+    if(fa[i] == i)
+        return i;
+    return fa[i] = father(fa[i]);
+}
+
+inline void read(int &n){
+	n = 0;
+	char c = getchar();
+	while(c < '0' || c > '9')
+		c = getchar();
+	while(c >= '0' && c <= '9'){
+		n = n * 10 + c - '0';
+		c = getchar();
+	}
+}
+ 
+int main(){
+    scanf("%d%d", &n, &m);
+    rep(i, n)
+        fa[i] = i;
+    rep(i, n)
+        fa[1000 + i] = 1000 + i;
+    rep(i, m){
+        char c = getchar();
+        while(c != 'E' && c != 'F')
+            c = getchar();
+        read(x); read(y);
+        if(c == 'E')
+            fa[father(x + 1000)] = father(y),
+            fa[father(y + 1000)] = father(x);
+        else
+            fa[father(x)] = father(y),
+            fa[father(y)] = father(x);
+    }
+    int tot = 0;
+    rep(i, n)
+        if(!v[father(i)])
+            v[father(i)] = 1, tot++;
+    printf("%d\n", tot);
+}

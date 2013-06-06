@@ -1,0 +1,45 @@
+#include <iostream>
+#include <cstring>
+#include <cstdio>
+#define rep(i, n) for(int i = 1; i <= (n); i++)
+#define repf(i, l, r) for(int i = (r); i >= (l); i--)
+#define MAXM 2000 + 10
+#define MAXN 2000 + 10
+using namespace std;
+
+int n, m, w[MAXN], f[MAXM], g[MAXM];
+
+inline void read(int &n){
+	char c = getchar();
+	while(c < '0' || c > '9')
+		c = getchar();
+	while(c >= '0' && c <= '9'){
+		n = n * 10 + c - '0';
+		c = getchar();
+	}
+}
+
+int main(){
+	scanf("%d%d", &n, &m);
+	rep(i, n)
+		read(w[i]);
+	f[0] = 1;
+	rep(i, n)
+		repf(j, w[i], m)
+			f[j] = (f[j] + f[j - w[i]]) % 10;
+	rep(i, n){
+		memset(g, 0, sizeof(g));
+		g[0] = 1;
+		rep(j, m){
+			if(j >= w[i])
+				g[j] = (f[j] - g[j - w[i]]) % 10;
+			else
+				g[j] = f[j] % 10;
+			g[j] = (g[j] + 10) % 10;
+			printf("%d", g[j]);
+		}
+		printf("\n");
+	}
+	return 0;
+}
+

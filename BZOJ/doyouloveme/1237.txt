@@ -1,0 +1,31 @@
+#include<iostream>
+#include<cstdio>
+#include<cstdlib>
+#include<algorithm>
+using namespace std;
+#define INF 0x7ffffffffffll
+#define NN 100001
+#define P(a,b) (a==b?INF:abs(a-b))
+typedef long long lld;
+inline lld min(lld a, lld b){ return a<b?a:b;}
+int A[NN],B[NN];
+int N,p1,p2,flag,Ans;
+lld F[NN];
+int main(){
+	scanf("%d",&N);
+	for (int i=1;i<=N;i++)
+		scanf("%d%d",A+i,B+i);
+	sort(A+1,A+N+1);
+	sort(B+1,B+N+1);
+	F[1]=P(A[1],B[1]);F[2]=min(F[1]+P(A[2],B[2]),P(A[1],B[2])+P(A[2],B[1]));
+	for (int i=3;i<=N;i++)
+		F[i]=min(F[i-1]+P(A[i],B[i]),
+				min(F[i-2]+P(A[i],B[i-1])+P(A[i-1],B[i]),
+					min(F[i-3]+P(A[i],B[i-2])+P(A[i-1],B[i])+P(A[i-2],B[i-1]),
+					    F[i-3]+P(A[i],B[i-1])+P(A[i-1],B[i-2])+P(A[i-2],B[i])
+					   )
+				   )
+			);
+	if (F[N]>INF) printf("-1/n");
+	else cout<<F[N];
+}

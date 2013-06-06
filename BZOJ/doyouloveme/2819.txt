@@ -1,0 +1,179 @@
+/*
+* Copyright (C) 2012 All rights reserved.
+* File name:  nim.cpp
+* Author:     Parabola_ds
+* Creat time: 2012.05.26
+*/
+#include <algorithm>
+#include <iostream>
+#include <cstdlib>
+#include <cstring>
+#include <climits>
+#include <vector>
+#include <cstdio>
+#include <queue>
+#include <cmath>
+#include <set>
+#include <map>
+#define LIMIT 500000
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+struct query{
+	bool type;
+	int v, u, LCA;
+	query(){}
+	query(bool type, int v, int u): 
+		type(type), v(v), u(u){}
+} que[LIMIT + 10];
+
+struct edge{
+	int t, next;
+	edge(){}
+	edge(int t, int next):
+		t(t), next(next){}
+} e[LIMIT * 2 + 10];
+
+int n, q, etop, _index, st[LIMIT + 10], num[LIMIT + 10], posl[LIMIT + 10], posr[LIMIT + 10];
+vector<pair<int, int> > queLCA[LIMIT + 10];
+
+int fa[LIMIT + 10];
+bool mark[LIMIT + 10];
+
+struct treeShapeArray{
+	int value[LIMIT * 2 + 10];
+	treeShapeArray(){
+		memset(value, 0, sizeof(value));
+	}
+	void modify(int k, int x){
+		for(; k <= n * 2; k += k & -k)
+			value[k] ^= x;
+	}
+	int xorSum(int k){
+		int s = 0;
+		for(; k; k -= k & -k)
+			s ^= value[k];
+		return s;
+	}
+} TSA;
+
+inline int father(int v){
+	return fa[v] == v ? v : father(fa[v]);
+}
+
+inline void add(int s, int t){
+	e[++etop] = edge(t, st[s]);
+	st[s] = etop;
+}
+
+void calcLCA(int root, int pre){
+	fa[root] = root;
+	TSA.modify(posl[root] = ++_index, num[root]);
+	for(int it = st[root]; it; it = e[it].next)
+		if(e[it].t != pre){
+			calcLCA(e[it].t, root);
+			fa[father(e[it].t)] = root;
+		}
+	TSA.modify(posr[root] = ++_index, num[root]);
+
+	mark[root] = 1;
+
+	for(vector<pair<int, int> >::iterator it = queLCA[root].begin(); it != queLCA[root].end(); ++it)
+		if(mark[(*it).first])
+			que[(*it).second].LCA = father((*it).first);
+}
+
+inline void read(int &n){
+	char c = getchar(); n = 0;
+	while(c < '0' || c > '9') c = getchar();
+	while(c >= '0' && c <= '9'){
+		n = n * 10 + c - '0';
+		c = getchar();
+	}
+}
+
+int chainTest[LIMIT + 10];
+bool chain = 1;
+
+void init(){
+	scanf("%d", &n);
+	rep(i, n)
+		read(num[i]);
+
+	int v, u;
+	rep(i, n - 1){
+		read(v); read(u);
+		add(v, u);
+		add(u, v);
+		chainTest[v]++;
+		chainTest[u]++;
+		if(chainTest[v] > 2) chain = 0;
+		if(chainTest[u] > 2) chain = 0;
+	}
+
+	char c;
+	scanf("%d", &q);
+	rep(i, q){
+		c = getchar();
+		while(c != 'Q' && c != 'C') c = getchar();
+		read(v); read(u);
+		if(c == 'Q'){
+			que[i] = query(0, v, u);
+			queLCA[v].push_back(make_pair(u, i));
+			queLCA[u].push_back(make_pair(v, i));
+		}
+		else
+			que[i] = query(1, v, u);
+	}
+}
+
+void solve(){
+	rep(i, q)
+		if(!que[i].type)
+			puts((TSA.xorSum(posl[que[i].v]) ^  TSA.xorSum(posl[que[i].u]) ^ num[que[i].LCA]) ? "Yes" : "No");
+		else{
+			TSA.modify(posl[que[i].v], num[que[i].v] ^ que[i].u);
+			TSA.modify(posr[que[i].v], num[que[i].v] ^ que[i].u);
+			num[que[i].v] = que[i].u;
+		}
+}
+
+void solveChain(){
+	int root, next, p = 0;
+	rep(i, n)
+		if(chainTest[i] == 1) root = i;
+	while(root){
+		chainTest[root] = 0;
+		posl[root] = ++p;
+		next = st[root];
+		if(!chainTest[e[next].t])
+			next = e[next].next;
+		if(!next) break;
+		root = e[next].t;
+	}
+
+	rep(i, n)
+		TSA.modify(posl[i], num[i]);
+	rep(i, q)
+		if(!que[i].type){
+			if(posl[que[i].v] > posl[que[i].u])
+				swap(que[i].v, que[i].u);
+			puts((TSA.xorSum(posl[que[i].v] - 1) ^  TSA.xorSum(posl[que[i].u])) ? "Yes" : "No");
+		}
+		else{
+			TSA.modify(posl[que[i].v], num[que[i].v] ^ que[i].u);
+			num[que[i].v] = que[i].u;
+		}
+}
+
+int main(){
+	init();
+	if(!chain){
+		calcLCA(1, 0);
+		solve();
+	}
+	else
+		solveChain();
+	return 0;
+}
+

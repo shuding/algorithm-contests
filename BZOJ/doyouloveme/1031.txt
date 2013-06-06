@@ -1,0 +1,86 @@
+/*
+* Copyright (C) 2012 All rights reserved.
+* File name:  1031.cpp
+* Author:     Parabola_ds
+* Creat time: 2012.05.31
+*/
+#include <algorithm>
+#include <iostream>
+#include <cstdlib>
+#include <cstring>
+#include <climits>
+#include <vector>
+#include <cstdio>
+#include <queue>
+#include <cmath>
+#include <set>
+#include <map>
+#define MAXN 100000
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+int n, m, p, s[MAXN * 2 + 10], num[MAXN + 10], a[MAXN + 10][3], tmp[MAXN + 10][3];
+int rank[MAXN + 10], sa[MAXN + 10];
+
+void radixSort(int d){
+	rep(i, n)
+		num[i] = 0;
+	rep(i, n)
+		++num[a[i][d]];
+	rep(i, n)
+		num[i] += num[i - 1];
+	for(int i = n; i; --i){
+		tmp[num[a[i][d]]][0] = a[i][0];
+		tmp[num[a[i][d]]][1] = a[i][1];
+		tmp[num[a[i][d]]][2] = a[i][2];
+		num[a[i][d]]--;
+	}
+	rep(i, n)
+		a[i][0] = tmp[i][0],
+		a[i][1] = tmp[i][1],
+		a[i][2] = tmp[i][2];
+}
+
+void suffixArray(){
+	rep(i, n)
+		++num[s[i]];
+	rep(i, 256)
+		num[i] += num[i - 1];
+	rep(i, n)
+		sa[num[s[i]]--] = i;
+	p = 0;
+	rep(i, n){
+		if(s[sa[i]] != s[sa[i - 1]]) ++p;
+		rank[sa[i]] = p;
+	}
+	for(int i = 1; i < n; i <<= 1){
+		rep(j, n)
+			rank[n + j] = rank[j];
+		rep(j, n){
+			a[j][0] = rank[j];
+			a[j][1] = rank[j + i];
+			a[j][2] = j;
+		}
+		radixSort(1);
+		radixSort(0);
+		p = 0;
+		rep(j, n){
+			if(a[j][0] != a[j - 1][0] || a[j][1] != a[j - 1][1]) ++p;
+			sa[j] = a[j][2];
+			rank[a[j][2]] = p;
+		}
+	}
+}
+
+char S[MAXN + 10];
+
+int main(){
+	cin.getline(S, MAXN + 10);
+	n = strlen(S);
+	rep(i, n)
+		s[i + n] = s[i] = int(S[i - 1]);
+	suffixArray();
+	rep(i, n)
+		printf("%c", (char)s[sa[i] + n - 1]);
+	puts("");
+}

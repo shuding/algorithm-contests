@@ -1,0 +1,48 @@
+/*
+* Copyright (C) 2012 All rights reserved.
+* File name:  1636.cpp
+* Author:     Parabola_ds
+* Creat time: 2012.07.22
+*/
+#include <algorithm>
+#include <iostream>
+#include <cstdlib>
+#include <cstring>
+#include <climits>
+#include <vector>
+#include <cstdio>
+#include <queue>
+#include <cmath>
+#include <set>
+#include <map>
+#define MAXN 50010
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+int n, q, a, b, Min[MAXN][17], Max[MAXN][17];
+
+void init(){
+	for(int i = 1; (1 << i) <= n; ++i)
+		for(int j = 1; j + (1 << i) - 1 <= n; ++j){
+			Min[j][i] = min(Min[j][i - 1], Min[j + (1 << (i - 1))][i - 1]);
+			Max[j][i] = max(Max[j][i - 1], Max[j + (1 << (i - 1))][i - 1]);
+		}
+}
+
+int query(int a, int b){
+	int len = int(log(b - a + 1) / log(2));
+	return max(Max[a][len], Max[b - (1 << len) + 1][len]) - min(Min[a][len], Min[b - (1 << len) + 1][len]);
+}
+
+int main(){
+	scanf("%d%d", &n, &q);
+	for(int i = 1; i <= n; ++i){
+		scanf("%d", &Min[i][0]);
+		Max[i][0] = Min[i][0];
+	}
+	init();
+	for(int i = 1; i <= q; ++i){
+		scanf("%d%d", &a, &b);
+		printf("%d\n", query(a, b));
+	}
+}

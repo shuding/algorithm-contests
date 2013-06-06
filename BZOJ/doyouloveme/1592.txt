@@ -1,0 +1,32 @@
+#include <algorithm>
+#include <iostream>
+#include <cstdio>
+#include <cmath>
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+int inf = ~0U >> 1;
+int n, a[2500], b[2500], m[2500][2500], ans;
+
+int main(){
+	scanf("%d", &n);
+	rep(i, n)
+		scanf("%d", &a[i]), b[i] = a[i];
+	sort(a + 1, a + 1 + n);
+	rep(i, n)
+		rep(j, n + 1)
+			m[i][j - 1] = inf;
+	rep(i, n)
+		rep(j, n)
+			m[i][j] = min(m[i][j - 1], m[i - 1][j] + abs(b[i] - a[j]));
+	ans = m[n][n];
+	rep(i, n / 2)
+		swap(a[i], a[n - i + 1]);
+	rep(i, n)
+		rep(j, n + 1)
+			m[i][j - 1] = inf;
+	rep(i, n)
+		rep(j, n)
+			m[i][j] = min(m[i][j - 1], m[i - 1][j] + abs(b[i] - a[j]));
+	printf("%d\n", min(ans, m[n][n]));
+}

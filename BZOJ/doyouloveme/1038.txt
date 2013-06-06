@@ -1,0 +1,68 @@
+//万恶的精度啊！！
+#include <algorithm>
+#include <iostream>
+#include <cstdio>
+#include <stack>
+#include <cmath>
+#define MAXN 350
+#define rep(i, n) for(int i = 1; i <= n; i++)
+using namespace std;
+
+struct line{
+	double a, b;
+	bool operator < (const line &l) const{
+		return a < l.a || (a == l.a && b < l.b);
+	}
+} l[MAXN];
+
+int n;
+double ans, x[MAXN], y[MAXN];
+stack<line> st;
+
+double cross(line a, line b){
+	return (b.b - a.b) / (a.a - b.a);
+}
+
+int main(){
+	scanf("%d", &n);
+	rep(i, n)
+		scanf("%lf", &x[i]);
+	rep(i, n)
+		scanf("%lf", &y[i]);
+	rep(i, n - 1){
+		l[i].a = (y[i + 1] - y[i]) / (x[i + 1] - x[i]);
+		l[i].b = y[i] - l[i].a * x[i];
+	}
+	sort(l + 1, l + n);
+	rep(i, n - 1){
+		if(st.empty())
+			st.push(l[i]);
+		else{
+			line _l = st.top();
+			st.pop();
+			while(!st.empty() && cross(l[i], st.top()) <= cross(_l, st.top())){
+				_l = st.top();
+				st.pop();
+			}
+			if(l[i].a != _l.a)
+				st.push(_l);
+			st.push(l[i]);
+		}
+	}
+	ans = 1e20;
+	while(st.size() > 1){
+		line _l = st.top();
+		st.pop();
+		double _x = cross(_l, st.top());
+		double _y = _l.a * _x + _l.b;
+		while(n && x[n] > _x){
+			ans = min(ans, _l.a * x[n] + _l.b - y[n]);
+			n--;
+		}
+		double la = (y[n + 1] - y[n]) / (x[n + 1] - x[n]);
+		double lb = y[n] - la * x[n];
+		ans = min(ans, _y - la * _x - lb);
+	}
+	printf("%.3lf", ans);
+	return 0;
+}

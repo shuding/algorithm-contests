@@ -1,0 +1,59 @@
+#include <algorithm>
+#include <iostream>
+#include <cstdio>
+#define SEED 13
+#define MAXN 100000 + 50
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+const long long inf = 999991;
+
+int n, k;
+long long p[inf + 10];
+long long h[MAXN], s[MAXN][50], next[MAXN];
+
+inline void read(long long &n){
+	char c = getchar(); n = 0;
+	while(c < '0' || c > '9') c = getchar();
+	while(c >= '0' && c <= '9'){
+		n = n * 10 + c - '0';
+		c = getchar();
+	}
+}
+
+bool eq(int i, int j){
+	rep(p, k)
+		if(s[i][p] != s[j][p])
+			return 0;
+	return 1;
+}
+
+int main(){
+	scanf("%d%d", &n, &k);
+	rep(i, n){
+		read(s[i][1]);
+		for(int j = 1; j <= k; ++j){
+			s[i][j + 1] = s[i][j] >> 1;
+			s[i][j] &= 1;
+		}
+		rep(j, k)
+			s[i][j] += s[i - 1][j];
+	}
+	for(int i = 0; i <= n; ++i){
+		long long H = inf;
+		rep(j, k){
+			s[i][j] -= s[i][k];
+			H = (H + j * SEED + (long long)s[i][j]) * SEED % inf;
+		}
+		H = (H + inf) % inf;
+		while(p[H] && !eq(p[H] - 1, i))
+			H = (H + SEED) % inf;
+		h[i] = H;
+		p[H] = i + 1;
+	}
+	long long ans = 0;
+	for(int i = 0; i <= n; ++i)
+		ans = max(ans, p[h[i]] - i - 1);
+	printf("%d\n", ans);
+	return 0;
+}

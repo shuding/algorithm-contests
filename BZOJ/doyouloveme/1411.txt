@@ -1,0 +1,49 @@
+/*
+* Copyright (C) 2012 All rights reserved.
+* File name:  1411.cpp
+* Author:     Parabola_ds
+* Creat time: 2012.05.24
+* 规律题跪了
+*/
+#include <algorithm>
+#include <iostream>
+#include <cstdlib>
+#include <cstring>
+#include <climits>
+#include <vector>
+#include <cstdio>
+#include <queue>
+#include <cmath>
+#include <set>
+#include <map>
+#define MAXN 100000
+#define pos(x) (x < 1 ? n + x : (x > n ? x - n : x))
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+int n, a[MAXN + 10], b[MAXN + 10];
+long long t;
+
+int main(){
+	scanf("%d%lld", &n, &t);
+	rep(i, n) scanf("%d", &a[i]), --a[i];
+	while(t > 1){
+		long long power = 2;
+		while(power * 2 <= t)
+			power *= 2;
+		t-= power; 
+		power = power / 2 % n;
+		rep(i, n)
+			b[i] = a[pos(i - power)] ^ a[pos(i + power)];
+		rep(i, n)
+			a[i] = b[i];
+	}
+	if(t)
+		rep(i, n)
+			printf("0 %d ", (a[i] ^ a[pos(i + 1)]) + 1);
+	else
+		rep(i, n)
+			printf("%d 0 ", a[i] + 1);
+	puts("");
+	return 0;
+}

@@ -1,0 +1,33 @@
+/*
+* Copyright (C) 2012 All rights reserved.
+* File name:  2697.cpp
+* Author:     Parabola_ds
+* Creat time: 2012.07.14
+*/
+#include <algorithm>
+#include <iostream>
+#include <cstdlib>
+#include <cstring>
+#include <climits>
+#include <vector>
+#include <cstdio>
+#include <queue>
+#include <cmath>
+#include <set>
+#include <map>
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+int n, k, s, c[301];
+
+int main(){
+	scanf("%d%d", &n, &k);
+	rep(i, k)
+		scanf("%d", &c[i]);
+	sort(c + 1, c + 1 + k);
+	rep(i, min(k, n / 2))
+		s += c[k - i + 1] * (n - i * 2 + 1);
+	printf("%d\n", s);
+	return 0;
+}
+

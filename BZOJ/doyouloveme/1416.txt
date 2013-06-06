@@ -1,0 +1,102 @@
+#include <iostream>
+#include <cstring>
+#include <cstdio>
+#define MAXT 20010
+using namespace std;
+
+int t, n, d, s, x, y, a[MAXT];
+int prime[MAXT], pn;
+int up[MAXT], dp[MAXT];
+bool isNotPrime[MAXT];
+
+void init(){
+	for(int i = 2; i < MAXT; ++i){
+		if(!isNotPrime[i])
+			prime[++pn] = i;
+		for(int j = 1; j <= pn && prime[j] * i < MAXT; ++j){
+			isNotPrime[prime[j] * i] =1;
+			if(i % prime[j] == 0)
+				break;
+		}
+	}
+}
+
+struct fraction{
+	void u(int n){
+		for(int i = 1; i <= pn && prime[i] <= n; ++i){
+			int cnt = 0;
+			while(n % prime[i] == 0)
+				cnt++, n /= prime[i];
+			up[i] += cnt;
+		}
+	}
+	void d(int n){
+		for(int i = 1; i <= pn && prime[i] <= n; ++i){
+			int cnt = 0;
+			while(n % prime[i] == 0)
+				cnt++, n /= prime[i];
+			dp[i] += cnt;
+		}
+	}
+	void print(){
+		for(int i = 1; i <= pn; ++i){
+			int tmp = min(up[i], dp[i]);
+			up[i] -= tmp;
+			dp[i] -= tmp;
+		}
+		static int n[100000];
+		n[0] = n[1] = 1;
+		for(int i = 1; i <= pn; ++i)
+			for(int j = 1; j <= up[i]; ++j){
+				for(int k = 1; k <= n[0]; ++k)
+					n[k] *= prime[i];
+				for(int k = 1; k <= n[0]; ++k){
+					n[k + 1] += n[k] / 10;
+					n[k] %= 10;
+				}
+				while(n[n[0] + 1]){
+					n[0]++;
+					n[n[0] + 1] += n[n[0]] / 10;
+					n[n[0]] %= 10;
+				}
+			}
+		for(int i = n[0]; i; --i)
+			printf("%d", n[i]);
+		printf("/");
+		memset(n, 0, sizeof n);
+		n[0] = n[1] = 1;
+		for(int i = 1; i <= pn; ++i)
+			for(int j = 1; j <= dp[i]; ++j){
+				for(int k = 1; k <= n[0]; ++k)
+					n[k] *= prime[i];
+				for(int k = 1; k <= n[0]; ++k){
+					n[k + 1] += n[k] / 10;
+					n[k] %= 10;
+				}
+				while(n[n[0] + 1]){
+					n[0]++;
+					n[n[0] + 1] += n[n[0]] / 10;
+					n[n[0]] %= 10;
+				}
+			}
+		for(int i = n[0]; i; --i)
+			printf("%d", n[i]);
+		puts("");
+	}
+} frac;
+
+int main(){
+	scanf("%d%d%d", &t, &n, &d);
+	for(int i = 1; i <= t; ++i)
+		scanf("%d", &a[i]), s += a[i];
+	init();
+	for(int i = 1; i <= n; ++i){
+		scanf("%d%d", &x, &y);
+		frac.u(a[y]);
+		frac.d(s);
+		s += d;
+		a[y] += d;
+	}
+	frac.print();
+	return 0;
+}

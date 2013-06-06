@@ -1,0 +1,92 @@
+#include <algorithm>
+#include <iostream>
+#include <cstdio>
+#include <cmath>
+#include <set>
+#define MAXN 100010
+using namespace std;
+ 
+const double eps = 1e-4;
+struct coor{
+        double x, y, k;
+        bool t;
+        bool operator < (const coor &c) const{
+                if(t || c.t)
+                        return k >= c.k;
+                return x < c.x;
+        }
+		coor(){
+			x = y = k = t = 0;
+		}
+        coor(double _x, double _y, double _k, bool _t):
+                x(_x), y(_y), k(_k), t(_t){}
+};
+ 
+set<coor> s;
+int n;
+double a[MAXN], b[MAXN], r[MAXN], f[MAXN];
+ 
+void calc(int i){
+        set<coor>::iterator it;
+        f[i] = f[i - 1];
+        coor c = coor(0, 0, -a[i] / b[i], 1);
+        it = s.upper_bound(c);
+        if(fabs(it->k - c.k) > eps) it--;
+        if(it != s.end()) f[i] = max(f[i], it->x * a[i] + it->y * b[i]);
+}
+
+double ita(coor a, coor b){
+        return (a.y - b.y) / (a.x - b.x);
+}
+
+void update(int i){
+        coor c = coor(r[i] * f[i] / (r[i] * a[i] + b[i]), f[i] / (r[i] * a[i] + b[i]), 0, 0);
+        set<coor>::iterator it, l, r;
+		it = s.lower_bound(c);
+		if(it != s.end() && fabs(c.x - it->x) < eps){
+				if(c.y <= it->y) return;
+				s.erase(it);
+		}
+        it = s.insert(c).first;
+        l = r = it; l--; r++;
+        if(it != s.begin()){
+                while(it != s.begin() && l->k <= ita(*l, *it)){
+                        s.erase(l);
+                        l = it; l--;
+                }
+                if(it != s.begin()){
+                        c.k = ita(*l, *it);
+                        s.erase(it);
+                        it = s.insert(c).first;
+                }
+        }
+        if(r != s.end()){
+                c = *r;
+                c.k = ita(*it, *r);
+                s.erase(r);
+                r = s.insert(c).first; l = it;
+                it++; r++;
+                while(r != s.end() && ita(*it, *l) <= ita(*it, *r)){
+                        s.erase(it);
+                        it = r; r++;
+                }
+                it--; r--;
+                c = *r;
+                c.k = ita(*it, *r);
+                s.erase(r);
+                r = s.insert(c).first;
+        }
+}
+
+int main(){
+        scanf("%d%lf", &n, &f[1]);
+        for(int i = 1; i <= n; ++i)
+                scanf("%lf%lf%lf", &a[i], &b[i], &r[i]);
+        s.insert(coor(r[1] * f[1] / (r[1] * a[1] + b[1]), f[1] / (r[1] * a[1] + b[1]), 0, 0));
+        for(int i = 2; i <= n; ++i){
+                calc(i);
+                update(i);
+        }
+        printf("%.3lf\n", f[n]);
+        return 0;
+}

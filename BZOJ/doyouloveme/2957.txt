@@ -1,0 +1,73 @@
+/*
+*	Copyright (C) Ds ds303077135@gmail.com
+*	File Name     : BZOJ_2957_THU_Training_Day1_Rebuild.cpp
+*	Creation Time : 2013/01/11 20:10:04
+*	Environment   : OS X 10.8
+*/
+#include <algorithm>
+#include <iostream>
+#include <cstdio>
+#include <cmath>
+#define MAXN 100000
+#define MAXS 400
+using namespace std;
+
+int n, m, x, y;
+int blockSize, blockNum;
+double h[MAXN + 10];
+int num[MAXS];
+double list[MAXS][MAXS];
+
+void init(){
+	blockSize = int(sqrt(n));
+	blockNum = int(ceil(double(n) / blockSize));
+}
+
+void modify(int x, int y){
+	h[x] = double(y) / x;
+	int pos = (x - 1) / blockSize;
+	double height = 0;
+	num[pos] = 0;
+	for(int i = pos * blockSize; i < n && i / blockSize == (x - 1) / blockSize; ++i)
+		if(h[i + 1] > height){
+			list[pos][++num[pos]] = h[i + 1];
+			height = h[i + 1];
+		}
+}
+
+int query(){
+	double height = 0;
+	int s = 0, l, r, m;
+	for(int i = 0; i < blockNum; ++i){
+		l = 1;
+		r = num[i];
+		while(l + 1 < r){
+			m = (l + r) >> 1;
+			if(list[i][m] <= height)
+				l = m;
+			else
+				r = m;
+		}
+		if(list[i][l] > height)
+			m = l;
+		else if(list[i][r] > height)
+			m = r;
+		else
+			m = r + 1;
+		height = max(height, list[i][num[i]]);
+		s += num[i] - m + 1;
+	}
+	return s;
+}
+
+int main(){
+	scanf("%d%d", &n, &m);
+	init();
+	while(m--){
+		scanf("%d%d", &x, &y);
+		modify(x, y);
+		printf("%d\n", query());
+	}
+	return 0;
+}
+

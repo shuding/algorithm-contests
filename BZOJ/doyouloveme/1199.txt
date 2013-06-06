@@ -1,0 +1,157 @@
+// k-d tree?
+#include <algorithm>
+#include <iostream>
+#include <vector>
+#include <cstdio>
+#include <cmath>
+#define MAXN 250000 + 10
+#define MAXM 10000 + 10
+#define limit 4000
+using namespace std;
+   
+const int inf = (~0U >> 1) - 1;
+   
+struct Space{
+    int L, R;
+    bool type;
+    vector<int> cover;
+    double l, r, u, d;
+} t[100000];
+   
+struct Graph{
+    bool type;
+    double a, b, c, d;
+} g[MAXN];
+   
+int n, m, tot(1), f_c[100000];
+double l(inf), r(-inf), u(-inf), d(inf);
+   
+void build(int n, bool type, int k, double l, double r, double u, double d){
+    if(g[k].type){
+        if(g[k].a >= r || g[k].b >= u || g[k].c <= l || g[k].d <= d)
+            return;
+        if(g[k].a <= l && g[k].b <= d && g[k].c >= r && g[k].d >= u)
+            f_c[n]++;
+        else
+            t[n].cover.push_back(k);
+    }
+    else{
+        if(g[k].a - g[k].c >= r || g[k].b - g[k].c >= u || g[k].a + g[k].c <= l || g[k].b + g[k].c <= d)
+            return;
+        if(pow(l - g[k].a, 2) + pow(d - g[k].b, 2) <= g[k].c * g[k].c
+        && pow(r - g[k].a, 2) + pow(d - g[k].b, 2) <= g[k].c * g[k].c
+        && pow(l - g[k].a, 2) + pow(u - g[k].b, 2) <= g[k].c * g[k].c
+        && pow(r - g[k].a, 2) + pow(u - g[k].b, 2) <= g[k].c * g[k].c)
+            f_c[n]++;
+        else
+            t[n].cover.push_back(k);
+    }
+    t[n].l = l;
+    t[n].r = r;
+    t[n].u = u;
+    t[n].d = d;
+    t[n].type = type;
+    if((r - l) < limit && (u - d) < limit)
+        return;
+    if(type){
+        if(!t[n].L)
+            t[n].L = ++tot;
+        build(t[n].L, !type, k, l, (l + r) / 2, u, d);
+        if(!t[n].R)
+            t[n].R = ++tot;
+        build(t[n].R, !type, k, (l + r) / 2, r, u, d);
+    }
+    else{
+        if(!t[n].L)
+            t[n].L = ++tot;
+        build(t[n].L, !type, k, l, r, u, (u + d) / 2);
+        if(!t[n].R)
+            t[n].R = ++tot;
+        build(t[n].R, !type, k, l, r, (u + d) / 2, d);
+    }
+}
+   
+int query(int n, double x, double y){
+    if(!n)
+        return 0;
+    if(((t[n].r - t[n].l) < limit && (t[n].u - t[n].d) < limit) || t[n].cover.size() <= 100){
+        int tot = f_c[n], len = t[n].cover.size();
+        for(int i = 0; i < len; i++){
+            Graph p = g[t[n].cover[i]];
+            if(p.type){
+                if(x > p.a && x < p.c && y < p.d && y > p.b)
+                    tot++;
+            }
+            else
+                if(pow(x - p.a, 2) + pow(y - p.b, 2) < p.c * p.c)
+                    tot++;
+        }
+        return tot;
+    }
+    if(x <= t[t[n].L].r && x >= t[t[n].L].l && y <= t[t[n].L].u && y >= t[t[n].L].d)
+        return query(t[n].L, x, y);
+    else
+        return query(t[n].R, x, y);
+}
+   
+char getC(){
+    char c = getchar();
+    while(c != 'r' && c != 'c')
+        c = getchar();
+    return c;
+}
+   
+inline void read(double &n){
+    n = 0;
+    char c = getchar();
+    int f = 0;
+    while(c < '0' || c > '9')
+        c = getchar();
+    while(c >= '0' && c <= '9'){
+        n = n * 10 + c - '0';
+        c = getchar();
+    }
+    if(c == '.'){
+        c = getchar();
+        while(c >= '0' && c <= '9'){
+            n = n * 10 + c - '0';
+            f++;
+            c = getchar();
+        }
+        while(f--)
+            n /= 10;
+    }
+}
+   
+int main(){
+    scanf("%d%d", &n, &m);
+    for(int i = 1; i <= n; i++){
+        g[i].type = (getC() == 'r');
+        if(g[i].type){
+            read(g[i].a); read(g[i].b); read(g[i].c); read(g[i].d);
+            if(g[i].a > g[i].c)
+                swap(g[i].a, g[i].c);
+            if(g[i].b > g[i].d)
+                swap(g[i].b, g[i].d);
+            l = min(l, g[i].a);
+            r = max(r, g[i].c);
+            u = max(u, g[i].d);
+            d = min(d, g[i].b);
+        }
+        else{
+            read(g[i].a); read(g[i].b); read(g[i].c); 
+            l = min(l, g[i].a - g[i].c);
+            r = max(r, g[i].a + g[i].c);
+            u = max(u, g[i].b + g[i].c);
+            d = min(d, g[i].b - g[i].c);
+        }
+    }
+    for(int i = 1; i <= n; i++)
+        build(1, 1, i, l, r, u, d);
+    for(int i = 1; i <= m; i++){
+        double x, y;
+        read(x); read(y);
+        printf("%d\n", query(1, x, y));
+    }
+    return 0;
+}

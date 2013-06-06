@@ -1,0 +1,52 @@
+#include <cstdio>
+#include <iostream>
+using namespace std;
+ 
+int bfs[50][50];
+
+int abs(int x)
+{
+    return x > 0 ? x : -x;
+}
+ 
+void flood_fill(int x, int y, int z)
+{
+    if(x < 0 || x > 15 || y < 0 || y > 15)
+	return;
+    if(!bfs[x][y] || bfs[x][y] > z)
+	bfs[x][y] = z;
+    else
+	return;
+    flood_fill(x + 1, y + 2, z + 1);
+    flood_fill(x + 1, y - 2, z + 1);
+    flood_fill(x + 2, y + 1, z + 1);
+    flood_fill(x + 2, y - 1, z + 1);
+    flood_fill(x - 1, y + 2, z + 1);
+    flood_fill(x - 1, y - 2, z + 1);
+    flood_fill(x - 2, y + 1, z + 1);
+    flood_fill(x - 2, y - 1, z + 1);
+}
+ 
+int main()
+{
+    int x1, y1, x2, y2, ans = 0, dx, dy;
+    scanf("%d%d%d%d", &x1, &y1, &x2, &y2);
+    dx = abs(x1 - x2);
+    dy = abs(y1 - y2);
+    while(dx > 10 || dy > 10)
+    {
+	if(dx > dy)
+	{
+	    dx -= 2;
+	    dy = abs(dy - 1);
+	}
+	else
+	{
+	    dy -= 2;
+	    dx = abs(dx - 1);
+	}
+	ans++;
+    }
+    flood_fill(3, 3, 1);
+    printf("%d\n", bfs[dx + 3][dy + 3] + ans - 1);
+}

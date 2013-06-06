@@ -1,0 +1,17 @@
+
+program bzoj1708;
+
+var v,n,i,j,k:longint;
+    f:array[0..10000] of int64;
+
+begin
+  read(v,n);
+  f[0]:=1;
+  for i:=1 to v do
+  begin
+    read(k);
+    for j:=k to n do
+      f[j]:=f[j]+f[j-k];
+  end;
+  write(f[n]);
+end.

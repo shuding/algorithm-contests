@@ -1,0 +1,41 @@
+#include <cstdio>
+#include <cstring>
+int n, Link[202];
+bool g[202][202], v[202];
+ 
+bool find(int k)
+{
+    for(int i = 1; i <= n; i++)
+        if(g[k][i] && !v[i])
+        {
+            v[i] = 1;
+            if(!Link[i] || find(Link[i]))
+            {
+                Link[i] = k;
+                return 1;
+            }
+        }
+    return 0;
+}
+ 
+int main()
+{
+    int Test;
+    scanf("%d", &Test);
+    while(Test--)
+    {
+        scanf("%d", &n);
+        for(int i = 1; i <= n; i++)
+            for(int j = 1; j <= n; j++)
+                scanf("%d", &g[i][j]);
+        int P = 0;
+        memset(Link, 0, sizeof(Link));
+        for(int i = 1; i <= n; i++)
+        {
+            memset(v, 0, sizeof(v));
+            P += find(i);
+        }
+        printf(P == n ? "Yes\n" : "No\n");
+    }
+}
+ 

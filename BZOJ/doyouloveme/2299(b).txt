@@ -1,0 +1,48 @@
+#include <algorithm>
+#include <iostream>
+#include <cstdio>
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+long long a, b, x, y;
+
+inline long long gcd(long long a, long long b){
+	return !b ? a : gcd(b, a % b);
+}
+
+inline void read(long long &n){
+	char c = getchar();	n = 0;
+	while(c < '0' || c > '9') c = getchar();
+	while(c >= '0' && c <= '9'){
+		n = n * 10 + c - '0';
+		c = getchar();
+	}
+}
+
+int main(){
+	int test_num;
+	scanf("%d", &test_num);
+	while(test_num--){
+		read(a); read(b); read(x); read(y);
+		int d = 2 * gcd(a, b);
+		if(x % d == 0 && y % d == 0){
+			printf("Y\n");
+			continue;
+		}
+		if((x - a) % d == 0 && (y - b) % d == 0){
+			printf("Y\n");
+			continue;
+		}
+		if((x - b) % d == 0 && (y - a) % d == 0){
+			printf("Y\n");
+			continue;
+		}
+		if((x - a - b) % d == 0 && (y - a - b) % d == 0){
+			printf("Y\n");
+			continue;
+		}
+		printf("N\n");
+	}
+	return 0;
+}
+

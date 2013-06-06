@@ -1,0 +1,177 @@
+#include <algorithm>
+#include <iostream>
+#include <cstring>
+#include <cstdio>
+#define MAXN 500010
+using namespace std;
+
+int nodeNum;
+struct node{
+	int l, r, cl, cr, cn, same, c[2];
+	node(){
+		c[0] = c[1] = same = 0;
+	}
+	void build(int _l, int _r);
+	void update();
+	void pushdown();
+	int color(int p);
+	void paint(int _l, int _r, int _c);
+	int count(int _l, int _r);
+} nodes[MAXN * 2];
+
+void node::build(int _l, int _r){
+	l = _l; r = _r;
+	if(l == r){
+		scanf("%d", &cl);
+		cr = cl; cn = 1;
+		return;
+	}
+	int m = (l + r) >> 1;
+	nodes[c[0] = ++nodeNum].build(l, m);
+	nodes[c[1] = ++nodeNum].build(m + 1, r);
+	update();
+}
+
+void node::update(){
+	cl = nodes[c[0]].cl;
+	cr = nodes[c[1]].cr;
+	cn = nodes[c[0]].cn + nodes[c[1]].cn - (nodes[c[0]].cr == nodes[c[1]].cl);
+}
+
+void node::pushdown(){
+	if(same){
+		if(c[0]){
+			nodes[c[0]].same = nodes[c[1]].same = same;
+			nodes[c[0]].cn = nodes[c[1]].cn = 1;
+			nodes[c[0]].cl = nodes[c[0]].cr = same;
+			nodes[c[1]].cl = nodes[c[1]].cr = same;
+		}
+		same = 0;
+	}
+}
+
+int node::color(int p){
+	pushdown();
+	if(l == r) return cl;
+	int m = (l + r) >> 1;
+	if(p <= m) return nodes[c[0]].color(p);
+	return nodes[c[1]].color(p);
+}
+
+void node::paint(int _l, int _r, int _c){
+	pushdown();
+	if(_l == l && _r == r){
+		same = _c;
+		cl = cr = _c;
+		cn = 1;
+		return;
+	}
+	int m = (l + r) >> 1;
+	if(_r <= m)
+		nodes[c[0]].paint(_l, _r, _c);
+	else if(_l > m)
+		nodes[c[1]].paint(_l, _r, _c);
+	else
+		nodes[c[0]].paint(_l, m, _c),
+		nodes[c[1]].paint(m + 1, _r, _c);
+	update();
+}
+
+int node::count(int _l, int _r){
+	pushdown();
+	if(_l == l && _r == r)
+		return cn;
+	int m = (l + r) >> 1, ret;
+	if(_r <= m)
+		ret = nodes[c[0]].count(_l, _r);
+	else if(_l > m)
+		ret = nodes[c[1]].count(_l, _r);
+	else
+		ret = nodes[c[0]].count(_l, m) + nodes[c[1]].count(m + 1, _r) - (nodes[c[0]].cr == nodes[c[1]].cl);
+	update();
+	return ret;
+}
+
+int n, c, q, pos(1);
+bool flip(0);
+
+int main(){
+	scanf("%d%d", &n, &c);
+	nodes[0].build(1, n);
+	scanf("%d", &q);
+	char cmd[5];
+	int i, j, k;
+	while(q--){
+		scanf("%s", cmd);
+		switch(cmd[0]){
+			case 'R':
+				scanf("%d", &k);
+				pos = (pos + (flip ? 1 : -1) * k + n - 1) % n + 1;
+				break;
+			case 'F':
+				flip = !flip;
+				break;
+			case 'S':
+				scanf("%d%d", &i, &j); i--; j--;
+				int ci, cj;
+				i = (pos + (flip ? -1 : 1) * i + n - 1) % n + 1;
+				j = (pos + (flip ? -1 : 1) * j + n - 1) % n + 1;
+				ci = nodes[0].color(i);
+				cj = nodes[0].color(j);
+				nodes[0].paint(i, i, cj);
+				nodes[0].paint(j, j, ci);
+				break;
+			case 'P':
+				scanf("%d%d%d", &i, &j, &k);
+				if(flip){
+					i = (pos - i + n) % n + 1;
+					j = (pos - j + n) % n + 1;
+					if(i >= j)
+						nodes[0].paint(j, i, k);
+					else
+						nodes[0].paint(1, i, k),
+						nodes[0].paint(j, n, k);
+				}
+				else{
+					i = (pos + i - 2 + n) % n + 1;
+					j = (pos + j - 2 + n) % n + 1;
+					if(i <= j)
+						nodes[0].paint(i, j, k);
+					else
+						nodes[0].paint(1, j, k),
+						nodes[0].paint(i, n, k);
+				}
+				break;
+			case 'C':
+				if(strlen(cmd) > 1){
+					int tmp;
+					scanf("%d%d", &i, &j);
+					if(flip){
+						i = (pos - i + n) % n + 1;
+						j = (pos - j + n) % n + 1;
+						if(i >= j)
+							tmp = nodes[0].count(j, i);
+						else
+							tmp = nodes[0].count(1, i) + nodes[0].count(j, n) - (nodes[0].cl == nodes[0].cr);
+					}
+					else{
+						i = (pos + i - 2 + n) % n + 1;
+						j = (pos + j - 2 + n) % n + 1;
+						if(i <= j)
+							tmp = nodes[0].count(i, j);
+						else
+							tmp = nodes[0].count(1, j) + nodes[0].count(i, n) - (nodes[0].cl == nodes[0].cr);
+					}
+					printf("%d\n", tmp);
+				}
+				else{
+					int tmp = nodes[0].cn;
+					if(tmp > 1)
+						tmp -= nodes[0].cl == nodes[0].cr;
+					printf("%d\n", tmp);
+				}
+				break;
+		}
+	}
+	return 0;
+}

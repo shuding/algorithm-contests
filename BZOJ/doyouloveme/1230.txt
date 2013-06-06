@@ -1,0 +1,84 @@
+#include <algorithm>
+#include <iostream>
+#include <cstdio>
+#define MAXN 100050
+using namespace std;
+
+struct node{
+	int l, r, c[2], sum;
+	bool state;
+} t[MAXN * 2];
+
+int n, m, s, e, cmd, root, tot;
+
+void build(int &root, int l, int r){
+	if(!root)
+		root = ++ tot;
+	t[root].l = l; t[root].r = r; t[root].state = t[n].sum = 0;
+	if(l == r)
+		return;
+	int mid = (l + r) / 2;
+	build(t[root].c[0], l, mid);
+	build(t[root].c[1], mid + 1, r);
+}
+
+void change(int n, int l, int r){
+	if(t[n].l == l && t[n].r == r){
+		t[n].state = !t[n].state;
+		t[n].sum = r - l + 1 - t[n].sum;
+		return;
+	}
+	int mid = (t[n].l + t[n].r) / 2;
+	if(r <= mid)
+		change(t[n].c[0], l, r);
+	else
+		if(l > mid)
+			change(t[n].c[1], l, r);
+		else{
+			change(t[n].c[0], l, mid);
+			change(t[n].c[1], mid + 1, r);
+		}
+	t[n].sum = t[t[n].c[0]].sum + t[t[n].c[1]].sum;
+	if(t[n].state)
+		t[n].sum = t[n].r - t[n].l + 1 - t[n].sum;
+}
+
+int query(int n, int l, int r){
+	if(t[n].l == l && t[n].r == r)
+		return t[n].sum;
+	int mid = (t[n].l + t[n].r) / 2, ans;
+	if(r <= mid)
+		ans = query(t[n].c[0], l, r);
+	else
+		if(l > mid)
+			ans = query(t[n].c[1], l, r);
+		else
+			ans = query(t[n].c[0], l, mid) + query(t[n].c[1], mid + 1, r);
+	if(t[n].state)
+		ans = r - l + 1 - ans;
+	return ans;
+}
+
+inline void read(int &n){
+	char c = getchar();
+	n  = 0;
+	while(c < '0' || c > '9')
+		c = getchar();
+	while(c >= '0' && c <= '9'){
+		n = n * 10 + c - '0';
+		c = getchar();
+	}
+}
+
+int main(){
+	scanf("%d%d", &n, &m);
+	build(root, 1, n);
+	while(m--){
+		read(cmd); read(s); read(e);
+		if(!cmd)
+			change(root, s, e);
+		else
+			printf("%d\n", query(root, s, e));
+	}
+	return 0;
+}

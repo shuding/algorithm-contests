@@ -1,0 +1,87 @@
+#include <iostream>
+#include <cstdio>
+#include <cstring>
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+struct number{
+	int d[200];
+} n, m, base, zero, ans_n, ans_m;
+
+inline number operator + (const number a, const number b){
+	number c;
+	memset(c.d, 0, sizeof(c.d));
+	c.d[0] = max(a.d[0], b.d[0]);
+	rep(i, a.d[0])
+		c.d[i] += a.d[i];
+	rep(i, b.d[0])
+		c.d[i] += b.d[i];
+	rep(i, c.d[0]){
+		c.d[i + 1] += c.d[i] / 10;
+		c.d[i] %= 10;
+	}
+	while(c.d[c.d[0] + 1])
+		c.d[0]++;
+	return c;
+}
+
+inline number operator / (const number a, const int n){
+	number c;
+	int l = 0;
+	memcpy(c.d, a.d, sizeof(a.d));
+	for(int i = c.d[0]; i >= 1; --i){
+		c.d[i] += l * 10;
+		l = c.d[i] % n;
+		c.d[i] /= n;
+	}
+	while(!c.d[c.d[0]] && c.d[0] > 1)
+		c.d[0]--;
+	return c;
+}
+
+char s[200];
+
+void solve(number m, number &ans_m, number &ans_n){
+	if(m.d[0] == 1 && m.d[1] == 0){
+		ans_m = zero;
+		ans_n = base;
+		return;
+	}
+	solve(m / 2, ans_m, ans_n);
+	if(m.d[1] & 1)
+		ans_m = ans_m + ans_n;
+	else
+		ans_n = ans_n + ans_m;
+}
+
+int main(){
+	int test_num;
+	scanf("%d", &test_num);
+	base.d[0] = base.d[1] = 1;
+	zero.d[0] = 1;
+	while(test_num--){
+		scanf("%s", s);
+		n.d[0] = strlen(s);
+		rep(i, n.d[0])
+			n.d[i] = s[n.d[0] - i] - '0';
+		memcpy(m.d, n.d, sizeof(n.d));
+		int d = 1, p = n.d[1] & 1;
+		if(p){
+			m.d[1]--;
+			while(m.d[d] < 0)
+				m.d[d] += 10, m.d[++d]--;
+			while(!m.d[m.d[0]] && m.d[0] > 1)
+				m.d[0]--;
+			solve(m, ans_n, ans_m);
+			for(int i = ans_m.d[0]; i; --i)
+				printf("%d", ans_m.d[i]);
+		}
+		else{
+			solve(n, ans_n, ans_m);
+			for(int i = ans_n.d[0]; i; --i)
+				printf("%d", ans_n.d[i]);
+		}
+		printf("\n");
+	}
+}
+

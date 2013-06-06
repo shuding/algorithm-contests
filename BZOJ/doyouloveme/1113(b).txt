@@ -1,0 +1,20 @@
+#include <cstdio>
+#define rep(i, n) for(int i = 0; i < n; i++)
+using namespace std;
+int n, a, b, tot = 0, s[250000], top = -1;
+int main()
+{
+    scanf("%d", &n);
+    rep(i, n)
+    {
+        scanf("%d%d", &a, &b);
+        while(top >= 0 && s[top] > b)
+        {
+            top--;
+            tot++;
+        }
+        if(top == -1 || b > s[top])
+            s[++top] = b;
+    }
+    printf("%d", tot + top + 1);
+}

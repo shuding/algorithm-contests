@@ -1,0 +1,71 @@
+#include <algorithm>
+#include <iostream>
+#include <cstring>
+#include <cstdio>
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+/*
+int sg[50][50];
+bool c[50][50];
+
+int csg(int i, int j){
+	if(c[i][j]) return sg[i][j];
+	bool u[15];
+	memset(u, 0, sizeof(u));
+	rep(k, i / 2)
+		u[csg(k, i - k)] = 1;
+	rep(k, j / 2)
+		u[csg(k,j - k)] = 1;
+	for(int k = 0; k <= 50; ++k)
+		if(!u[k]){
+		sg[i][j] = k;
+		break;
+	}
+	c[i][j] = 1;
+	return sg[i][j];
+}
+
+int main(){
+	sg[1][1] = 0;
+	c[1][1] = 1;
+	rep(i, 10){
+		rep(j, 10)
+			printf("%d ", csg(i, j));
+		printf("\n");
+	}
+	return 0;
+}
+打表找规律
+*/
+
+bool check(int l, long long a, long long b){
+	if(a < 0 || b < 0) return 0;
+	if(!l) return a & 1 && b & 1;
+	if(!((a - 1) % (1LL << l + 1) < (1LL << l) 
+	  && (b - 1) % (1LL << l + 1) < (1LL << l))) return 0;
+	a = (a - 1) % (1LL << l) + 1;
+	b = (b - 1) % (1LL << l) + 1;
+	l--;
+	if(a <= (1LL << l)) return check(l, a, b - (1LL << l));
+	if(b <= (1LL << l)) return check(l, a - (1LL << l), b);
+	return check(l, a - (1LL << l), b - (1LL << l));
+}
+
+int main(){
+	int test_num, n, a, b, sg;
+	scanf("%d", &test_num);
+	while(test_num--){
+		scanf("%d", &n);
+		sg = 0; n /= 2;
+		rep(i, n){
+			scanf("%d%d", &a, &b);
+			for(int j = 0; ; ++j)
+				if(check(j, a, b)){
+					sg ^= j;
+					break;
+				}
+		}
+		printf("%s\n", sg ? "YES" : "NO");
+	}
+	return 0;
+}

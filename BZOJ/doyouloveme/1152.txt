@@ -1,0 +1,30 @@
+#include <iostream>
+#include <cstdio>
+#define mod 10000
+using namespace std;
+ 
+int pow[100001], s[100001], next[100001];
+ 
+int main(){
+        int n, t, m, ans, p;
+        scanf("%d%d", &n, &t);
+        pow[0] = 1;
+        for(int i = 1; i < 100001; ++i)
+                pow[i] = pow[i - 1] * n % mod;
+        for(int i = 1; i <= t; ++i){
+                scanf("%d", &m);
+                for(int j = 0; j < m; ++j)
+                        scanf("%d", &s[j]);
+                next[0] = 0;
+                for(int j = 1; j < m; ++j){
+                        next[j] = next[j - 1];
+                        while(next[j] && s[next[j]] != s[j]) next[j] = next[next[j] - 1];
+                        if(s[next[j]] == s[j]) next[j]++;
+                }
+                ans = 0;
+                for(p = m; p; p = next[p - 1])
+                        ans = (ans + pow[p]) % mod;
+                printf("%04d\n", ans);
+        }
+        return 0;
+}

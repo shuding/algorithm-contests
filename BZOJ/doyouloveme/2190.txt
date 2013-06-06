@@ -1,0 +1,38 @@
+#include <algorithm>
+#include <iostream>
+#include <cstdio>
+using namespace std;
+
+int n, p, tot;
+
+int phi(int n){
+	int tot = 1, p;
+	bool ok = 1;
+	while(ok){
+		ok = 0;
+		for(int i = 2; i * i <= n; ++i)
+			if(n % i == 0){
+				p = 1;
+				ok = 1;
+				while(n % i == 0){
+					p *= i;
+					n /= i;
+				}
+				tot *= (p - p / i);
+			}
+	}
+	if(n > 1)
+		tot *= (n - 1);
+	return tot;
+}
+
+int main(){
+	scanf("%d", &n);
+	for(int i = 1; i < n; ++i){
+		p = 2 * phi(i);
+		if(i == 1) p++;
+		tot += p;
+	}
+	printf("%d\n", tot);
+}
+

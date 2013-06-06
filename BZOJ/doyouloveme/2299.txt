@@ -1,0 +1,39 @@
+#include <algorithm>
+#include <iostream>
+#include <cstdio>
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+long long a, b, x, y;
+
+long long gcd(long long a, long long b){
+	return !b ? a : gcd(b, a % b);
+}
+
+int main(){
+	int test_num;
+	scanf("%d", &test_num);
+	while(test_num--){
+		scanf("%lld%lld%lld%lld", &a, &b, &x, &y);
+		int d = 2 * gcd(a, b);
+		if(x % d == 0 && y % d == 0){
+			printf("Y\n");
+			continue;
+		}
+		if((x - a) % d == 0 && (y - b) % d == 0){
+			printf("Y\n");
+			continue;
+		}
+		if((x - b) % d == 0 && (y - a) % d == 0){
+			printf("Y\n");
+			continue;
+		}
+		if((x - a - b) % d == 0 && (y - a - b) % d == 0){
+			printf("Y\n");
+			continue;
+		}
+		printf("N\n");
+	}
+	return 0;
+}
+

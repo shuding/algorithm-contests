@@ -1,0 +1,62 @@
+#include <iostream>
+#include <cstring>
+#include <cstdio>
+#include <cmath>
+#define rep(i, n) for(int i = 1; i <= n; i++)
+using namespace std;
+
+typedef long long int64;
+
+const int fact[11] = {1, 1, 2, 6, 24, 120, 720, 5040, 40320, 362880, 3628800};
+int d, l, s[11], num[11];
+bool u[11];
+
+void readin(){
+	char c = getchar();
+	memset(num, 0, sizeof(num));
+	memset(u, 0, sizeof(u));
+	l = 0;
+	while(c < '0' || c > '9')
+		c = getchar();
+	while(c >= '0' && c <= '9'){
+		s[++l] = c - '0';
+		num[s[l]]++;
+		c = getchar();
+	}
+}
+
+int64 calc(int k, int64 n){
+	if(k > l)
+		return n % d == 0;
+	int64 tot = 0;/*
+	rep(i, l)
+		if(!u[i]){
+			u[i] = 1;
+			tot += calc(k + 1, n * 10 + s[i]);
+			u[i] = 0;
+		}*/
+	bool hash[10] = {};
+	rep(i, l)
+		if(!u[i] && !hash[s[i]]){
+			hash[s[i]] = 1;
+			u[i] = 1;
+			tot += calc(k + 1, n * 10 + s[i]);
+			u[i] = 0;
+		}
+	return tot;
+}
+
+int main(){
+	int test_number;
+	int64 SUM;
+	scanf("%d", &test_number);
+	while(test_number--){
+		readin();
+		scanf("%d", &d);
+		SUM = 1;
+		for(int i = 0; i <= 9; i++)
+			SUM *= fact[num[i]];
+		printf("%lld\n", calc(1, 0));// / SUM);
+	}
+	return 0;
+}

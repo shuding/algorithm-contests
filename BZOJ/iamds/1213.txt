@@ -1,0 +1,152 @@
+
+#include <algorithm>
+#include <iostream>
+#include <cstring>
+#include <cstdio>
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+int t[105000];
+
+struct number{
+	int d[5000];
+	inline void read(){
+		char c = getchar();
+		while(c < '0' || c > '9') c = getchar();
+		while(c >= '0' && c <= '9'){
+			t[++d[0]] = c - '0';
+			c = getchar();
+		}
+		rep(i, d[0] / 2)
+			swap(t[i], t[d[0] - i + 1]);
+		rep(i, d[0] / 4 + 1)
+			d[i] = ((t[i * 4] * 10 + t[i * 4 - 1]) * 10 + t[i * 4 - 2]) * 10 + t[i * 4 - 3];
+		d[0] = d[0] / 4 + 1;
+		if(!d[d[0]] && d[0] > 1) d[0]--;
+	}
+	void print(){
+		rep(i, d[0]){
+			if(i > 1 && d[d[0] - i + 1] < 1000) printf("0");
+			if(i > 1 && d[d[0] - i + 1] < 100) printf("0");
+			if(i > 1 && d[d[0] - i + 1] < 10) printf("0");
+			printf("%d", d[d[0] - i + 1]);
+		}
+		printf("\n");
+	}
+} n, npo, l, r, mid, one, tmp, W;
+
+inline int cmp(const number a, const number b){
+	if(a.d[0] != b.d[0]) return a.d[0] < b.d[0] ? -1 : 1;
+	rep(i, a.d[0])
+		if(a.d[a.d[0] - i + 1] != b.d[b.d[0] - i + 1])
+			return a.d[a.d[0] - i + 1] < b.d[b.d[0] - i + 1] ? -1 : 1;
+	return 0;
+}
+
+inline number operator + (const number a, const number b){
+	number c; memset(c.d, 0, sizeof(c.d));
+	rep(i, a.d[0]) c.d[i] = a.d[i];
+	rep(i, b.d[0]) c.d[i] += b.d[i];
+	c.d[0] = max(a.d[0], b.d[0]);
+	rep(i, c.d[0]){
+		c.d[i + 1] += c.d[i] / 10000;
+		c.d[i] %= 10000;
+	}
+	while(c.d[c.d[0] + 1]) c.d[0]++;
+	return c;
+}
+
+inline number operator - (const number a, const int b){
+	number c; memset(c.d, 0, sizeof(c.d));
+	rep(i, a.d[0]) c.d[i] = a.d[i];
+	c.d[0] = a.d[0];
+	int p = 1;
+	while(!c.d[p]) c.d[p] = 9999, p++;
+	c.d[p]--;
+	while(!c.d[c.d[0]] && c.d[0] > 1) c.d[0]--;
+	return c;
+}
+
+inline number operator / (const number a, const int b){
+	number c; memset(c.d, 0, sizeof(c.d));
+	rep(i, a.d[0]) c.d[i] = a.d[i];
+	c.d[0] = a.d[0];
+	rep(i, c.d[0]){
+		if(i < c.d[0])
+			c.d[c.d[0] - i] += (c.d[c.d[0] - i + 1] & 1) * 10000;
+		c.d[c.d[0] - i + 1] /= 2;
+	}
+	while(!c.d[c.d[0]] && c.d[0] > 1) c.d[0]--;
+	return c;
+}
+
+inline number operator * (const number a, const number b){
+	number c; memset(c.d, 0, sizeof(c.d));
+	rep(i, a.d[0])
+		rep(j, b.d[0]){
+			c.d[i + j - 1] += a.d[i] * b.d[j];
+			c.d[i + j] += c.d[i + j - 1] / 10000;
+			c.d[i + j - 1] %= 10000;
+		}
+	c.d[0] = a.d[0] + b.d[0];
+	while(!c.d[c.d[0]] && c.d[0] > 1) c.d[0]--;
+	if(c.d[0] > n.d[0]) return npo;
+	return c;
+}
+
+inline number power(number a, int b){
+	number p = one;
+	while(cmp(p, n) != 1 && b){
+		p = p * a;
+		b--;
+	}
+	return p;
+}
+
+int k;
+
+int main(){
+	scanf("%d", &k);
+	n.read();
+	if(n.d[0] == 1 && n.d[1] == 0){
+		printf("0\n");
+		return 0;
+	}
+	one.d[0] = 1;
+	one.d[1] = 1;
+	W.d[0] = 1;
+	W.d[1] = 1000;
+	npo = n + one;
+	l.d[0] = 1;
+	l.d[1] = 0;
+	r = one;
+	while(cmp(power(r, k), n) == -1)
+		r = r * W;
+	if(cmp(one, n) == -1){
+		l = one;
+		tmp = l * W;
+		while(cmp(power(tmp, k), n) == -1){
+			l = tmp;
+			tmp = l * W;
+		}
+	}
+	while(cmp(l, r) != 1){
+		mid = (l + r) / 2;
+		int tmp = cmp(power(mid, k), n);
+		if(tmp == 0){
+			mid.print();
+			return 0;
+		}
+		if(tmp == -1){
+			memcpy(l.d, mid.d, sizeof(mid.d));
+			l = l + one;
+		}
+		else{
+			memcpy(r.d, mid.d, sizeof(mid.d));
+			r = r - 1;
+		}
+	}
+	if(cmp(power(l, k), n) == 1) l = l - 1;
+	l.print();
+	return 0;
+}

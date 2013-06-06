@@ -1,0 +1,71 @@
+#include <algorithm>
+#include <iostream>
+#include <vector>
+#include <cstdio>
+#define MAXN 100010
+#define MAXM 1000010
+using namespace std;
+
+struct edge{
+	int s, t, c, h;
+	bool operator < (const edge &e) const{
+		return h > e.h || (h == e.h && c <= e.c);
+	}
+} e[MAXM * 2];
+int n, m, a, b, c, tot, ans, h[MAXN];
+long long sum;
+vector<int> l[MAXN];
+bool vst[MAXN];
+
+void dfs(int v){
+	if(vst[v]) return;
+	vst[v] = 1; ans++;
+	for(vector<int>::iterator it = l[v].begin(); it != l[v].end(); ++it)
+		dfs(*it);
+}
+
+int f[MAXN];
+
+int father(int v){
+	return f[v] == v ? v : f[v] = father(f[v]);
+}
+
+int main(){
+	scanf("%d%d", &n, &m);
+	for(int i = 1; i <= n; ++i)
+		scanf("%d", &h[i]);
+	for(int i = 1; i <= m; ++i){
+		scanf("%d%d%d", &a, &b, &c);
+		if(h[a] >= h[b]){
+			l[a].push_back(b);
+			++tot;
+			e[tot].s = a;
+			e[tot].t = b;
+			e[tot].c = c;
+			e[tot].h = h[b];
+		}
+		if(h[a] <= h[b]){
+			l[b].push_back(a);
+			++tot;
+			e[tot].s = b;
+			e[tot].t = a;
+			e[tot].c = c;
+			e[tot].h = h[a];
+		}
+	}
+	dfs(1);
+	sort(e + 1, e + 1 + tot);
+	for(int i = 1; i <= n; ++i)
+		f[i] = i;
+	for(int i = 1; i <= tot; ++i)
+		if(vst[e[i].s] && vst[e[i].t]){
+			int a = father(e[i].s), b = father(e[i].t);
+			if(a != b){
+				f[a] = b;
+				sum += e[i].c;
+			}
+		}
+	cout << ans << " " << sum << endl;
+	return 0;
+}
+

@@ -1,0 +1,28 @@
+#include <iostream>
+#include <cstdio>
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+int n, m, p, a[100005], num[1000000];
+long long tot;
+
+int main(){
+	scanf("%d%d", &n, &m);
+	rep(i, n){
+		scanf("%d", &a[i]);
+		if(a[i] == m)
+			p = i;
+	}
+	if(!p){ printf("0\n"); return 0; }
+	for(int i = p, t = 0; i >= 1; --i){
+		t = t + (a[i] < m);
+		num[i + 2 * t]++;
+	}
+	for(int i = p, t = 0; i <= n; ++i){
+		t = t + (a[i] < m);
+		if(i >= 2 * t)
+			tot += num[i - 2 * t];
+	}
+	printf("%lld\n", tot);
+	return 0;
+}

@@ -1,0 +1,28 @@
+#include <algorithm>
+#include <iostream>
+#include <cstdio>
+#include <set>
+#define MAXN 1000010
+using namespace std;
+
+int n, m, p, q, c[MAXN];
+set<int> s;
+
+int main(){
+	scanf("%d%d%d%d", &n, &m, &p, &q);
+	for(int i = 1; i <= n + 1; ++i) 
+		s.insert(i);
+	int l, r;
+	for(int i = m; i; --i){
+		l = (i * p + q) % n + 1;
+		r = (i * q + p) % n + 1;
+		if(l > r) swap(l, r);
+		set<int>::iterator it = s.lower_bound(l);
+		while(*it < l) ++it;
+		while(*it <= r) c[*it] = i, s.erase(it++);
+	}
+	for(int i = 1; i <= n; ++i)
+		printf("%d\n", c[i]);
+	return 0;
+}
+

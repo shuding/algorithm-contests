@@ -1,0 +1,31 @@
+/*
+* Copyright (C) 2012 All rights reserved.
+* File name:  SXDFS.cpp
+* Author:     Parabola_ds
+* Creat time: 2012.07.14
+*/
+#include <algorithm>
+#include <iostream>
+#include <cstdlib>
+#include <cstring>
+#include <climits>
+#include <vector>
+#include <cstdio>
+#include <queue>
+#include <cmath>
+#include <set>
+#include <map>
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+int n;
+
+int main(){
+	scanf("%d", &n);
+	while(n){
+		printf("%s\n", n & 1 ? "Bob" : "Alice");
+		scanf("%d", &n);
+	}
+	return 0;
+}
+

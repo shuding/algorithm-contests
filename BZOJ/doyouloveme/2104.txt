@@ -1,0 +1,277 @@
+/*
+一样的代码为神马我的就缓冲区溢出。。。
+法克啊！！！！！！！！！！！！！！！！
+尼玛懒得改了。。。。。。。。。。。。。
+*/
+#include <cstdio>
+#include <iostream>
+#include <algorithm>
+#include <climits>
+#include <cstring>
+#include <cassert>
+#define foreach(e,x) for(__typeof(x.begin()) e=x.begin();e!=x.end();++e)
+using namespace std;
+
+const int MAX_N_COLS = 100000 + 10;
+int w[MAX_N_COLS][6];
+
+struct Tree {
+	int lr[6][6], ll[6][6], rr[6][6], mm[6][6];
+	int l, r;
+	Tree*ch[2];
+	bool update() {
+		Tree*L = ch[0], *R = ch[1];
+		static int d1[6][6];
+		bool updated = false;
+		int m = l + r >> 1;
+		for (int i = 0; i < 6; ++i) {
+			for (int j = 0; j < 6; ++j) {
+				d1[i][j] = min(L->rr[i][j] + w[m][i] + w[m][j], R->ll[i][j]);
+			}
+		}
+		for (int k = 0; k < 6; ++k) {
+			for (int i = 0; i < 6; ++i) {
+				for (int j = 0; j < 6; ++j) {
+					d1[i][j] = min(d1[i][j], d1[i][k] + d1[k][j] - w[m][k]);
+				}
+			}
+		}
+		for (int i = 0; i < 6; ++i) {
+			for (int j = 0; j < 6; ++j) {
+				if (d1[i][j] != mm[i][j]) {
+					updated = true;
+					mm[i][j] = d1[i][j];
+				}
+			}
+		}
+		static int d2[6];
+		for (int i = 0; i < 6; ++i) {
+			for (int j = 0; j < 6; ++j) {
+				d2[j] = INT_MAX;
+				for (int k = 0; k < 6; ++k) {
+					d2[j] = min(d2[j], L->lr[i][k] + d1[k][j]);
+				}
+			}
+			for (int j = 0; j < 6; ++j) {
+				int d = L->ll[i][j];
+				for (int k = 0; k < 6; ++k) {
+					d = min(d, L->lr[j][k] + d2[k]);
+				}
+				if (d != ll[i][j])
+					updated = true, ll[i][j] = d;
+			}
+			for (int j = 0; j < 6; ++j) {
+				int d = INT_MAX;
+				for (int k = 0; k < 6; ++k) {
+					d = min(d, d2[k] + R->lr[k][j] - w[m][k]);
+				}
+				if (d != lr[i][j])
+					updated = true, lr[i][j] = d;
+			}
+			for (int j = 0; j < 6; ++j) {
+				d2[j] = INT_MAX;
+				for (int k = 0; k < 6; ++k) {
+					d2[j] = min(d2[j], R->lr[k][i] + d1[k][j] - w[m][k]);
+				}
+			}
+			for (int j = 0; j < 6; ++j) {
+				int d = R->rr[i][j];
+				for (int k = 0; k < 6; ++k) {
+					d = min(d, d2[k] + R->lr[k][j] - w[m][k]);
+				}
+				if (d != rr[i][j])
+					updated = true, rr[i][j] = d;
+			}
+		}
+		return updated;
+	}
+
+	void setLeaf() {
+		static int sum[7];
+		int*w = ::w[l];
+		sum[0] = 0;
+		for (int i = 0; i < 6; ++i) {
+			sum[i + 1] = sum[i] + w[i];
+		}
+		for (int i = 0; i < 6; ++i) {
+			for (int j = 0; j < 6; ++j) {
+				int L = min(i, j), R = max(i, j);
+				int d = sum[R + 1] - sum[L];
+				ll[i][j] = rr[i][j] = lr[i][j] = mm[i][j] = d;
+			}
+		}
+	}
+
+	Tree(int _l, int _r) :
+		l(_l), r(_r) {
+		if (l + 1 == r) {
+			setLeaf();
+			return;
+		}
+		ch[0] = new Tree(l, l + r >> 1);
+		ch[1] = new Tree(l + r >> 1, r);
+		update();
+	}
+
+	bool change(int c) {
+		if (c < l || c >= r)
+			return false;
+		if (l + 1 == r) {
+			setLeaf();
+			return true;
+		}
+		bool updated = false;
+		for (int i = 0; i < 2; ++i) {
+			updated |= ch[i]->change(c);
+		}
+		if (updated)
+			updated |= update();
+		return updated;
+	}
+
+	void updateWithLeft(int dl[], int dr[]) {
+		Tree*L = ch[0], *R = ch[1];
+		int m = l + r >> 1;
+		static int d[6];
+		for (int i = 0; i < 6; ++i) {
+			d[i] = INT_MAX;
+			for (int j = 0; j < 6; ++j) {
+				d[i] = min(d[i], dr[j] + mm[j][i]);
+			}
+		}
+		for (int i = 0; i < 6; ++i) {
+			for (int j = 0; j < 6; ++j) {
+				dl[i] = min(dl[i], L->lr[i][j] + d[j]);
+			}
+		}
+		for (int i = 0; i < 6; ++i) {
+			dr[i] = INT_MAX;
+			for (int j = 0; j < 6; ++j) {
+				dr[i] = min(dr[i], d[j] + R->lr[j][i] - w[m][j]);
+			}
+		}
+	}
+
+	void updateWithRight(int dl[], int dr[]) {
+		Tree*L = ch[0], *R = ch[1];
+		int m = l + r >> 1;
+		static int d[6];
+		for (int i = 0; i < 6; ++i) {
+			d[i] = INT_MAX;
+			for (int j = 0; j < 6; ++j) {
+				d[i] = min(d[i], dl[j] + mm[j][i] - w[m][j]);
+			}
+		}
+		for (int i = 0; i < 6; ++i) {
+			for (int j = 0; j < 6; ++j) {
+				dr[i] = min(dr[i], d[j] + R->lr[j][i] - w[m][j]);
+			}
+		}
+		for (int i = 0; i < 6; ++i) {
+			dl[i] = INT_MAX;
+			for (int j = 0; j < 6; ++j) {
+				dl[i] = min(dl[i], d[j] + L->lr[i][j]);
+			}
+		}
+	}
+
+	void solveSinglePoint(int r1, int c1, int dl[], int dr[]) {
+		if (l + 1 == r) {
+			for (int i = 0; i < 6; ++i) {
+				dl[i] = dr[i] = mm[r1][i];
+			}
+			return;
+		}
+		int m = l + r >> 1;
+		if (c1 < m) {
+			ch[0]->solveSinglePoint(r1, c1, dl, dr);
+			updateWithLeft(dl, dr);
+		} else {
+			ch[1]->solveSinglePoint(r1, c1, dl, dr);
+			updateWithRight(dl, dr);
+		}
+	}
+
+	int solveTwoPoint(int r1, int c1, int r2, int c2, int dl1[], int dr1[],
+			int dl2[], int dr2[]) {
+		//c1<=c2
+		if (l + 1 == r) {
+			for (int i = 0; i < 6; ++i) {
+				dl1[i] = dr1[i] = mm[r1][i];
+				dl2[i] = dr2[i] = mm[r2][i];
+			}
+			return mm[r1][r2];
+		}
+		int m = l + r >> 1;
+		if (c2 < m) {
+			int ret = ch[0]->solveTwoPoint(r1, c1, r2, c2, dl1, dr1, dl2, dr2);
+			for (int i = 0; i < 6; ++i) {
+				for (int j = 0; j < 6; ++j) {
+					ret = min(ret, dr1[i] + mm[i][j] + dr2[j]);
+				}
+			}
+			updateWithLeft(dl1, dr1);
+			updateWithLeft(dl2, dr2);
+			return ret;
+		} else if (c1 >= m) {
+			int ret = ch[1]->solveTwoPoint(r1, c1, r2, c2, dl1, dr1, dl2, dr2);
+			for (int i = 0; i < 6; ++i) {
+				for (int j = 0; j < 6; ++j) {
+					ret = min(ret, dl1[i] + dl2[j] + mm[i][j] - w[m][i]
+							- w[m][j]);
+				}
+			}
+			updateWithRight(dl1, dr1);
+			updateWithRight(dl2, dr2);
+			return ret;
+		} else {
+			ch[0]->solveSinglePoint(r1, c1, dl1, dr1);
+			ch[1]->solveSinglePoint(r2, c2, dl2, dr2);
+			int ret = INT_MAX;
+			for (int i = 0; i < 6; ++i) {
+				for (int j = 0; j < 6; ++j) {
+					ret = min(ret, dr1[i] + mm[i][j] + dl2[j] - w[m][j]);
+				}
+			}
+			updateWithLeft(dl1, dr1);
+			updateWithRight(dl2, dr2);
+			return ret;
+		}
+	}
+}*root;
+
+int main() {
+	int n;
+	scanf("%d", &n);
+	for (int i = 0; i < 6; ++i) {
+		for (int j = 0; j < n; ++j) {
+			scanf("%d", &w[j][i]);
+		}
+	}
+	root = new Tree(0, n);
+	int nQ;
+	scanf("%d", &nQ);
+	while (nQ--) {
+		int cmd;
+		scanf("%d", &cmd);
+		if (cmd == 1) {
+			int r, c, v;
+			scanf("%d%d%d", &r, &c, &v);
+			--r, --c;
+			w[c][r] = v;
+			root->change(c);
+		} else {
+			int r1, c1, r2, c2;
+			scanf("%d%d%d%d", &r1, &c1, &r2, &c2);
+			--r1, --c1, --r2, --c2;
+			if (c1 > c2) {
+				swap(c1, c2);
+				swap(r1, r2);
+			}
+			static int dl1[6], dr1[6], dl2[6], dr2[6];
+			printf("%d\n", root->solveTwoPoint(r1, c1, r2, c2, dl1, dr1, dl2,
+					dr2));
+		}
+	}
+}
+

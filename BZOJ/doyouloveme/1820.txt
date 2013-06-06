@@ -1,0 +1,38 @@
+#include <iostream>
+#include <cstdio>
+#define MAXM 201
+#define rep(i, n, m) for(int i = n; i <= m; ++i)
+using namespace std;
+ 
+const int inf = ~0U >> 2;
+int m, n, ans = inf, g[MAXM][MAXM], f[2][MAXM][MAXM], pos[1002];
+ 
+int main(){
+        scanf("%d", &m);
+        rep(i, 1, m)
+                rep(j, 1, m)
+                        scanf("%d", &g[i][j]);
+        while(scanf("%d", &pos[++n]) != EOF); n--;
+        rep(i, 1, m)
+                rep(j, 1, m)
+                        f[0][i][j] = inf;
+        f[0][2][3] = f[0][3][2] = 0;
+        pos[0] = 1;
+        rep(i, 1, n){
+                rep(j, 1, m)
+                        rep(k, 1, m)
+                                f[i & 1][j][k] = inf;
+                rep(j, 1, m)
+                        rep(k, 1, m){
+                                f[i & 1][j][k] = min(f[i & 1][j][k], f[!(i & 1)][j][k] + g[pos[i - 1]][pos[i]]);
+                                f[i & 1][pos[i - 1]][j] = min(f[i & 1][pos[i - 1]][j], f[!(i & 1)][j][k] + g[k][pos[i]]);
+                                f[i & 1][pos[i - 1]][k] = min(f[i & 1][pos[i - 1]][k], f[!(i & 1)][j][k] + g[j][pos[i]]);
+                        }
+        }
+        rep(i, 1, m)
+                rep(j, 1, m)
+                        ans = min(ans, f[n & 1][i][j]);
+        printf("%d\n", ans);
+        return 0;
+}
+ 

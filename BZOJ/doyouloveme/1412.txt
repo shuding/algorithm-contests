@@ -1,0 +1,86 @@
+/*
+* Copyright (C) 2012 All rights reserved.
+* File name:  1412.cpp
+* Author:     Ding Shu
+* Creat time: 2012.05.23
+*/
+#include <algorithm>
+#include <iostream>
+#include <cstdlib>
+#include <cstring>
+#include <climits>
+#include <vector>
+#include <cstdio>
+#include <cmath>
+#include <set>
+#include <map>
+#define MAXN 100
+#define pos(x, y) ((x - 1) * m + y)
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+const int inf = ~0U >> 2;
+
+struct edge{
+	int t, f, next;
+	edge(){}
+	edge(int t, int f, int n): t(t), f(f), next(n){}
+} e[MAXN * MAXN * 10];
+
+int etop, st[MAXN * MAXN + 10], S, T;
+int n, m, g[MAXN * MAXN + 10];
+int h[MAXN * MAXN + 10], hn[MAXN * MAXN + 10];
+
+int sap(int v, int lim){
+	if(v == T || !lim) return lim;
+	int left = lim, tmp = T - 1;
+	for(int i = st[v]; i; i = e[i].next){
+		if(e[i].f && h[v] == h[e[i].t] + 1){
+			int f = sap(e[i].t, min(left, e[i].f));
+			left -= f;
+			e[i].f -= f;
+			e[(i & 1) ? i + 1 : i - 1].f += f;
+			if(h[S] == T) return lim - left;
+		}
+		if(e[i].f)
+			tmp = min(tmp, h[e[i].t]);
+	}
+	if(lim == left){
+		hn[h[v]]--;
+		if(!hn[h[v]])
+			h[S] = T;
+		else
+			hn[h[v] = tmp + 1]++;
+	}
+	return lim - left;
+}
+
+int maxFlow(){
+	int f = 0;
+	hn[0] = T;
+	while(h[S] != T)
+		f += sap(S, inf);
+	return f;
+}
+
+void add(int a, int b, int c){
+	e[++etop] = edge(b, c, st[a]);
+	st[a] = etop;
+	e[++etop] = edge(a, c, st[b]);
+	st[b] = etop;
+}
+
+int main(){
+	scanf("%d%d", &n, &m);
+	S = n * m + 1, T = n * m + 2;
+	rep(i, n)
+		rep(j, m){
+			scanf("%d", &g[pos(i, j)]);
+			if(i > 1) add(pos(i, j), pos(i - 1, j), 1);
+			if(j > 1) add(pos(i, j), pos(i, j - 1), 1);
+			if(g[pos(i, j)] == 1) add(S, pos(i, j), inf);
+			if(g[pos(i, j)] == 2) add(T, pos(i, j), inf);
+		}
+	printf("%d\n", maxFlow());
+	return 0;
+}

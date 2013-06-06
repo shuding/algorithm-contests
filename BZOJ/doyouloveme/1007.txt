@@ -1,0 +1,76 @@
+#include <iostream> 
+#include <cstdio>
+#include <algorithm>
+#include <stack>
+#define rep(i, n) for(int i = 0; i < n; i++)
+#define debug(x) cout << #x << " = " << x << endl;
+using namespace std;
+struct line
+{
+    int a, b, No;
+} l[50000];
+int n;
+bool Pout[50000];
+stack<line> sl;
+bool compare(line Line1, line Line2)
+{
+    return Line1.a < Line2.a;
+}
+double GetX(line Line1, line Line2)
+{
+    return double(Line2.b - Line1.b) / double(Line1.a - Line2.a);
+}
+int main()
+{
+    scanf("%d", &n);
+    rep(i, n)
+        Pout[i] = 0;
+    rep(i, n)
+    {
+        scanf("%d%d", &l[i].a, &l[i].b);
+        l[i].No = i;
+    }
+    sort(l, l + n, compare);
+    sl.push(l[0]);
+    rep(i, n - 1)
+    {
+        while(sl.size() >= 2)
+        {
+            double x1, x2;
+            line L = sl.top();
+            sl.pop();
+            x1 = GetX(L, sl.top());
+            if(L.a != l[i + 1].a)
+            {
+                x2 = GetX(L, l[i + 1]);
+                if(x2 > x1)
+                {
+                    sl.push(L);
+                    break;
+                }
+            }
+            else
+            if(L.b > l[i + 1].b)
+            {
+                sl.push(L);
+                break;
+            }
+        }
+        if(sl.top().a != l[i + 1].a)
+            sl.push(l[i + 1]);
+        else
+        if(sl.top().b < l[i + 1].b)
+        {
+            sl.pop();
+            sl.push(l[i + 1]);           
+        }
+    }
+    while(!sl.empty())
+    {
+        Pout[sl.top().No] = 1;
+        sl.pop();
+    }
+    rep(i, n)
+        if(Pout[i])
+            printf("%d ", i + 1);
+}

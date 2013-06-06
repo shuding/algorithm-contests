@@ -1,0 +1,82 @@
+#include <algorithm>
+#include <iostream>
+#include <cstdlib>
+#include <cstring>
+#include <cstdio>
+#define MAXN 1001
+#define rep(i, n) for(int i = 1; i <= n; ++i)
+using namespace std;
+
+struct number{
+	long long d[30000];
+	void operator *= (const long long &t){
+		rep(i, d[0])
+			d[i] = d[i] * t;
+		rep(i, d[0]){
+			d[i + 1] += d[i] / 100000;
+			d[i] %= 100000;
+		}
+		while(d[d[0] + 1]){
+			d[0]++;
+			d[d[0] + 1] += d[d[0]] / 100000;
+			d[d[0]] %= 100000;
+		}
+	}
+	number operator + (const number &n) const{
+		number c;
+		memset(c.d, 0, sizeof(c.d));
+		rep(i, d[0])
+			c.d[i] = d[i];
+		rep(i, n.d[0])
+			c.d[i] += n.d[i];
+		c.d[0] = max(d[0], n.d[0]);
+		rep(i, c.d[0]){
+			c.d[i + 1] += c.d[i] / 100000;
+			c.d[i] %= 100000;
+		}
+		while(c.d[c.d[0] + 1])
+			c.d[0]++;
+		return c;
+	}
+} ans, tmp;
+
+int n, m;
+
+int main(){
+	scanf("%d%d", &n, &m);
+	ans.d[0] = 1;
+	ans.d[1] = 1;
+	tmp.d[0] = 1;
+	tmp.d[1] = 2 * m;
+	if(n + 2 >= m - 1 && m - 1 >= 0)
+		for(int i = m - 1, j = n + 2; i; --i, --j)
+			tmp *= j;
+	else
+		tmp *= 0;
+	tmp *= (n + 1);
+	if(n + 3 >= m)
+		for(int i = m, j = n + 3; i; --i, --j)
+			ans *= j;
+	else
+		ans *= 0;
+	if(n + 1 >= 2)
+		for(int i = 2, j = n + 1; i; --i, --j)
+			ans *= j;
+	else
+		ans *= 0;
+	ans = ans + tmp;
+	rep(i, n)
+		ans *= i;
+	for(int i = ans.d[0]; i; --i){
+		if(i < ans.d[0]){
+			if(ans.d[i] < 10000) printf("0");
+			if(ans.d[i] < 1000) printf("0");
+			if(ans.d[i] < 100) printf("0");
+			if(ans.d[i] < 10) printf("0");
+		}
+		printf("%lld", ans.d[i]);
+	}
+	puts("");
+	return 0;
+}
+
