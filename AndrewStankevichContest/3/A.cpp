@@ -1,7 +1,7 @@
 /*
 *   Copyright (C) Ds ds303077135@Gmail.com
 *   File Name     : A.cpp
-*   Creation Time : 2013/06/18 06:38:21
+*   Creation Time : 2013/06/07 09:45:21
 *   Environment   : OS X 10.8 & Vim 7.3
 */
 #include <algorithm>
@@ -18,121 +18,119 @@
 #define sqr(x) ((x) * (x))
 #define pb push_back
 #define mp make_pair
-#define sign(x) (x < -eps ? -1 : (x > eps))
+#define sign(x) (x < 0 ? -1 : (x > 0))
 #define debug(x) cout << #x << " = " << x << endl
 #define MAXN 100
 using namespace std;
 
-const double eps = 1e-8;
 const double inf = 1e10;
+const double eps = 1e-6;
 
 struct point{
     double x, y;
-    int a, b;
     point(){}
     point(double _x, double _y): x(_x), y(_y){}
-    bool operator < (const point &p) const{
-        if(fabs(x - p.x) > eps)
-            return x < p.x;
-        return y < p.y;
-    }
 };
 
 struct line{
     point a, b;
     line(){}
     line(point _a, point _b): a(_a), b(_b){}
-} l[MAXN], inte[MAXN * MAXN * 2];
+} l[MAXN];
 
-int n, m;
-vector<int> st[MAXN][MAXN];
-
-double det(point a, point b, point c){
-    return a.x * (b.y - c.y) + b.x * (c.y - a.y) + c.x * (a.y - b.y);
-}
-
-void addInte(int a, int b, vector<point> &p){
-    double s1 = det(l[a].a, l[a].b, l[b].a);
-    double s2 = det(l[a].a, l[a].b, l[b].b);
-    if(fabs(s1 - s2) < eps)
-        return;                                                                  /* parallels */
-    double rate = fabs(s1) / (fabs(s1) + fabs(s2));
-    point tmp = point(l[b].a.x + rate * (l[b].b.x - l[b].a.x),
-                      l[b].a.y + rate * (l[b].b.y - l[b].a.y));
-    tmp.a = min(a, b);
-    tmp.b = max(a, b);
-    p.pb(tmp);
-}
-
-double dis(point &a, point &b){
-    return sqr(a.x - b.x) + sqr(a.y - b.y);
-}
-
-void getInte(int v){
-    static vector<point> pt;
-    pt.clear();
-    rep(i, n)
-        if(i != v)
-            addInte(v, i, pt);
-    sort(pt.begin(), pt.end());
-    point l;
-    for(int i = 0; i < pt.size(); ++i){
-        if(!i)
-            l = pt[i];
-        if(dis(pt[i], l) > eps){
-            inte[++m] = line(pt[i], l);
-            inte[++m] = line(l, pt[i]);
-        }
-        l = pt[i];
+struct poly{
+    vector<point> ver;
+    poly(){
+        ver.clear();
     }
-}
+    double s(){
+        int sz = ver.size();
+        double ret = 0;
+        for(int i = 0; i < sz; ++i){
+            ret += (ver[i].x - ver[(i + 1) % sz].x) * (ver[i].y + ver[(i + 1) % sz].y);
+            if(fabs(ver[i].x) >= inf - eps || fabs(ver[i].y) >= inf - eps)
+                return inf * 10;
+        }
+        return fabs(ret) * .5;
+    }
+} rect;
 
+int n;
 vector<double> ans;
 
-void solve(){
-    rep(i, m)
-        st[inte[i].a.a][inte[i].a.b].pb(i);
+double det(point &a, point &b, point &c){
+    return a.x * (b.y - c.y) + (a.y - b.y) * c.x + b.x * (c.y - a.y);
+}
 
-    int a, b, l, t;
-    double s;
-    rep(i, m)
-        if(!st[inte[i].a.a][inte[i].a.b].empty()){
-            a = inte[i].a.a;
-            b = inte[i].a.b;
-            l = st[a][b][0];
-            s = 0;
-            t = 0;
-            while(l){
-                st[a][b].erase(st[a][b].begin() + t);
-                s += (inte[l].b.x - inte[l].a.x) * (inte[l].b.y + inte[l].a.y);
-                a = inte[l].b.a;
-                b = inte[l].b.b;
-                t = l;
-                l = 0;
-                for(int j = 0; j < st[a][b].size(); ++j)
-                    if(det(inte[t].a, inte[t].b, inte[st[a][b][j]].b) > eps){
-                        l = st[a][b][j];
-                        t = j;
-                        break;
-                    }
+bool cross(line &l, poly &p){
+    bool s[2] = {0, 0};
+    int sz = p.ver.size(), si;
+    for(int i = 0; i < sz; ++i){
+        si = sign(det(l.a, l.b, p.ver[i]));
+        if(si)
+            s[si == 1] = 1;
+        if(s[0] && s[1])
+            return 1;
+    }
+    return 0;
+}
+
+bool cross(line l, line &r){
+    int sl = sign(det(r.a, r.b, l.a)), sr = sign(det(r.a, r.b, l.b));
+    return sr && sl != sr;
+}
+
+point crossPoint(line l, line &r){
+    double sl = fabs(det(r.a, r.b, l.a)), sr = fabs(det(r.a, r.b, l.b));
+    return point(l.a.x + (l.b.x - l.a.x) * fabs(sl / (sl + sr)),
+                 l.a.y + (l.b.y - l.a.y) * fabs(sl / (sl + sr)));
+}
+
+void cut(poly &p){
+    bool flag = 1;
+    while(flag && p.s() > eps){
+        flag = 0;
+        rep(i, n)
+            if(cross(l[i], p)){
+                poly *L = new poly();
+                int st = 0, sz = p.ver.size();
+                for(; !cross(line(p.ver[st], p.ver[(st + 1) % sz]), l[i]); st = (st + 1) % sz);
+                L->ver.pb(crossPoint(line(p.ver[st], p.ver[(st + 1) % sz]), l[i]));
+                for(st = (st + 1) % sz; !cross(line(p.ver[st], p.ver[(st + 1) % sz]), l[i]); st = (st + 1) % sz)
+                    L->ver.pb(p.ver[st]);
+                L->ver.pb(p.ver[st]);
+                L->ver.pb(crossPoint(line(p.ver[st], p.ver[(st + 1) % sz]), l[i]));
+                cut(*L);
+
+                L->ver.clear();
+                L->ver.pb(crossPoint(line(p.ver[st], p.ver[(st + 1) % sz]), l[i]));
+                for(st = (st + 1) % sz; !cross(line(p.ver[st], p.ver[(st + 1) % sz]), l[i]); st = (st + 1) % sz)
+                    L->ver.pb(p.ver[st]);
+                L->ver.pb(p.ver[st]);
+                L->ver.pb(crossPoint(line(p.ver[st], p.ver[(st + 1) % sz]), l[i]));
+                p.ver = L->ver;
+
+                delete(L);
+                flag = 1;
             }
-            if(a != inte[i].a.a || b != inte[i].a.b)
-                s = 0;
-            s = fabs(s) / 2;
-            if(s > eps)
-                ans.pb(s);
-        }
-    cout << ans.size() << endl;
-    for(int i = 0; i < ans.size(); ++i)
-        printf("%.4lf\n", ans[i]);
+    }
+    double s = p.s();
+    if(s > eps && s < inf)
+        ans.pb(s);
 }
 
 int main(){
-    cin >> n;
+    scanf("%d", &n);
     rep(i, n)
         scanf("%lf%lf%lf%lf", &l[i].a.x, &l[i].a.y, &l[i].b.x, &l[i].b.y);
-    rep(i, n)
-        getInte(i);
-    solve();
+    rect.ver.pb(point(-inf, -inf));
+    rect.ver.pb(point(-inf,  inf));
+    rect.ver.pb(point( inf,  inf));
+    rect.ver.pb(point( inf, -inf));
+    cut(rect);
+    sort(ans.begin(), ans.end());
+    cout << ans.size() << endl;
+    rep(i, ans.size())
+        printf("%.4lf\n", ans[i - 1]);
     return 0;
 }
